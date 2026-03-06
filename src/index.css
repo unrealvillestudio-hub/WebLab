@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  --color-accent: #FFAB00;
+}
+
+@layer base {
+  body { background: #0A0A0A; color: #e4e4e7; }
+  * { box-sizing: border-box; }
+}
