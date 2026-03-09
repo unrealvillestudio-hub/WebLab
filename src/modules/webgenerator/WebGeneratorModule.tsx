@@ -17,6 +17,7 @@ import {
 import { useWebOutputStore } from '../../store/useWebOutputStore';
 import { WebModuleId, WebLanguage, WebTone, WebPlatform, WebOutput } from '../../core/types';
 import { cn, Badge, Spinner } from '../../ui/components';
+import { BlueprintPanel } from '../../ui/BlueprintPanel';
 
 // ── TABS ───────────────────────────────────────────────────────────────────────
 type MainTab = 'generator' | 'blog';
@@ -234,6 +235,8 @@ export default function WebGeneratorModule() {
   const [dbPromptText, setDbPromptText]           = useState('');
   const [autoFilled, setAutoFilled]               = useState(false);
   const [extraContext, setExtraContext]            = useState('');
+  const [bpInjected, setBpInjected]               = useState(false);
+  const [bpBaseContext, setBpBaseContext]          = useState(''); // contexto sin BP
   const [productName, setProductName]             = useState('');
   const [productBenefits, setProductBenefits]     = useState('');
   const [productAudience, setProductAudience]     = useState('');
@@ -649,18 +652,35 @@ export default function WebGeneratorModule() {
                     </span>
                   )}
                 </div>
-                <button
-                  onClick={() => setDbPromptMode(v => !v)}
-                  className={cn(
-                    "flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-md font-medium transition-colors border",
-                    dbPromptMode
-                      ? "bg-accent/15 border-accent/40 text-accent"
-                      : "bg-zinc-800 border-zinc-700 text-zinc-500 hover:text-zinc-300"
-                  )}
-                >
-                  <Database size={10} />
-                  {dbPromptMode ? 'DB Prompt activo' : 'DB Prompt'}
-                </button>
+                <div className="flex items-center gap-2">
+                  <BlueprintPanel
+                    injected={bpInjected}
+                    onInject={(bpContext) => {
+                      setBpBaseContext(extraContext);
+                      setExtraContext(prev => {
+                        const base = bpInjected ? bpBaseContext : prev;
+                        return base + bpContext;
+                      });
+                      setBpInjected(true);
+                    }}
+                    onClearInjection={() => {
+                      setExtraContext(bpBaseContext);
+                      setBpInjected(false);
+                    }}
+                  />
+                  <button
+                    onClick={() => setDbPromptMode(v => !v)}
+                    className={cn(
+                      "flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-md font-medium transition-colors border",
+                      dbPromptMode
+                        ? "bg-accent/15 border-accent/40 text-accent"
+                        : "bg-zinc-800 border-zinc-700 text-zinc-500 hover:text-zinc-300"
+                    )}
+                  >
+                    <Database size={10} />
+                    {dbPromptMode ? 'DB Prompt activo' : 'DB Prompt'}
+                  </button>
+                </div>
               </div>
 
               <AnimatePresence>
