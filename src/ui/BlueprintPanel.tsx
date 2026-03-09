@@ -182,9 +182,10 @@ function ImportSection() {
       <textarea
         value={pasteText}
         onChange={e => setPasteText(e.target.value)}
-        placeholder={'{ "schema_version": "BP_PERSON_1.0", ... }'}
-        rows={3}
-        className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1.5 text-xs text-zinc-300 placeholder:text-zinc-600 outline-none focus:border-zinc-500 resize-none font-mono"
+        placeholder={'Pega aquí el JSON de un blueprint individual.\n\nEjemplo:\n{\n  "schema_version": "BP_PERSON_1.0",\n  "displayName": "Patricia Osorio",\n  ...\n}\n\n⚠️ No pegues el contexto exportado (=== BLUEPRINTS ACTIVOS ===) — ese formato es para prompts externos, no para importar.'}
+        rows={12}
+        className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-2 text-xs text-zinc-300 placeholder:text-zinc-500 outline-none focus:border-violet-500/50 resize-y font-mono leading-relaxed"
+        style={{ minHeight: '200px' }}
       />
       <button
         onClick={handlePaste}
@@ -279,7 +280,7 @@ export function BlueprintPanel({ onInject, injected, onClearInjection }: Bluepri
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 24, scale: 0.97 }}
               transition={{ type: 'spring', damping: 28, stiffness: 400 }}
-              className="fixed right-4 top-4 bottom-4 z-50 w-80 bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+              className="fixed right-4 top-4 bottom-4 z-50 w-96 bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
