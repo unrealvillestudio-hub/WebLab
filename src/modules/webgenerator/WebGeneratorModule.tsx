@@ -18,6 +18,7 @@ import { useWebOutputStore } from '../../store/useWebOutputStore';
 import { WebModuleId, WebLanguage, WebTone, WebPlatform, WebOutput } from '../../core/types';
 import { cn, Badge, Spinner } from '../../ui/components';
 import { BlueprintPanel } from '../../ui/BlueprintPanel';
+import { useBlueprintStore } from '../../store/useBlueprintStore';
 
 // ── TABS ───────────────────────────────────────────────────────────────────────
 type MainTab = 'generator' | 'blog';
@@ -218,6 +219,7 @@ function PlatformToggle({ value, onChange }: { value: WebPlatform; onChange: (p:
 // ══════════════════════════════════════════════════════════════════════════════
 export default function WebGeneratorModule() {
   const { outputs, addOutput, removeOutput } = useWebOutputStore();
+  const { getSlotContext, slots } = useBlueprintStore();
 
   // ── Main tab ──
   const [mainTab, setMainTab] = useState<MainTab>('generator');
@@ -235,8 +237,7 @@ export default function WebGeneratorModule() {
   const [dbPromptText, setDbPromptText]           = useState('');
   const [autoFilled, setAutoFilled]               = useState(false);
   const [extraContext, setExtraContext]            = useState('');
-  const [bpInjected, setBpInjected]               = useState(false);
-  const [bpBaseContext, setBpBaseContext]          = useState(''); // contexto sin BP
+  // Blueprint context se lee del store al generar — no se inyecta en el textarea
   const [productName, setProductName]             = useState('');
   const [productBenefits, setProductBenefits]     = useState('');
   const [productAudience, setProductAudience]     = useState('');
@@ -321,6 +322,10 @@ export default function WebGeneratorModule() {
       complianceNotes: productCompliance,
     } : undefined;
 
+    // Combinar contexto de marca + blueprints activos (invisible para el usuario)
+    const bpContext = getSlotContext();
+    const fullContext = extraContext + (bpContext || '');
+
     try {
       const output = await runWebPack({
         brand,
@@ -329,7 +334,7 @@ export default function WebGeneratorModule() {
         tone,
         platform,
         productSpec,
-        extraContext,
+        extraContext: fullContext,
         dbPrompt: dbPromptMode && dbPromptText.trim() ? dbPromptText : undefined,
         superAggro,
         outputMode,
@@ -641,46 +646,29 @@ export default function WebGeneratorModule() {
               )}
             </AnimatePresence>
 
-            {/* Context inputs */}
+            {/* ── PANEL CONTEXTO ── */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <p className="text-[10px] uppercase font-bold text-zinc-600 tracking-widest">Contexto</p>
+                  <p className="text-[10px] uppercase font-bold text-zinc-600 tracking-widest">Contexto de marca</p>
                   {autoFilled && (
                     <span className="flex items-center gap-1 text-[9px] text-accent/60 font-mono">
                       <Database size={9} /> DB auto-fill
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <BlueprintPanel
-                    injected={bpInjected}
-                    onInject={(bpContext) => {
-                      setBpBaseContext(extraContext);
-                      setExtraContext(prev => {
-                        const base = bpInjected ? bpBaseContext : prev;
-                        return base + bpContext;
-                      });
-                      setBpInjected(true);
-                    }}
-                    onClearInjection={() => {
-                      setExtraContext(bpBaseContext);
-                      setBpInjected(false);
-                    }}
-                  />
-                  <button
-                    onClick={() => setDbPromptMode(v => !v)}
-                    className={cn(
-                      "flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-md font-medium transition-colors border",
-                      dbPromptMode
-                        ? "bg-accent/15 border-accent/40 text-accent"
-                        : "bg-zinc-800 border-zinc-700 text-zinc-500 hover:text-zinc-300"
-                    )}
-                  >
-                    <Database size={10} />
-                    {dbPromptMode ? 'DB Prompt activo' : 'DB Prompt'}
-                  </button>
-                </div>
+                <button
+                  onClick={() => setDbPromptMode(v => !v)}
+                  className={cn(
+                    "flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-md font-medium transition-colors border",
+                    dbPromptMode
+                      ? "bg-accent/15 border-accent/40 text-accent"
+                      : "bg-zinc-800 border-zinc-700 text-zinc-500 hover:text-zinc-300"
+                  )}
+                >
+                  <Database size={10} />
+                  {dbPromptMode ? 'DB Prompt activo' : 'DB Prompt'}
+                </button>
               </div>
 
               <AnimatePresence>
@@ -697,8 +685,8 @@ export default function WebGeneratorModule() {
                         value={dbPromptText}
                         onChange={e => setDbPromptText(e.target.value)}
                         placeholder="Contexto completo desde DB_VARIABLES (CONTEXTOS sheet, PersonBlueprint, o prompt personalizado)..."
-                        rows={5}
-                        className="w-full bg-zinc-800 border border-accent/30 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/60 resize-none font-mono text-xs"
+                        rows={6}
+                        className="w-full bg-zinc-800 border border-accent/30 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/60 resize-y font-mono text-xs"
                       />
                     </div>
                   </motion.div>
@@ -740,9 +728,9 @@ export default function WebGeneratorModule() {
                 value={extraContext}
                 onChange={e => setExtraContext(e.target.value)}
                 placeholder="Contexto de marca: propuesta única de valor, palabras clave SEO, tono específico, información especial..."
-                rows={3}
+                rows={6}
                 className={cn(
-                  "w-full bg-zinc-800 border rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50 resize-none transition-colors",
+                  "w-full bg-zinc-800 border rounded-lg px-3 py-2.5 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50 resize-y transition-colors",
                   dbPromptMode ? "border-zinc-700 opacity-50" : "border-zinc-700"
                 )}
                 disabled={dbPromptMode && !!dbPromptText.trim()}
@@ -750,6 +738,57 @@ export default function WebGeneratorModule() {
               {dbPromptMode && dbPromptText.trim() && (
                 <p className="text-[10px] text-zinc-600 -mt-1 px-0.5">
                   ↑ Contexto estándar ignorado — DB Prompt activo
+                </p>
+              )}
+            </div>
+
+            {/* ── PANEL BLUEPRINTS ACTIVOS ── */}
+            <div className={cn(
+              "rounded-xl border p-4 space-y-3 transition-colors",
+              Object.keys(slots).length > 0
+                ? "bg-violet-950/20 border-violet-500/25"
+                : "bg-zinc-900 border-zinc-800"
+            )}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <p className="text-[10px] uppercase font-bold text-zinc-600 tracking-widest">Blueprints</p>
+                  {Object.keys(slots).length > 0 && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-400 font-bold">
+                      {Object.keys(slots).length} activos — se inyectarán al generar
+                    </span>
+                  )}
+                </div>
+                <BlueprintPanel
+                  injected={Object.keys(slots).length > 0}
+                  onInject={() => {}}
+                  onClearInjection={() => {}}
+                />
+              </div>
+
+              {Object.keys(slots).length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {(Object.entries(slots) as [string, any][]).map(([slotId, bp]) => {
+                    const colors: Record<string, string> = {
+                      BP_PERSON:   'bg-blue-500/15 text-blue-300 border-blue-500/30',
+                      BP_LOCATION: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+                      BP_PRODUCT:  'bg-amber-500/15 text-amber-300 border-amber-500/30',
+                    };
+                    const icons: Record<string, string> = { BP_PERSON: '👤', BP_LOCATION: '📍', BP_PRODUCT: '📦' };
+                    return (
+                      <div key={slotId} className={cn(
+                        "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs",
+                        colors[bp.type] || 'bg-zinc-800 text-zinc-300 border-zinc-700'
+                      )}>
+                        <span className="text-[10px] font-bold opacity-60">{slotId}</span>
+                        <span>{icons[bp.type] || '🔹'}</span>
+                        <span className="font-medium max-w-[120px] truncate">{bp.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-xs text-zinc-600 italic">
+                  Ningún blueprint asignado. Abre el panel BPs para importar y asignar slots.
                 </p>
               )}
             </div>
