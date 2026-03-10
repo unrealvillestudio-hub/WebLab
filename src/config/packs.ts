@@ -139,6 +139,15 @@ export const WEB_PACKS: Record<string, WebPack> = {
     estimatedWords: 650,
     outputFormat: "markdown",
   },
+  ecom_product_page: {
+    id: "ecom_product_page",
+    label: "Product Page",
+    module: "ecommerce",
+    description: "Página de producto Shopify completa. Título SEO + descripción + beneficios + uso + FAQ.",
+    sections: ["hero", "features", "faq", "cta"],
+    estimatedWords: 700,
+    outputFormat: "structured",
+  },
   ecom_about: {
     id: "ecom_about",
     label: "About / Historia de Marca",

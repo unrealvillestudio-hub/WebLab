@@ -408,15 +408,34 @@ export function buildExportFile(sections: { sectionId: string; label: string; co
     ).join('\n\n{% comment %} ─────────────────────────────────────── {% endcomment %}\n\n');
   }
   if (mode === 'html') {
+    // Resolver variables Liquid con fallbacks visuales para preview HTML
+    const resolveForPreview = (html: string) => html
+      .replace(/\{\{\s*section\.settings\.background_color\s*\}\}/g, '#0d0d0d')
+      .replace(/\{\{\s*section\.settings\.text_color\s*\}\}/g, '#ffffff')
+      .replace(/\{\{\s*section\.settings\.heading\s*\}\}/g, '')
+      .replace(/\{\{\s*section\.settings\.subheading\s*\}\}/g, '')
+      .replace(/\{\{\s*section\.settings\.eyebrow\s*\}\}/g, '')
+      .replace(/\{\{[^}]+\}\}/g, '')       // cualquier otra variable Liquid
+      .replace(/\{%-?\s*.*?-?%\}/g, '');   // tags Liquid {% ... %}
+
+    const body = sections
+      .map(s => `<!-- === ${s.label.toUpperCase()} === -->\n${resolveForPreview(s.content)}`)
+      .join('\n\n');
+
     return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebLab Export</title>
+  <title>WebLab Preview — ${sections[0]?.label ?? 'Export'}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Helvetica Neue', Arial, sans-serif; background: #f0f0f0; }
+    a { color: inherit; }
+  </style>
 </head>
 <body>
-${sections.map(s => `<!-- === ${s.label.toUpperCase()} === -->\n${s.content}`).join('\n\n')}
+${body}
 </body>
 </html>`;
   }
