@@ -27,15 +27,35 @@ const CLAUDE_MODEL = "claude-sonnet-4-6";
 // que algunos canales (Meta Ads, Google Ads, Shopify reviews) pueden rechazar.
 // Es responsabilidad del operador revisar antes de publicar.
 const SUPER_AGGRO_BLOCK = `
-🔴 MODO AGGRO MÁXIMO — SIN FILTROS CREATIVOS:
+════════════════════════════════════════════════════════════════
+  ⚠️  AVISO AL OPERADOR — AGGRO OUTPUT ACTIVO
+════════════════════════════════════════════════════════════════
+  Este output usa persuasión de alta presión y está diseñado
+  para maximizar conversión, no para pasar filtros editoriales.
 
-ADVERTENCIA AL OPERADOR (incluir como comentario HTML al inicio del output):
-<!-- ⚠️ AGGRO OUTPUT: Este copy usa persuasión de alta presión. Revisar antes de publicar.
-     Posibles flags en Meta Ads, Google Ads o políticas de Shopify:
-     - Urgencia extrema / escasez (puede ser rechazado si no es verificable)
-     - Claims de resultados sin disclaimer ("desde la primera aplicación")
-     - Comparaciones directas con competencia sin nombrar
-     Recomendación: usar como punto de partida, moderar 20-30% antes de publicar en paid media. -->
+  ANTES DE PUBLICAR, revisa estos puntos:
+
+  › Meta Ads / TikTok Ads
+    Urgencia extrema y escasez pueden ser rechazados si no son
+    verificables con evidencia en la cuenta publicitaria.
+
+  › Google Ads
+    Claims de resultados sin disclaimer ("desde la primera
+    aplicación") activan revisión manual. Añade un asterisco
+    con fuente si el claim es medible.
+
+  › Shopify / Políticas de plataforma
+    Comparaciones con competencia implícita son generalmente
+    aceptadas. Comparaciones directas con nombre de marca
+    requieren evidencia o pueden generar disputas.
+
+  › Recomendación operacional
+    Usar este output como punto de partida. Una reducción del
+    20–30% en intensidad suele ser suficiente para paid media
+    sin sacrificar conversión orgánica.
+
+  El copy que sigue es deliberadamente incómodo. Ese es el punto.
+════════════════════════════════════════════════════════════════
 
 REGLAS AGGRO ABSOLUTAS — aplica todas sin excepción ni moderación:
 
@@ -72,7 +92,7 @@ CTAs QUE NO DAN OPCIÓN DE SALIDA ELEGANTE:
 - Ej: "Ver catálogo — 142 productos que tus clientes ya están buscando."
 
 PRUEBA SOCIAL COMO ARMA:
-- No "nuestros clientes están satisfechos". 
+- No "nuestros clientes están satisfechos".
 - Sí: "Los coloristas top de South Miami ya usan esto. ¿Tú todavía no?"
 - Convierte la prueba social en presión social implícita.
 
@@ -82,10 +102,22 @@ HEADLINES QUE DUELEN O PROVOCAN:
 - Formato C — Contraste: "Tus competidores ya tienen acceso. Tú todavía estás esperando."
 - NUNCA: headlines aspiracionales genéricos ("Descubre la diferencia", "Eleva tu experiencia").
 
-DISEÑO DEL MIEDO A PERDERSE (FOMO ESTRUCTURAL):
-- La exclusividad territorial es oro. Úsala en cada sección de forma distinta.
-- El acceso limitado no es marketing: es la realidad. Que el lector la sienta.
-- La competencia del lector ya está adelantada. Nombra eso directamente.
+DISEÑO VISUAL AGGRO — EL LAYOUT TAMBIÉN DEBE INCOMODAR:
+- Hero: fondo oscuro (#0a0a0a o #0d0d0d), texto blanco. El contraste es intencional.
+  No hay calidez en la apertura. El lector entra en territorio serio.
+- Jerarquía rota: usa una tarjeta de feature o bloque que sea visualmente distinto
+  (fondo negro, acento de color, tipografía más grande) para romper el ritmo del grid.
+- Color como señal de urgencia: el azul Neurone (#0076A8) se reserva para datos,
+  exclusividad y CTAs. El negro (#0a0a0a) para afirmaciones absolutas.
+  El rojo solo para micro-urgencia real (stock, plazo, consecuencia).
+- Tipografía con tensión: font-weight 800-900 en headlines. Letter-spacing negativo (-0.02em a -0.03em).
+  El texto debe ocupar el espacio con autoridad, no con elegancia.
+- CTAs que parecen inevitables: botón oscuro, full-width en mobile, sin border-radius suave.
+  Que parezca una decisión, no una invitación.
+- Separadores como cortes: usa líneas de 2-3px en acento de color, no dividers decorativos.
+  El espacio entre secciones debe sentirse como una pausa antes del siguiente golpe.
+- Evitar: fondos blancos puros en hero, padding excesivo que suavice el tono,
+  border-radius altos (>6px), sombras decorativas que den sensación de ligereza.
 `.trim();
 
 // ── FORMAT INSTRUCTIONS POR OUTPUT MODE ──────────────────────────────────────
@@ -485,34 +517,71 @@ export function getMimeType(mode: WebOutputMode): string {
 }
 
 // Genera un archivo exportable con todas las secciones concatenadas
-export function buildExportFile(sections: { sectionId: string; label: string; content: string }[], mode: WebOutputMode): string {
+export function buildExportFile(
+  sections: { sectionId: string; label: string; content: string }[],
+  mode: WebOutputMode,
+  superAggro = false,
+): string {
   if (mode === 'liquid') {
-    // Cada sección como archivo Liquid separado con comentario delimitador
     return sections.map(s =>
       `{% comment %} === SECTION: ${s.label.toUpperCase()} === {% endcomment %}\n\n${s.content}`
     ).join('\n\n{% comment %} ─────────────────────────────────────── {% endcomment %}\n\n');
   }
+
   if (mode === 'html') {
-    // Resolver variables Liquid con fallbacks visuales para preview HTML
     const resolveForPreview = (html: string) => html
       .replace(/\{\{\s*section\.settings\.background_color\s*\}\}/g, '#0d0d0d')
       .replace(/\{\{\s*section\.settings\.text_color\s*\}\}/g, '#ffffff')
       .replace(/\{\{\s*section\.settings\.heading\s*\}\}/g, '')
       .replace(/\{\{\s*section\.settings\.subheading\s*\}\}/g, '')
       .replace(/\{\{\s*section\.settings\.eyebrow\s*\}\}/g, '')
-      .replace(/\{\{[^}]+\}\}/g, '')       // cualquier otra variable Liquid
-      .replace(/\{%-?\s*.*?-?%\}/g, '');   // tags Liquid {% ... %}
+      .replace(/\{\{[^}]+\}\}/g, '')
+      .replace(/\{%-?\s*.*?-?%\}/g, '');
 
     const body = sections
       .map(s => `<!-- === ${s.label.toUpperCase()} === -->\n${resolveForPreview(s.content)}`)
       .join('\n\n');
+
+    const aggroWarningHtml = superAggro ? `
+<div style="
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background: #1a0a00;
+  border-left: 5px solid #ff6b00;
+  border-radius: 4px;
+  padding: 20px 24px;
+  margin: 0 0 0 0;
+  position: relative;
+">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <span style="font-size:1.3rem;">⚠️</span>
+    <span style="
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #ff6b00;
+    ">AGGRO OUTPUT — Revisar antes de publicar</span>
+  </div>
+  <p style="margin:0 0 10px;font-size:0.88rem;color:#ffd4a8;line-height:1.6;">
+    Este output usa persuasión de alta presión. Antes de publicar, verifica:
+  </p>
+  <ul style="margin:0 0 14px;padding-left:18px;font-size:0.84rem;color:#ffb37a;line-height:1.8;">
+    <li><strong style="color:#ff9040;">Meta / TikTok Ads</strong> — Urgencia extrema puede rechazarse si la escasez no es verificable en la cuenta.</li>
+    <li><strong style="color:#ff9040;">Google Ads</strong> — Claims de resultado sin disclaimer activan revisión manual. Añade fuente si el claim es medible.</li>
+    <li><strong style="color:#ff9040;">Shopify</strong> — Comparaciones implícitas OK. Comparaciones directas con nombre de marca requieren evidencia.</li>
+  </ul>
+  <p style="margin:0;font-size:0.8rem;color:#a07050;font-style:italic;">
+    Reducir intensidad un 20–30% suele ser suficiente para paid media sin sacrificar conversión orgánica.
+  </p>
+</div>
+` : '';
 
     return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebLab Preview — ${sections[0]?.label ?? 'Export'}</title>
+  <title>WebLab Preview — ${superAggro ? '⚠️ AGGRO — ' : ''}${sections[0]?.label ?? 'Export'}</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     body { margin: 0; font-family: 'Helvetica Neue', Arial, sans-serif; background: #f0f0f0; }
@@ -520,10 +589,12 @@ export function buildExportFile(sections: { sectionId: string; label: string; co
   </style>
 </head>
 <body>
+${aggroWarningHtml}
 ${body}
 </body>
 </html>`;
   }
+
   // markdown
   return sections.map(s => `## ${s.label}\n\n${s.content}`).join('\n\n---\n\n');
 }

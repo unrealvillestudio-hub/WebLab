@@ -387,7 +387,7 @@ export default function WebGeneratorModule() {
     const header  = resolvedMode === 'markdown'
       ? `# ${brand.name} — ${pack.label}\n_Generado: ${new Date(result.generatedAt).toLocaleString('es-ES')} · ${result.language} · ${result.platform}${result.superAggro ? ' · SUPER AGGRO' : ''}_\n\n`
       : '';
-    const content = header + buildExportFile(result.sections, resolvedMode);
+    const content = header + buildExportFile(result.sections, resolvedMode, result.superAggro ?? false);
     const blob = new Blob([content], { type: mime });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
