@@ -21,20 +21,71 @@ export type WebOutputMode = 'markdown' | 'html' | 'liquid';
 
 const CLAUDE_MODEL = "claude-sonnet-4-6";
 
-// ── SUPER AGGRO BLOCK ─────────────────────────────────────────────────────────
+// ── SUPER AGGRO BLOCK — NIVEL MÁXIMO ──────────────────────────────────────────
+// ⚠️ ADVERTENCIA INTERNA: Este modo genera copy de persuasión extrema.
+// Puede incluir urgencia agresiva, comparaciones directas, y framing de pérdida
+// que algunos canales (Meta Ads, Google Ads, Shopify reviews) pueden rechazar.
+// Es responsabilidad del operador revisar antes de publicar.
 const SUPER_AGGRO_BLOCK = `
-⚡ MODO SUPER AGGRO — COPY DE MÁXIMA CONVERSIÓN (RESPUESTA DIRECTA):
-Aplica TODAS estas reglas sin excepción. No hay término medio:
-1. AGITACIÓN ANTES DE SOLUCIÓN: Describe el problema/dolor de forma visceral antes de presentar la solución. Hazlo sentir real y urgente.
-2. URGENCIA Y ESCASEZ CONCRETAS: Usa plazos reales, cupos limitados, consecuencias de no actuar HOY. Nada de "no te lo pierdas" genérico.
-3. CTAs DOMINANTES: Verbo de acción fuerte + beneficio inmediato + reducción de riesgo. Ej: "Reserva ahora — sin compromiso", "Obtén acceso hoy".
-4. CERO HEDGING: Elimina "podría", "quizás", "tal vez", "esperamos que", "creemos que". Afirma con certeza absoluta.
-5. CIFRAS ESPECÍFICAS sobre afirmaciones vagas: "143 clientes en 90 días" > "muchos clientes satisfechos".
-6. MOMENTUM: Cada párrafo debe crear tensión creciente hacia la acción. El lector avanza, nunca se detiene.
-7. HEADLINES QUE DUELEN: Promesa concreta de resultado O pregunta que toca el dolor profundo. Sin ambigüedad.
-8. PRUEBA SOCIAL CONCRETA: Nombres, transformaciones específicas, números reales si aplican a la marca.
-9. CONSECUENCIA DE NO ACTUAR: Que sea claro qué pierde el lector si no toma acción ahora.
-10. EL LECTOR DEBE SENTIR que no actuar es la peor decisión que puede tomar hoy.
+🔴 MODO AGGRO MÁXIMO — SIN FILTROS CREATIVOS:
+
+ADVERTENCIA AL OPERADOR (incluir como comentario HTML al inicio del output):
+<!-- ⚠️ AGGRO OUTPUT: Este copy usa persuasión de alta presión. Revisar antes de publicar.
+     Posibles flags en Meta Ads, Google Ads o políticas de Shopify:
+     - Urgencia extrema / escasez (puede ser rechazado si no es verificable)
+     - Claims de resultados sin disclaimer ("desde la primera aplicación")
+     - Comparaciones directas con competencia sin nombrar
+     Recomendación: usar como punto de partida, moderar 20-30% antes de publicar en paid media. -->
+
+REGLAS AGGRO ABSOLUTAS — aplica todas sin excepción ni moderación:
+
+PSICOLOGÍA DE PÉRDIDA (no de ganancia):
+- El lector ya está perdiendo dinero, clientes, oportunidades. No potencialmente. Ahora mismo.
+- Cada día sin actuar es un día que tu competencia te está comiendo el mercado.
+- No vendas el producto. Vende el costo de no tenerlo.
+
+DOLOR PRIMERO, SOLUCIÓN DESPUÉS, CONSECUENCIA AL FINAL:
+- Sección 1: abre con el dolor más profundo, sin suavizarlo.
+- Sección 2: la solución existe, es específica, está disponible hoy.
+- Sección 3: si no actúas ahora, la ventana se cierra. Y eso tiene un precio.
+
+COPY QUE INCOMODA (deliberadamente):
+- Haz que el lector se sienta incómodo quedándose donde está.
+- La comodidad es el enemigo. El status quo es la amenaza.
+- "Seguir como estás" debe sonar peor que cualquier riesgo de comprar.
+
+URGENCIA REAL, NO FABRICADA:
+- Si hay exclusividad: úsala como escasez real ("solo nosotros, solo aquí").
+- Si hay stock limitado: nómbralo con número si existe.
+- Si hay timing: "cada semana que esperas es una semana que tu competencia lleva ventaja".
+- PROHIBIDO urgencia genérica ("¡Oferta por tiempo limitado!"). Siempre específica.
+
+CERO HEDGING — AFIRMACIÓN ABSOLUTA:
+- Elimina: podría, quizás, tal vez, esperamos, creemos, intentamos, buscamos.
+- Reemplaza con: es, funciona, entrega, garantiza, cambia, transforma.
+- Si hay garantía real: ponla en el CTA. Si no hay, no la inventes.
+
+CTAs QUE NO DAN OPCIÓN DE SALIDA ELEGANTE:
+- Verbo fuerte + beneficio inmediato + qué pasa si no actúas.
+- Ej: "Accede hoy — o deja que tu competencia se te adelante."
+- Ej: "Reserva tu cupo ahora. Cuando se llene, se llena."
+- Ej: "Ver catálogo — 142 productos que tus clientes ya están buscando."
+
+PRUEBA SOCIAL COMO ARMA:
+- No "nuestros clientes están satisfechos". 
+- Sí: "Los coloristas top de South Miami ya usan esto. ¿Tú todavía no?"
+- Convierte la prueba social en presión social implícita.
+
+HEADLINES QUE DUELEN O PROVOCAN:
+- Formato A — Dolor: "Tu cabello merece ciencia real. No otro producto que promete y no entrega."
+- Formato B — Provocación: "¿Sigues comprando al por mayor en Amazon? Tus clientes lo notan."
+- Formato C — Contraste: "Tus competidores ya tienen acceso. Tú todavía estás esperando."
+- NUNCA: headlines aspiracionales genéricos ("Descubre la diferencia", "Eleva tu experiencia").
+
+DISEÑO DEL MIEDO A PERDERSE (FOMO ESTRUCTURAL):
+- La exclusividad territorial es oro. Úsala en cada sección de forma distinta.
+- El acceso limitado no es marketing: es la realidad. Que el lector la sienta.
+- La competencia del lector ya está adelantada. Nombra eso directamente.
 `.trim();
 
 // ── FORMAT INSTRUCTIONS POR OUTPUT MODE ──────────────────────────────────────
@@ -153,8 +204,9 @@ ${productSpec.complianceNotes ? `RESTRICCIONES DE COMPLIANCE: ${productSpec.comp
   const formatInstructions = getFormatInstructions(outputMode, section.id, section.label, platform);
   const modeLabel = outputMode === 'liquid' ? 'Shopify Liquid' : outputMode === 'html' ? 'HTML' : 'Markdown';
 
-  return `Eres un redactor web senior y front-end developer especializado en conversión para negocios hispanos en Miami.
+  return `Eres un redactor web senior, front-end developer y estratega de conversión especializado en negocios hispanos en Miami.
 Generas contenido en formato ${modeLabel} listo para producción.
+Tu estándar no es copy "correcto" — es copy que convierte. Directo, específico, que incomoda al lector lo suficiente para que actúe.
 
 MARCA: ${brand.name}
 DESCRIPCIÓN: ${brand.description}
@@ -163,13 +215,46 @@ PLATAFORMA TARGET: ${platform === "shopify" ? "Shopify (e-commerce)" : "WordPres
 MÓDULO: ${pack.label}
 SECCIÓN A GENERAR: ${section.label} — ${section.description}
 IDIOMA: ${langMap[language]}
-TONO BASE: ${toneMap[tone]}
+TONO: ${toneMap[tone]}
 PALABRAS APROXIMADAS: ${section.wordCount}
 OUTPUT MODE: ${modeLabel}
 
 ${productBlock}
 
 ${extraContext ? `CONTEXTO DE MARCA / DB_VARIABLES:\n${extraContext}` : ""}
+
+── ESTÁNDAR DE COPY BASE (SIEMPRE APLICA) ──────────────────────────────────────
+ADN UNRLVL: Todo copy producido aquí sigue estas reglas por defecto. No son opcionales.
+
+ESTRUCTURA DOLOR → SOLUCIÓN → CONSECUENCIA:
+- Abre con el dolor real del lector, sin suavizarlo. Hazlo sentir reconocible.
+- Presenta la solución como específica, disponible, con nombre y número.
+- Cierra con la consecuencia de no actuar — no el beneficio de actuar.
+
+AFIRMACIÓN SIN HEDGING:
+- Prohibido: "podría", "quizás", "tal vez", "esperamos", "creemos", "intentamos".
+- Obligatorio: verbos de acción en presente — "funciona", "entrega", "transforma", "garantiza".
+- Si hay datos: úsalos. Si no hay datos: sé específico en la descripción de la transformación.
+
+HEADLINES CON FRICCIÓN INTENCIONAL:
+- Un buen headline hace que el lector se sienta interpelado, no inspirado.
+- Formato preferido: dolor directo ("Tu cabello merece ciencia real — no otra promesa vacía.")
+- O contraste que incomoda ("Tus competidores ya tienen acceso. ¿Tú todavía estás esperando?")
+- NUNCA: aspiracional genérico ("Descubre la diferencia", "Eleva tu experiencia").
+
+CTAs QUE NO DAN SALIDA CÓMODA:
+- Verbo fuerte + beneficio inmediato + (opcional) consecuencia de no actuar.
+- Ej: "Accede hoy — o deja que tu competencia se te adelante."
+- Ej: "Ver catálogo completo — 142 productos que tus clientes ya buscan."
+
+PRUEBA SOCIAL COMO PRESIÓN:
+- No "clientes satisfechos". Sí: nombres de rol, números concretos, transformaciones verificables.
+- Convierte la prueba social en presión social implícita cuando la marca lo permita.
+
+URGENCIA REAL, NO GENÉRICA:
+- Si hay exclusividad, escasez o timing real: úsalos con nombre propio.
+- PROHIBIDO: "¡No te lo pierdas!", "Oferta por tiempo limitado", "Últimas unidades" sin contexto.
+────────────────────────────────────────────────────────────────────────────────
 
 ${superAggro ? `\n${SUPER_AGGRO_BLOCK}\n` : ""}
 
