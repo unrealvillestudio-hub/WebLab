@@ -276,7 +276,7 @@ async function callClaude(prompt: string, signal?: AbortSignal): Promise<string>
     body: JSON.stringify({
       prompt,
       model: CLAUDE_MODEL,
-      max_tokens: 2000,
+      max_tokens: 4000,
       temperature: 0.75,
     }),
   });
@@ -285,7 +285,14 @@ async function callClaude(prompt: string, signal?: AbortSignal): Promise<string>
     throw new Error(`Claude API error ${res.status}: ${(err as any)?.error ?? (err as any)?.detail ?? res.statusText}`);
   }
   const data = await res.json();
-  return (data.text ?? '').trim();
+  // Strip markdown code fences que Claude puede añadir
+  const raw = (data.text ?? '').trim();
+  const stripped = raw
+    .replace(/^```[a-zA-Z]*
+?/gm, '')
+    .replace(/^```\s*$/gm, '')
+    .trim();
+  return stripped;
 }
 
 // ── PUBLIC API: WEB PACK ──────────────────────────────────────────────────────

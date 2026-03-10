@@ -12,7 +12,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { prompt, model = 'claude-sonnet-4-6', max_tokens = 2000, temperature = 0.75 } = req.body;
+    const { prompt, model = 'claude-sonnet-4-6', max_tokens = 4000, temperature = 0.75 } = req.body;
 
     if (!prompt) {
       return res.status(400).json({ error: 'prompt is required' });
