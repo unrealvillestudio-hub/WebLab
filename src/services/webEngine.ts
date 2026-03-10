@@ -16,6 +16,7 @@ import {
 } from '../core/types';
 import { PAGE_SECTIONS } from '../config/packs';
 import { getHumanizeBlock } from '../config/humanizeConfig';
+import { getBrandBlueprintBlock } from '../config/brandBlueprints';
 
 export type WebOutputMode = 'markdown' | 'html' | 'liquid';
 
@@ -235,6 +236,7 @@ ${productSpec.complianceNotes ? `RESTRICCIONES DE COMPLIANCE: ${productSpec.comp
   const humanizeBlock = getHumanizeBlock('web', brand.id);
   const formatInstructions = getFormatInstructions(outputMode, section.id, section.label, platform);
   const modeLabel = outputMode === 'liquid' ? 'Shopify Liquid' : outputMode === 'html' ? 'HTML' : 'Markdown';
+  const brandBlueprintBlock = getBrandBlueprintBlock(brand.id as any);
 
   return `Eres un redactor web senior, front-end developer y estratega de conversión especializado en negocios hispanos en Miami.
 Generas contenido en formato ${modeLabel} listo para producción.
@@ -253,7 +255,7 @@ OUTPUT MODE: ${modeLabel}
 
 ${productBlock}
 
-${extraContext ? `CONTEXTO DE MARCA / DB_VARIABLES:\n${extraContext}` : ""}
+${brandBlueprintBlock ? `${brandBlueprintBlock}\n\n` : ""}${extraContext ? `CONTEXTO DE MARCA / DB_VARIABLES:\n${extraContext}` : ""}
 
 ── ESTÁNDAR DE COPY BASE (SIEMPRE APLICA) ──────────────────────────────────────
 ADN UNRLVL: Todo copy producido aquí sigue estas reglas por defecto. No son opcionales.

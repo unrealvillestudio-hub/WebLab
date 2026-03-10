@@ -26,7 +26,7 @@ export default function App() {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-400/70 bg-emerald-500/5 border border-emerald-500/20 px-2.5 py-1 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            GEMINI CONNECTED
+            CLAUDE CONNECTED
           </div>
           <button className="p-2 hover:bg-zinc-800 rounded-full transition-colors">
             <Bell className="w-4 h-4 text-zinc-500" />
@@ -46,6 +46,7 @@ export default function App() {
           </div>
         </div>
         <span className="text-[#FFAB00]/30">UNRLVL WebLab {BUILD_TAG}</span>
+        <span className="text-zinc-600 hidden md:block tracking-wide normal-case">Designed &amp; Developed by <span className="text-zinc-500">Unreal&gt;ille Studio</span> · Miami, FL</span>
       </footer>
     </div>
   );

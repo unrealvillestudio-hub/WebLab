@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { BRAND_LIST, getBrandById, BrandId } from '../../config/brands';
 import { BRAND_CONTEXTS } from '../../config/brandContexts';
+import { hasBrandBlueprint } from '../../config/brandBlueprints';
 import { WEB_PACKS, PACKS_BY_MODULE, PAGE_SECTIONS } from '../../config/packs';
 import {
   runWebPack, runBlogPost, estimateTotalWords,
@@ -527,6 +528,14 @@ export default function WebGeneratorModule() {
                 <span className="w-2 h-2 rounded-full" style={{ backgroundColor: brand.color }} />
                 <span className="text-[10px] text-zinc-600">{brand.market} · {(brand as any).channels?.join(', ')}</span>
               </div>
+              {hasBrandBlueprint(brandId) && (
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-500/10 border border-blue-500/25 w-fit">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                  <span className="text-[9px] font-semibold text-blue-400 tracking-wide uppercase">
+                    Brand context — injected by default
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Output Mode */}
