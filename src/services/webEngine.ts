@@ -19,7 +19,7 @@ import { getHumanizeBlock } from '../config/humanizeConfig';
 
 export type WebOutputMode = 'markdown' | 'html' | 'liquid';
 
-const GEMINI_MODEL = "gemini-2.0-flash";
+const CLAUDE_MODEL = "claude-sonnet-4-6";
 
 // ── SUPER AGGRO BLOCK ─────────────────────────────────────────────────────────
 const SUPER_AGGRO_BLOCK = `
@@ -267,23 +267,33 @@ ${formatBlock}
 GENERA EL POST COMPLETO AHORA:`;
 }
 
-// ── GEMINI CALLER ─────────────────────────────────────────────────────────────
-async function callGemini(prompt: string, signal?: AbortSignal): Promise<string> {
+// ── CLAUDE CALLER ─────────────────────────────────────────────────────────────
+async function callClaude(prompt: string, signal?: AbortSignal): Promise<string> {
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${(import.meta as any).env?.VITE_GEMINI_API_KEY ?? ""}`,
+    'https://api.anthropic.com/v1/messages',
     {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': (import.meta as any).env?.VITE_ANTHROPIC_API_KEY ?? '',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-calls': 'true',
+      },
       signal,
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.75, maxOutputTokens: 2000 },
+        model: CLAUDE_MODEL,
+        max_tokens: 2000,
+        temperature: 0.75,
+        messages: [{ role: 'user', content: prompt }],
       }),
     }
   );
-  if (!res.ok) throw new Error(`Gemini API error: ${res.status}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`Claude API error ${res.status}: ${(err as any)?.error?.message ?? res.statusText}`);
+  }
   const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  return (data.content?.[0]?.text ?? '').trim();
 }
 
 // ── PUBLIC API: WEB PACK ──────────────────────────────────────────────────────
@@ -327,7 +337,7 @@ export async function runWebPack(params: {
     });
 
     prompts.push(prompt);
-    const content = await callGemini(prompt, params.signal);
+    const content = await callClaude(prompt, params.signal);
     totalWords += content.split(/\s+/).length;
     sections.push({ sectionId, label: section.label, content });
     params.onSectionComplete?.(sectionId, content);
@@ -370,7 +380,7 @@ export async function runBlogPost(params: {
     extraContext: params.extraContext,
   });
 
-  const content = await callGemini(prompt, params.signal);
+  const content = await callClaude(prompt, params.signal);
 
   return {
     content,
