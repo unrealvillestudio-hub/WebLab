@@ -1,7 +1,6 @@
 import { Bell } from 'lucide-react';
 import WebGeneratorModule from './modules/webgenerator/WebGeneratorModule';
-
-const BUILD_TAG = "WL v2.1";
+import { BUILD_TAG } from './config/buildTag';
 
 const Logo = () => (
   <div className="flex items-center gap-2 font-bold tracking-tighter text-xl">

@@ -160,6 +160,23 @@ export const BRAND_CONTEXTS: Partial<Record<BrandId, BrandAutoContext>> = {
       'USAR: apoya, contribuye a, ayuda a mantener, favorece, potencia el bienestar. ' +
       'INCLUIR disclaimer FDA: "Este producto no ha sido evaluado por la FDA. No está destinado a diagnosticar, tratar, curar o prevenir ninguna enfermedad." ' +
       'No mencionar efectos sobre enfermedades específicas.',
+    complianceBlock:
+      '── COMPLIANCE D7 HERBAL — GUARDARRAÍL OBLIGATORIO FDA/FTC ──────────────────────\n' +
+      'CLASIFICACIÓN: Suplemento alimenticio / Dietary Supplement (DSHEA, 21 CFR 101.36).\n' +
+      'JURISDICCIÓN: Florida / US — estándares FTC (verdad en publicidad) + FDA (DSHEA).\n\n' +
+      'VERBOS APROBADOS (únicos permitidos para describir beneficios):\n' +
+      '  apoya • contribuye a • ayuda a mantener • favorece • potencia • nutre\n' +
+      '  aporta energía a • promueve el bienestar • complementa\n\n' +
+      'PROHIBIDO ABSOLUTO:\n' +
+      '  ✗ Claims de tratamiento, diagnóstico, cura o prevención de enfermedades\n' +
+      '  ✗ Mencionar diabetes, obesidad, presión arterial, colesterol, cáncer u otras condiciones médicas\n' +
+      '  ✗ "Clínicamente probado", "aprobado por la FDA", "cura", "elimina", "trata"\n' +
+      '  ✗ Resultados de pérdida de peso con cifras específicas sin estudio clínico registrado\n' +
+      '  ✗ Testimonios que atribuyan curación de enfermedades al producto\n\n' +
+      'DISCLAIMER FDA — OBLIGATORIO en toda landing page y product page:\n' +
+      '  "Este producto no ha sido evaluado por la FDA. No está destinado a diagnosticar,\n' +
+      '  tratar, curar o prevenir ninguna enfermedad o condición médica."\n' +
+      '────────────────────────────────────────────────────────────────────────────────',
   },
 
   diamondDetails: {
@@ -186,6 +203,20 @@ export const BRAND_CONTEXTS: Partial<Record<BrandId, BrandAutoContext>> = {
       'Cosmética tópica. SIN claims médicos o dermatológicos clínicos. ' +
       'USAR: hidrata, nutre, suaviza, ilumina, revitaliza, mejora la apariencia de. ' +
       'PROHIBIDO: trata, cura condiciones de piel como acné, rosacea, eczema.',
+    complianceBlock:
+      '── COMPLIANCE VIVOSE MASK — GUARDARRAÍL OBLIGATORIO FDA/FTC ─────────────────────\n' +
+      'CLASIFICACIÓN: Cosmético tópico (21 CFR 700). NO es medicamento ni device.\n' +
+      'JURISDICCIÓN: Florida / US — estándares FTC + FDA cosmetic claims.\n\n' +
+      'VERBOS APROBADOS (únicos permitidos):\n' +
+      '  hidrata • nutre • suaviza • ilumina • revitaliza • mejora la apariencia de\n' +
+      '  aporta luminosidad • protege • limpia • equilibra\n\n' +
+      'PROHIBIDO ABSOLUTO:\n' +
+      '  ✗ "trata", "cura" o referencias a acné, rosácea, eczema, psoriasis, dermatitis\n' +
+      '  ✗ Claims de acción biológica interna ("regenera células", "estimula colágeno" sin estudio)\n' +
+      '  ✗ "Dermatológicamente probado" o "clínicamente testado" sin documentación válida\n' +
+      '  ✗ Resultados de reducción de arrugas con % específico sin estudio\n' +
+      '  ✗ Comparaciones con medicamentos o tratamientos médicos estéticos\n' +
+      '────────────────────────────────────────────────────────────────────────────────',
   },
 
   vizosCosmetics: {
@@ -210,6 +241,21 @@ export const BRAND_CONTEXTS: Partial<Record<BrandId, BrandAutoContext>> = {
       'Productos de salud/wellness. SIN claims médicos sin respaldo científico. ' +
       'Cumplimiento FDA para suplementos dietéticos (DSHEA). ' +
       'INCLUIR disclaimer cuando aplique.',
+    complianceBlock:
+      '── COMPLIANCE PHAS — GUARDARRAÍL OBLIGATORIO FDA/FTC ───────────────────────────\n' +
+      'CLASIFICACIÓN: Suplementos dietéticos / Productos wellness (DSHEA, 21 CFR 101).\n' +
+      'CANALES: Amazon (políticas adicionales) + Shopify propio. Florida / US.\n\n' +
+      'VERBOS APROBADOS:\n' +
+      '  apoya • contribuye a • ayuda a mantener • favorece • potencia • promueve\n\n' +
+      'PROHIBIDO ABSOLUTO:\n' +
+      '  ✗ Disease claims: cualquier referencia a diagnóstico, tratamiento o cura de enfermedades\n' +
+      '  ✗ "Clínicamente probado" o "aprobado por la FDA" sin documentación válida\n' +
+      '  ✗ Cifras de resultados (pérdida de peso, ganancia muscular) sin estudio clínico registrado\n' +
+      '  ✗ En Amazon: estructura/función claims sin notificación FTC previa\n\n' +
+      'DISCLAIMER FDA — OBLIGATORIO en toda landing page, product page y listing Amazon:\n' +
+      '  "Este producto no ha sido evaluado por la FDA. No está destinado a diagnosticar,\n' +
+      '  tratar, curar o prevenir ninguna enfermedad o condición médica."\n' +
+      '────────────────────────────────────────────────────────────────────────────────',
   },
 
   unrealilleStudio: {
