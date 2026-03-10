@@ -9,6 +9,8 @@ export interface BrandAutoContext {
   extraContext: string;
   productAudience?: string;
   productCompliance?: string;
+  complianceBlock?: string;         // compliance extendido — hard-guardarraíl inyectado ANTES del AGGRO
+  productCatalogContext?: string;   // resumen catálogo en texto — contexto de prompt para copy de producto
   defaultPlatform: 'wordpress' | 'shopify';
 }
 
@@ -29,6 +31,79 @@ export const BRAND_CONTEXTS: Partial<Record<BrandId, BrandAutoContext>> = {
       'Cosmética capilar registrada. SIN claims médicos ni curativos. ' +
       'USAR: ayuda a, favorece, contribuye a, potencia, optimiza, nutre, fortalece. ' +
       'PROHIBIDO: trata, cura, elimina enfermedades, patologías o condiciones capilares médicas.',
+
+    complianceBlock:
+      '── COMPLIANCE NEURONE — GUARDARRAÍL OBLIGATORIO FDA/FTC ──────────────────────\n' +
+      'CLASIFICACIÓN: Cosméticos capilares registrados (21 CFR 701). NO son medicamentos.\n' +
+      'JURISDICCIÓN: Florida / US — estándares FTC (verdad en publicidad) + FDA (claims cosméticos).\n\n' +
+      'VERBOS APROBADOS (únicos permitidos para describir beneficios):\n' +
+      '  ayuda a • favorece • contribuye a • potencia • optimiza • nutre • fortalece\n' +
+      '  hidrata • suaviza • mejora la apariencia de • aporta brillo a • protege\n\n' +
+      'PROHIBIDO ABSOLUTO — activa rechazo de plataforma y riesgo legal:\n' +
+      '  ✗ "trata" • "cura" • "elimina" enfermedades o condiciones médicas capilares\n' +
+      '  ✗ Claims sobre alopecia, psoriasis, dermatitis seborreica, caspa patológica\n' +
+      '  ✗ "regenera el folículo piloso" o cualquier claim de acción biológica interna\n' +
+      '  ✗ Antes/después con claims de crecimiento capilar sin estudio clínico\n' +
+      '  ✗ "aprobado por la FDA" o "clínicamente probado" sin documentación válida\n\n' +
+      'PRODUCTOS DE RIESGO CRÍTICO — NO GENERAR COPY DE VENTA:\n' +
+      '  ✗ Capissen Shampoo — posible drug claim (anticaída clínico)\n' +
+      '  ✗ Capissen Lotion — posible drug claim\n' +
+      '  ✗ Derma Roller — posible medical device (FDA)\n' +
+      '  → shopify_visibility: pending — NO activar hasta attorney review\n\n' +
+      'PRODUCTOS DE RIESGO ALTO — copy con precaución extra:\n' +
+      '  Depura Shampoo ("detox"), Pro Salon line (Fanzi Mix, Plattina White, Total Violet Ink,\n' +
+      '  Neuroxide, Density Proff, Neurone Color, Pro Filus)\n' +
+      '  → B2B only. Evitar claims de resultado sin soporte técnico verificable.\n\n' +
+      'TESTIMONIOS Y PRUEBA SOCIAL:\n' +
+      '  • Solo testimonios reales y verificables. No fabricar resultados específicos.\n' +
+      '  • Si se usan resultados ("mi cabello creció X cm"), requieren disclaimer: "Resultados individuales pueden variar."\n\n' +
+      'DISCLAIMER FDA — incluir en landing pages y product pages cuando aplique:\n' +
+      '  "Este producto no ha sido evaluado por la FDA. No está destinado a diagnosticar,\n' +
+      '  tratar, curar o prevenir ninguna enfermedad o condición médica."\n' +
+      '────────────────────────────────────────────────────────────────────────────────',
+
+    productCatalogContext:
+      '── CATÁLOGO NEURONE S&C FLORIDA — 39 BP_PRODUCT activos ────────────────────────\n' +
+      'Nota: catálogo completo en repo BluePrints/products/. Este es el resumen estructurado para copy.\n\n' +
+      'CATEGORÍA 1 — CUIDADO Y TRATAMIENTO (B2C, riesgo compliance: low)\n' +
+      '  • Humit Shampoo — hidratación profunda, control del frizz\n' +
+      '  • Humit Mask — mascarilla nutrición intensa, cabello seco y poroso\n' +
+      '  • Kerasin HB Shampoo — keratina hidrolizada, suavidad y brillo\n' +
+      '  • Dyfensor SF Shampoo — fortalecimiento, cabello debilitado\n' +
+      '  • Dyfensor Serum — sérum protector anti-daño\n' +
+      '  • Velvety Control — control frizz y suavidad duradera\n\n' +
+      'CATEGORÍA 2 — STYLING Y ACABADOS (B2C, riesgo: low)\n' +
+      '  • Geometry Gel — fijación fuerte, definición de rizos\n' +
+      '  • Geometry Cream — fijación media, acabado natural\n' +
+      '  • Controller — crema de control y peinado\n' +
+      '  • Molding Toner — tónico moldeador flexible\n' +
+      '  • Resplander Shine — brillo intenso, acabado liso\n\n' +
+      'CATEGORÍA 3 — COLORIMETRÍA CONSUMIDOR (B2C/B2B, riesgo: low)\n' +
+      '  • DY Fazza — coloración permanente profesional\n' +
+      '  • DY Fazza Color — gama ampliada de tonos\n\n' +
+      'CATEGORÍA 4 — DETOX / LIMPIEZA PROFUNDA (B2C, riesgo: high — precaución en copy)\n' +
+      '  • Depura Shampoo — limpieza profunda. EVITAR "detox capilar" — usar "limpieza profunda"\n\n' +
+      'CATEGORÍA 5 — PRO SALON LINE (B2B exclusivo, riesgo: high, shopifyVisibility: pending)\n' +
+      '  • Fanzi Mix — mezcla profesional para servicios de salón\n' +
+      '  • Plattina White — decoloración profesional\n' +
+      '  • Total Violet Ink — matizador violeta intenso\n' +
+      '  • Neuroxide — oxidante profesional\n' +
+      '  • Density Proff — tratamiento densidad profesional\n' +
+      '  • Neurone Color — coloración profesional full-coverage\n' +
+      '  • Pro Filus — alisado profesional\n' +
+      '  → COPY: solo para Portal Pro B2B. No generar copy B2C para estos productos.\n\n' +
+      'CATEGORÍA 6 — CRÍTICOS — SIN COPY ACTIVO (shopifyVisibility: pending / attorney)\n' +
+      '  • Capissen Shampoo — NO generar copy\n' +
+      '  • Capissen Lotion — NO generar copy\n' +
+      '  • Derma Roller — NO generar copy\n\n' +
+      'IMÁGENES DISPONIBLES:\n' +
+      '  • standard (fondo blanco): todos los 39 productos — usar para tienda Shopify y Portal Pro\n' +
+      '  • dark/campaign (fondo negro estudio): solo 8 productos disponibles:\n' +
+      '    Kerasin HB Shampoo, Capissen Shampoo*, Dyfensor Serum, Humit Shampoo,\n' +
+      '    DY Fazza, DY Fazza Color, Dyfensor SF Shampoo, Humit Mask\n' +
+      '    (*Capissen: imagen dark disponible pero producto sin copy activo)\n' +
+      '  ⚠️ Pendiente confirmar con PO si imágenes dark son uso libre para distribuidor.\n' +
+      '────────────────────────────────────────────────────────────────────────────────',
   },
 
   patriciaOsorioVizosSalon: {

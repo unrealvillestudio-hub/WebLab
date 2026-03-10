@@ -17,6 +17,7 @@ import {
 import { PAGE_SECTIONS } from '../config/packs';
 import { getHumanizeBlock } from '../config/humanizeConfig';
 import { getBrandBlueprintBlock } from '../config/brandBlueprints';
+import { BRAND_CONTEXTS } from '../config/brandContexts';
 
 export type WebOutputMode = 'markdown' | 'html' | 'liquid';
 
@@ -237,6 +238,7 @@ ${productSpec.complianceNotes ? `RESTRICCIONES DE COMPLIANCE: ${productSpec.comp
   const formatInstructions = getFormatInstructions(outputMode, section.id, section.label, platform);
   const modeLabel = outputMode === 'liquid' ? 'Shopify Liquid' : outputMode === 'html' ? 'HTML' : 'Markdown';
   const brandBlueprintBlock = getBrandBlueprintBlock(brand.id as any);
+  const brandCtx = BRAND_CONTEXTS[brand.id as keyof typeof BRAND_CONTEXTS];
 
   return `Eres un redactor web senior, front-end developer y estratega de conversión especializado en negocios hispanos en Miami.
 Generas contenido en formato ${modeLabel} listo para producción.
@@ -255,7 +257,7 @@ OUTPUT MODE: ${modeLabel}
 
 ${productBlock}
 
-${brandBlueprintBlock ? `${brandBlueprintBlock}\n\n` : ""}${extraContext ? `CONTEXTO DE MARCA / DB_VARIABLES:\n${extraContext}` : ""}
+${brandBlueprintBlock ? `${brandBlueprintBlock}\n\n` : ""}${brandCtx?.complianceBlock ? `${brandCtx.complianceBlock}\n\n` : ""}${brandCtx?.productCatalogContext ? `${brandCtx.productCatalogContext}\n\n` : ""}${extraContext ? `CONTEXTO DE MARCA / DB_VARIABLES:\n${extraContext}` : ""}
 
 ── ESTÁNDAR DE COPY BASE (SIEMPRE APLICA) ──────────────────────────────────────
 ADN UNRLVL: Todo copy producido aquí sigue estas reglas por defecto. No son opcionales.
@@ -593,10 +595,14 @@ export function buildExportFile(
 <body>
 ${aggroWarningHtml}
 ${body}
+<footer style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:0.72rem;color:#888;text-align:center;padding:24px 16px;border-top:1px solid #e0e0e0;margin-top:48px;background:#fafafa;">
+  Designed &amp; Developed by <strong style="color:#555;">Unreal&gt;ille Studio</strong> &middot; Miami, FL
+</footer>
 </body>
 </html>`;
   }
 
   // markdown
-  return sections.map(s => `## ${s.label}\n\n${s.content}`).join('\n\n---\n\n');
+  return sections.map(s => `## ${s.label}\n\n${s.content}`).join('\n\n---\n\n') +
+    '\n\n---\n\n*Designed & Developed by Unreal>ille Studio · Miami, FL*';
 }
