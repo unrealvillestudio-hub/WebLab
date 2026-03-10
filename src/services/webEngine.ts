@@ -285,12 +285,10 @@ async function callClaude(prompt: string, signal?: AbortSignal): Promise<string>
     throw new Error(`Claude API error ${res.status}: ${(err as any)?.error ?? (err as any)?.detail ?? res.statusText}`);
   }
     const data = await res.json();
-  // Strip markdown code fences que Claude puede añadir (e.g. ```liquid, ```html)
-  let raw = (data.text ?? '').trim();
-  raw = raw.split('
-').filter(line => !line.match(/^```/)).join('
-').trim();
-  return raw;
+  // Strip markdown code fences que Claude puede añadir
+  const lines = (data.text ?? '').trim().split('\n');
+  const clean = lines.filter((l: string) => !l.startsWith('```')).join('\n').trim();
+  return clean;
 }
 
 // ── PUBLIC API: WEB PACK ──────────────────────────────────────────────────────
