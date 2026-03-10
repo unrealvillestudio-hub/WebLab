@@ -267,33 +267,25 @@ ${formatBlock}
 GENERA EL POST COMPLETO AHORA:`;
 }
 
-// ── CLAUDE CALLER ─────────────────────────────────────────────────────────────
+// ── CLAUDE CALLER (via Vercel proxy — evita CORS) ────────────────────────────
 async function callClaude(prompt: string, signal?: AbortSignal): Promise<string> {
-  const res = await fetch(
-    'https://api.anthropic.com/v1/messages',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': (import.meta as any).env?.VITE_ANTHROPIC_API_KEY ?? '',
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-calls': 'true',
-      },
-      signal,
-      body: JSON.stringify({
-        model: CLAUDE_MODEL,
-        max_tokens: 2000,
-        temperature: 0.75,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    }
-  );
+  const res = await fetch('/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    signal,
+    body: JSON.stringify({
+      prompt,
+      model: CLAUDE_MODEL,
+      max_tokens: 2000,
+      temperature: 0.75,
+    }),
+  });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(`Claude API error ${res.status}: ${(err as any)?.error?.message ?? res.statusText}`);
+    throw new Error(`Claude API error ${res.status}: ${(err as any)?.error ?? (err as any)?.detail ?? res.statusText}`);
   }
   const data = await res.json();
-  return (data.content?.[0]?.text ?? '').trim();
+  return (data.text ?? '').trim();
 }
 
 // ── PUBLIC API: WEB PACK ──────────────────────────────────────────────────────
