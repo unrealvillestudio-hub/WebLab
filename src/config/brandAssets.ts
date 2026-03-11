@@ -56,6 +56,12 @@ export const BRAND_ASSETS_CONFIG: Record<string, BrandAssetsConfig> = {
   //   brandPath:    'assets/images/AcmeCosmeticos/brand',
   //   displayName:  'Acme Cosméticos',
   // },
+  // ── Forum PH's ────────────────────────────────────────────────────────────
+  forumPhs: {
+    productsPath: 'assets/images/ForumPHs/products',
+    brandPath:    'assets/images/ForumPHs/brand',
+    displayName:  'Forum PH\'s',
+  },
 };
 
 // ── Canonical brand logo filenames ────────────────────────────────────────────

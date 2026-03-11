@@ -19,7 +19,7 @@ import { getHumanizeBlock } from '../config/humanizeConfig';
 import { getBrandBlueprintBlock } from '../config/brandBlueprints';
 import { BRAND_CONTEXTS } from '../config/brandContexts';
 
-export type WebOutputMode = 'markdown' | 'html' | 'liquid';
+export type WebOutputMode = 'html' | 'liquid';
 
 const CLAUDE_MODEL = "claude-sonnet-4-6";
 
@@ -457,7 +457,7 @@ export async function runWebPack(params: {
 
   const resolvedContext = params.dbPrompt?.trim() || params.extraContext;
   const superAggro  = params.superAggro  ?? false;
-  const outputMode  = params.outputMode  ?? 'markdown';
+  const outputMode  = params.outputMode ?? 'html';
 
   for (const sectionId of params.pack.sections) {
     const section = PAGE_SECTIONS[sectionId as keyof typeof PAGE_SECTIONS];
@@ -516,7 +516,7 @@ export async function runBlogPost(params: {
   extraContext?: string;
   signal?: AbortSignal;
 }): Promise<{ content: string; outputMode: WebOutputMode; generatedAt: string }> {
-  const outputMode = params.outputMode ?? 'markdown';
+  const outputMode = params.outputMode ?? 'html';
 
   const prompt = buildBlogPrompt({
     brand: params.brand,

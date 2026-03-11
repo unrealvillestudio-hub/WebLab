@@ -11,10 +11,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   X, ShoppingCart, LayoutTemplate, Globe,
   ChevronRight, Zap, Check, ArrowLeft, Eye,
-  Layers, Home, Grid, Package,
+  Home, Grid, Package,
 } from 'lucide-react';
 import {
-  THEME_CATALOG, ThemeIdentity, ThemeType,
+  ThemeIdentity, ThemeType,
   getThemesByType,
 } from '../../config/themeCatalog';
 import { cn } from '../../ui/components';
@@ -225,7 +225,6 @@ function ThemeCard({
       )}
       style={{
         borderColor: isSelected ? p.accent : `${p.accent}30`,
-        ringColor: p.accent,
         boxShadow: isSelected ? `0 0 0 2px ${p.accent}, 0 8px 32px ${p.accent}30` : undefined,
         background: p.bg,
       }}

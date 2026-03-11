@@ -55,17 +55,7 @@ interface BPProduct {
   format: string;
   size: string;
   cross_sell?: string[];
-  imagelab?: {
-    dominant_hex?: string;
-    accent_hex?: string;
-    mood?: string;
-    packaging_style?: string;
-    image_usage?: {
-      standard?: { filename?: string; background?: string };
-      campaign?: { filename?: string; background?: string };
-      dark_available?: boolean;
-    };
-  };
+  imagelab?: Record<string, unknown>;
 }
 
 // ── Fetch from GitHub API ─────────────────────────────────────────────────────
@@ -151,17 +141,7 @@ function generateTS(products: BPProduct[]): string {
     `  format: string;`,
     `  size: string;`,
     `  cross_sell?: string[];`,
-    `  imagelab?: {`,
-    `    dominant_hex?: string;`,
-    `    accent_hex?: string;`,
-    `    mood?: string;`,
-    `    packaging_style?: string;`,
-    `    image_usage?: {`,
-    `      standard?: { filename?: string; background?: string };`,
-    `      campaign?: { filename?: string; background?: string };`,
-    `      dark_available?: boolean;`,
-    `    };`,
-    `  };`,
+    `  imagelab?: Record<string, unknown>;`,
     `}`,
     ``,
     `export interface CatalogSubcollection {`,

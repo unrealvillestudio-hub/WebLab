@@ -4,8 +4,10 @@ import {
   Globe, LayoutTemplate, ShoppingCart, Play, Square,
   ChevronRight, Copy, Check, Download, Trash2, BookOpen,
   AlertCircle, CheckCircle2, FileText, RotateCcw, Zap,
-  Database, RefreshCw, Code2, FileCode, FileType, PenLine, Rss, Layers, X,
+  Database, RefreshCw, Code2, FileCode, PenLine, Rss, Layers, X,
+  CloudUpload, Clock,
 } from 'lucide-react';
+import { saveDraft, SaveDraftResult } from '../../services/draftService';
 import { BRAND_LIST, getBrandById, BrandId } from '../../config/brands';
 import { BRAND_CONTEXTS } from '../../config/brandContexts';
 import { hasBrandBlueprint } from '../../config/brandBlueprints';
@@ -51,8 +53,7 @@ const TONES: { id: WebTone; label: string; emoji: string }[] = [
 ];
 
 const OUTPUT_MODES: { id: WebOutputMode; label: string; icon: React.ElementType; color: string; description: string }[] = [
-  { id: "markdown", label: "Markdown", icon: FileType, color: "#6B7280", description: "Copy para CMS / docs" },
-  { id: "html",     label: "HTML",     icon: Code2,    color: "#F97316", description: "Custom HTML Shopify/WP" },
+  { id: "html",     label: "HTML",     icon: Code2,    color: "#F97316", description: "HTML entregable — landings, product pages, previews" },
   { id: "liquid",   label: "Liquid",   icon: FileCode, color: "#06B6D4", description: "Sección nativa Shopify" },
 ];
 
@@ -98,7 +99,7 @@ function SectionCard({ section, live, aggro, outputMode }: {
 }) {
   const [expanded, setExpanded] = useState(true);
   const [preview, setPreview]   = useState(false);
-  const mode = outputMode ?? 'markdown';
+  const mode = outputMode ?? 'html';
 
   return (
     <div className={cn(
@@ -148,7 +149,7 @@ function SectionCard({ section, live, aggro, outputMode }: {
               ) : (
                 <pre className={cn(
                   "text-sm whitespace-pre-wrap leading-relaxed overflow-auto",
-                  mode === 'markdown' ? "text-zinc-300 font-sans" : "text-zinc-400 font-mono"
+                  "text-zinc-400 font-mono"
                 )} style={{ maxHeight: '400px' }}>
                   {section.content}
                 </pre>
@@ -235,7 +236,7 @@ export default function WebGeneratorModule() {
   const [language, setLanguage]                   = useState<WebLanguage>("ES-FL");
   const [tone, setTone]                           = useState<WebTone>("professional");
   const [platform, setPlatform]                   = useState<WebPlatform>("wordpress");
-  const [outputMode, setOutputMode]               = useState<WebOutputMode>("markdown");
+  const [outputMode, setOutputMode]               = useState<WebOutputMode>("html");
   const [superAggro, setSuperAggro]               = useState(false);
   const [selectedThemeId, setSelectedThemeId]     = useState<string | null>(null);
   const [showThemePicker, setShowThemePicker]     = useState(false);
@@ -255,6 +256,9 @@ export default function WebGeneratorModule() {
   // ── Blueprint image toggles ──
   const [bpToggles, setBpToggles]                 = useState<BlueprintImageToggles>({ usePersonBP: true, useLocationBP: true });
   const [isGenerating, setIsGenerating]           = useState(false);
+  const [draftSaving, setDraftSaving]             = useState(false);
+  const [draftResult, setDraftResult]             = useState<SaveDraftResult | null>(null);
+  const [draftError, setDraftError]               = useState("");
   const [liveSections, setLiveSections]           = useState<WebOutput["sections"]>([]);
   const [currentSection, setCurrentSection]       = useState('');
   const [result, setResult]                       = useState<WebOutput | null>(null);
@@ -268,7 +272,7 @@ export default function WebGeneratorModule() {
   const [blogType, setBlogType]             = useState<BlogPostType>('educativo');
   const [blogLanguage, setBlogLanguage]     = useState<WebLanguage>("ES-FL");
   const [blogWordCount, setBlogWordCount]   = useState(800);
-  const [blogOutputMode, setBlogOutputMode] = useState<WebOutputMode>("markdown");
+  const [blogOutputMode, setBlogOutputMode] = useState<WebOutputMode>("html");
   const [blogContext, setBlogContext]       = useState('');
   const [blogGenerating, setBlogGenerating] = useState(false);
   const [blogResult, setBlogResult]         = useState<string | null>(null);
@@ -346,8 +350,8 @@ export default function WebGeneratorModule() {
       filteredBpContext = filteredBpContext.replace(/BP_LOCATION[^─]*──[^─]*/g, '');
     }
 
-    // E-commerce product context injection
-    const ecomContext = activeModule === 'ecommerce'
+    // Product context injection — both ecommerce and landing use BP selector
+    const ecomContext = (activeModule === 'ecommerce' || activeModule === 'landing')
       ? buildEcomPromptContext(ecomCtx, brandId)
       : '';
 
@@ -396,7 +400,7 @@ export default function WebGeneratorModule() {
     setLanguage("ES-FL");
     setTone("professional");
     setPlatform(ctx?.defaultPlatform ?? "wordpress");
-    setOutputMode("markdown");
+    setOutputMode("html");
     setSuperAggro(false);
     setDbPromptMode(false);
     setDbPromptText('');
@@ -418,15 +422,43 @@ export default function WebGeneratorModule() {
     const resolvedMode = ((result as any).outputMode as WebOutputMode) ?? outputMode;
     const ext     = getFileExtension(resolvedMode);
     const mime    = getMimeType(resolvedMode);
-    const header  = resolvedMode === 'markdown'
-      ? `# ${brand.name} — ${pack.label}\n_Generado: ${new Date(result.generatedAt).toLocaleString('es-ES')} · ${result.language} · ${result.platform}${result.superAggro ? ' · SUPER AGGRO' : ''}_\n\n`
-      : '';
-    const content = header + buildExportFile(result.sections, resolvedMode, result.superAggro ?? false);
+    const content = buildExportFile(result.sections, resolvedMode, result.superAggro ?? false);
     const blob = new Blob([content], { type: mime });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `weblab_${brand.id}_${pack.id}_${result.superAggro ? 'AGGRO_' : ''}${Date.now()}.${ext}`;
     a.click();
+  };
+
+  const handleSaveDraft = async () => {
+    if (!result || !githubToken.trim()) return;
+    setDraftSaving(true);
+    setDraftError('');
+    setDraftResult(null);
+    try {
+      const resolvedMode = ((result as any).outputMode as WebOutputMode) ?? outputMode;
+      const content = buildExportFile(result.sections, resolvedMode, result.superAggro ?? false);
+      const saved = await saveDraft({
+        token:      githubToken,
+        brandId:    brand.id,
+        brandName:  brand.name,
+        packId:     pack.id,
+        packLabel:  pack.label,
+        module:     activeModule,
+        outputMode: resolvedMode,
+        themeId:    selectedThemeId,
+        aggro:      !!result.superAggro,
+        language:   result.language,
+        platform:   result.platform,
+        content,
+        sections:   result.sections.length,
+      });
+      setDraftResult(saved);
+    } catch (e: any) {
+      setDraftError(e.message ?? 'Error al guardar borrador');
+    } finally {
+      setDraftSaving(false);
+    }
   };
 
   // ── Handlers: Blog ──────────────────────────────────────────────────────
@@ -690,7 +722,7 @@ export default function WebGeneratorModule() {
                       <OutputHistoryCard
                         key={o.id}
                         output={o}
-                        onLoad={o => { setResult(o); setLiveSections([]); setOutputMode(((o as any).outputMode as WebOutputMode) ?? 'markdown'); }}
+                        onLoad={o => { setResult(o); setLiveSections([]); setOutputMode(((o as any).outputMode as WebOutputMode) ?? 'html'); }}
                         onDelete={removeOutput}
                       />
                     ))}
@@ -748,46 +780,24 @@ export default function WebGeneratorModule() {
 
               {(activeModule === "ecommerce" || activeModule === "landing") && (
                 <div className="space-y-3">
-                  {/* E-Commerce: smart product/collection selector */}
-                  {activeModule === "ecommerce" ? (
-                    <EcomProductSelector
-                      packId={packId}
-                      brandId={brandId}
-                      brandContext={extraContext}
-                      value={ecomCtx}
-                      onChange={setEcomCtx}
-                      githubToken={githubToken}
+                  {/* Both E-Commerce and Landing: smart BP product selector */}
+                  {/* Landing uses product pack (single product focus) — same selector, same BP context */}
+                  <EcomProductSelector
+                    packId={packId}
+                    brandId={brandId}
+                    brandContext={extraContext}
+                    value={ecomCtx}
+                    onChange={setEcomCtx}
+                    githubToken={githubToken}
+                  />
+                  {/* Landing: optional compliance/restriction field */}
+                  {activeModule === "landing" && (
+                    <input
+                      value={productCompliance}
+                      onChange={e => setProductCompliance(e.target.value)}
+                      placeholder="Restricciones / compliance / objetivo de conversión (opcional)"
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50"
                     />
-                  ) : (
-                    /* Landing: generic product inputs */
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="col-span-2">
-                        <input
-                          value={productName}
-                          onChange={e => setProductName(e.target.value)}
-                          placeholder="Nombre del producto o servicio"
-                          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50"
-                        />
-                      </div>
-                      <input
-                        value={productBenefits}
-                        onChange={e => setProductBenefits(e.target.value)}
-                        placeholder="Beneficios clave (separados por coma)"
-                        className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50"
-                      />
-                      <input
-                        value={productAudience}
-                        onChange={e => setProductAudience(e.target.value)}
-                        placeholder="Audiencia objetivo"
-                        className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50"
-                      />
-                      <input
-                        value={productCompliance}
-                        onChange={e => setProductCompliance(e.target.value)}
-                        placeholder="Restricciones / compliance (opcional)"
-                        className="col-span-2 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50"
-                      />
-                    </div>
                   )}
                 </div>
               )}
@@ -980,6 +990,46 @@ export default function WebGeneratorModule() {
                   >
                     <Download size={13} />
                   </button>
+                )}
+                {/* Save Draft */}
+                {result && (
+                  <button
+                    onClick={handleSaveDraft}
+                    disabled={draftSaving || !githubToken.trim()}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                      draftResult
+                        ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400"
+                        : draftSaving
+                          ? "bg-zinc-800 text-zinc-500"
+                          : "bg-zinc-800 hover:bg-zinc-700 text-zinc-300 disabled:opacity-40"
+                    )}
+                    title={!githubToken.trim() ? "Requiere GitHub Token" : "Guardar borrador en Drafts repo"}
+                  >
+                    {draftSaving
+                      ? <><RefreshCw size={12} className="animate-spin" />Guardando...</>
+                      : draftResult
+                        ? <><Check size={12} />Guardado</>
+                        : <><CloudUpload size={12} />Borrador</>
+                    }
+                  </button>
+                )}
+                {draftError && (
+                  <span className="text-[10px] text-red-400 max-w-40 truncate" title={draftError}>
+                    ⚠ {draftError}
+                  </span>
+                )}
+                {draftResult && (
+                  <a
+                    href={draftResult.contentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors"
+                    title="Ver en GitHub"
+                  >
+                    <Clock size={9} />
+                    Expira {new Date(draftResult.expiresAt).toLocaleDateString('es-ES')}
+                  </a>
                 )}
               </div>
             </div>

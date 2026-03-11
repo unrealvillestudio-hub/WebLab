@@ -1,6 +1,6 @@
 // AUTO-GENERATED — DO NOT EDIT MANUALLY
 // Regenerate: GITHUB_TOKEN=ghp_xxx npx ts-node scripts/generate_catalog.ts
-// Last generated: 2026-03-11T21:09:21.012Z
+// Last generated: 2026-03-11T21:40:42.031Z
 
 import type { BrandId } from './brands';
 
@@ -27,17 +27,7 @@ export interface CatalogProduct {
   format: string;
   size: string;
   cross_sell?: string[];
-  imagelab?: {
-    dominant_hex?: string;
-    accent_hex?: string;
-    mood?: string;
-    packaging_style?: string;
-    image_usage?: {
-      standard?: { filename?: string; background?: string };
-      campaign?: { filename?: string; background?: string };
-      dark_available?: boolean;
-    };
-  };
+  imagelab?: Record<string, unknown>;
 }
 
 export interface CatalogSubcollection {

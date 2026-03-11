@@ -13,6 +13,7 @@ export type BrandId =
   | 'vizosCosmetics'
   | 'phas'
   | 'neuroneCosmetics'
+  | 'forumPhs'
 
 export interface Brand {
   id: BrandId
@@ -138,6 +139,18 @@ export const BRANDS: Record<BrandId, Brand> = {
     description: 'Distribución exclusiva South & Central Miami — Neurocosmética + Nano Tribología. B2C + Portal Pro B2B para profesionales.',
     market: 'South & Central Miami, FL',
     channels: ['shopify', 'instagram', 'whatsapp', 'b2b-portal'],
+  },
+  forumPhs: {
+    id: 'forumPhs',
+    name: 'Forum PH\'s',
+    shortName: 'ForumPHs',
+    owner: 'Sam',
+    color: '#2563EB',
+    secondaryColor: '#1E3A8A',
+    emoji: '🔵',
+    description: 'Marca en construcción. Dominio: forumphs.com',
+    market: 'TBD',
+    channels: ['web', 'shopify'],
   },
 }
 

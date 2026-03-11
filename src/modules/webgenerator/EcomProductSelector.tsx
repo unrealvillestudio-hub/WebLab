@@ -10,7 +10,6 @@ import {
 import { getCatalog, CatalogProduct, CatalogCollection } from '../../config/productCatalog';
 import type { EcomProductContext, EcomListingMode, BlueprintImageToggles } from '../../core/types';
 import {
-  resolveProductImageUrl,
   resolveProductImagePair,
   getBrandLogoUrls,
 } from '../../config/brandAssets';

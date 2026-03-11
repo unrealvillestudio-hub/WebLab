@@ -258,6 +258,19 @@ export const BRAND_CONTEXTS: Partial<Record<BrandId, BrandAutoContext>> = {
       '────────────────────────────────────────────────────────────────────────────────',
   },
 
+  forumPhs: {
+    defaultPlatform: 'shopify',
+    extraContext:
+      'Forum PH\'s — marca nueva en desarrollo. Dominio: forumphs.com. ' +
+      'Categoría y productos pendientes de definir. ' +
+      'Tono profesional, moderno, orientado al mercado US/Florida.',
+    productAudience:
+      'Por definir según categoría de producto.',
+    productCompliance:
+      'Sin restricciones de compliance definidas aún. Aplicar criterios generales de honestidad y FTC.',
+    complianceBlock: '',
+  },
+
   unrealilleStudio: {
     defaultPlatform: 'wordpress',
     extraContext:

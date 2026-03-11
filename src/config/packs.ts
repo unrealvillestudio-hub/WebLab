@@ -61,7 +61,7 @@ export const WEB_PACKS: Record<string, WebPack> = {
     description: "Sitio completo para marca o negocio. Hero + About + Services + CTA + Contact.",
     sections: ["hero", "about", "services", "testimonials", "faq", "cta", "contact"],
     estimatedWords: 1400,
-    outputFormat: "markdown",
+    outputFormat: "html",
   },
   web_personal_brand: {
     id: "web_personal_brand",
@@ -70,7 +70,7 @@ export const WEB_PACKS: Record<string, WebPack> = {
     description: "Web para marca personal. Hero + Bio + Oferta + Testimonios + Contacto.",
     sections: ["hero", "about", "services", "testimonials", "cta", "contact"],
     estimatedWords: 1100,
-    outputFormat: "markdown",
+    outputFormat: "html",
   },
   web_salon_detailing: {
     id: "web_salon_detailing",
@@ -79,7 +79,7 @@ export const WEB_PACKS: Record<string, WebPack> = {
     description: "Web para servicios locales. Hero + Servicios + Galería + Testimonios + CTA.",
     sections: ["hero", "services", "gallery", "testimonials", "faq", "cta", "contact"],
     estimatedWords: 1200,
-    outputFormat: "markdown",
+    outputFormat: "html",
   },
 
   // ── LANDING PACKS ────────────────────────────────────────────────────────
@@ -90,7 +90,7 @@ export const WEB_PACKS: Record<string, WebPack> = {
     description: "Landing page enfocada en captura de email o lead. Copy completo y CTA.",
     sections: ["hero", "features", "testimonials", "faq", "cta"],
     estimatedWords: 700,
-    outputFormat: "markdown",
+    outputFormat: "html",
   },
   landing_product_sale: {
     id: "landing_product_sale",
@@ -99,7 +99,7 @@ export const WEB_PACKS: Record<string, WebPack> = {
     description: "Landing de conversión directa para un producto. Features + Prueba social + CTA fuerte.",
     sections: ["hero", "features", "pricing", "testimonials", "faq", "cta"],
     estimatedWords: 900,
-    outputFormat: "markdown",
+    outputFormat: "html",
   },
   landing_appointment: {
     id: "landing_appointment",
@@ -108,7 +108,7 @@ export const WEB_PACKS: Record<string, WebPack> = {
     description: "Landing para agendar cita o consulta. Salones, consultoras, servicios.",
     sections: ["hero", "services", "testimonials", "faq", "cta"],
     estimatedWords: 700,
-    outputFormat: "markdown",
+    outputFormat: "html",
   },
 
   // ── ECOMMERCE PACKS ──────────────────────────────────────────────────────
@@ -137,7 +137,7 @@ export const WEB_PACKS: Record<string, WebPack> = {
     description: "Homepage completa de tienda Shopify. Hero + Categorías + Propuesta + Testimonios.",
     sections: ["hero", "features", "testimonials", "cta"],
     estimatedWords: 650,
-    outputFormat: "markdown",
+    outputFormat: "html",
   },
   ecom_product_page: {
     id: "ecom_product_page",
@@ -155,7 +155,7 @@ export const WEB_PACKS: Record<string, WebPack> = {
     description: "Página Nuestra Historia para tienda. Origen, valores, diferenciadores.",
     sections: ["about", "team"],
     estimatedWords: 450,
-    outputFormat: "markdown",
+    outputFormat: "html",
   },
 };
 

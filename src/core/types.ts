@@ -99,7 +99,7 @@ export interface BlueprintImageToggles {
   usePersonBP: boolean;
   useLocationBP: boolean;
 }
-  export type WebOutputMode = 'markdown' | 'html' | 'liquid';
+  export type WebOutputMode = 'html' | 'liquid';
 export interface WebOutput {
   id: string;
   packId: string;
