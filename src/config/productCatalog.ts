@@ -1,5 +1,6 @@
-// AUTO-GENERATED from BluePrints/products/ — DO NOT EDIT MANUALLY
-// Regenerate with: scripts/generate_catalog.py
+// AUTO-GENERATED — DO NOT EDIT MANUALLY
+// Regenerate: GITHUB_TOKEN=ghp_xxx npx ts-node scripts/generate_catalog.ts
+// Last generated: 2026-03-11T07:09:19.252Z
 
 import type { BrandId } from './brands';
 
@@ -9,10 +10,10 @@ export interface CatalogProduct {
   id: string;
   sku: string;
   display_name: string;
-  collection: string;       // = category (Shopify/WP Collection)
-  collection_id: string;    // slugified
-  subcollection: string;    // = line (sub-agrupación dentro de collection)
-  subcollection_id: string; // slugified
+  collection: string;
+  collection_id: string;
+  subcollection: string;
+  subcollection_id: string;
   description: string;
   description_enhanced: string | null;
   key_ingredients: string[];
@@ -37,7 +38,7 @@ export interface CatalogCollection {
   id: string;
   label: string;
   subcollections: CatalogSubcollection[];
-  products: CatalogProduct[];  // all products flat
+  products: CatalogProduct[];
 }
 
 // ── NEURONE CATALOG ─────────────────────────────────────────────────────────
@@ -51,7 +52,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "scalp",
     subcollection: "Anti-Caída / Capissen",
     subcollection_id: "anti_cada_capissen",
-    description: "{'en': 'Hair Lotion for Hair Loss Prevention.', 'es': 'Loción Capilar. Prevención Caída del Cabello.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: [],
     benefit_claims: ["contribuye al aspecto de densidad y fortaleza del cabello", "cuidado del cuero cabelludo"],
@@ -72,7 +73,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "scalp",
     subcollection: "Anti-Caída / Capissen",
     subcollection_id: "anti_cada_capissen",
-    description: "{'en': 'Hair Shampoo for Hair Loss Prevention.', 'es': 'Champú Capilar. Prevención Caída del Cabello.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: [],
     benefit_claims: ["contribuye al aspecto de densidad", "cuida el cuero cabelludo", "fortalece la hebra capilar"],
@@ -93,7 +94,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "pro_salon_colour",
     subcollection: "Neurone Color",
     subcollection_id: "neurone_color",
-    description: "{'en': 'Permanent Hair Color Cream. Quinoa Protein. Nano Tribology. Formula 1+1½.', 'es': 'Tinte Permanente para el Cabello en Crema. Proteína de Quinoa. Nano Tribología Capilar. Fórmula 1+1½.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["quinoa protein", "nano tribology complex", "oxidative dyes"],
     benefit_claims: [],
@@ -114,7 +115,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "styling",
     subcollection: "Styling",
     subcollection_id: "styling",
-    description: "{'en': 'Styling Gel Wax. Wet Look. Extreme Hold.', 'es': 'Cera Gel. Aspecto Húmedo. Extrema Fijación.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: [],
     benefit_claims: ["fijación extrema", "efecto wet look", "control total del peinado"],
@@ -135,7 +136,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "pro_salon_peroxide",
     subcollection: "Density Proff",
     subcollection_id: "density_proff",
-    description: "{'en': 'Cream Developer. High Density Formula. Available in 20 and 30 volumes.', 'es': 'Peróxido en Crema. Fórmula de Alta Densidad. Disponible en 20 y 30 volúmenes.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["hydrogen peroxide", "high density formula"],
     benefit_claims: [],
@@ -156,7 +157,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "scalp",
     subcollection: "Depura",
     subcollection_id: "depura",
-    description: "{'en': 'Deep Cleaning Shampoo. Purify & Detox.', 'es': 'Champú de Limpieza Profunda. Efecto Purificante.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: [],
     benefit_claims: ["limpieza profunda", "efecto purificante", "elimina residuos de producto"],
@@ -177,7 +178,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "scalp",
     subcollection: "Anti-Caída",
     subcollection_id: "anti_cada",
-    description: "{'en': 'Titanium Microneedle Roller. Auxiliary for scalp care.', 'es': 'Rodillo de Microagujas de Titanio. Auxiliar para tratar el adelgazamiento capilar.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["titanium microneedles"],
     benefit_claims: ["auxiliar para el cuidado del cuero cabelludo", "contribuye al aspecto del cabello"],
@@ -198,7 +199,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "color_rescue",
     subcollection: "DY Fazza",
     subcollection_id: "dy_fazza",
-    description: "{'en': '2 Phase Nutritive Moisturizing Treatment for Colored Hair. Leave In.', 'es': 'Tratamiento Hidratante Nutritivo de 2 Fases para Cabello Teñido. Sin Enjuague.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["2-phase formula"],
     benefit_claims: ["hidrata el cabello teñido sin enjuague", "nutre la hebra coloreada", "contribuye a prolongar la viveza del color"],
@@ -219,7 +220,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "moisture",
     subcollection: "DY Fazza",
     subcollection_id: "dy_fazza",
-    description: "{'en': '2 Phase Nutritive Moisturizing Hair Treatment. Leave In.', 'es': 'Tratamiento Hidratante Nutritivo de 2 Fases. Sin Enjuague.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["2-phase formula"],
     benefit_claims: ["hidrata en profundidad", "nutre la hebra", "sin enjuague — fácil de aplicar"],
@@ -240,7 +241,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "color_rescue",
     subcollection: "Dyfensor",
     subcollection_id: "dyfensor",
-    description: "{'en': 'Hair Restructuring Serum. Color Protector.', 'es': 'Suero Pro-Reestructuración. Protector De Color.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: [],
     benefit_claims: ["reestructura la hebra", "protege el color", "sella la cutícula"],
@@ -261,7 +262,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "color_rescue",
     subcollection: "Dyfensor",
     subcollection_id: "dyfensor",
-    description: "{'en': 'Sulfate Free Shampoo. Color Protection for Dyed Hair.', 'es': 'Champú Libre de Sulfatos. Protección de Color para Cabello Teñido.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["sulfate-free cleansing agents"],
     benefit_claims: ["libre de sulfatos", "protege el color del cabello teñido", "limpieza suave que prolonga el color"],
@@ -282,7 +283,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "pro_salon_colour",
     subcollection: "Fanzi Mix",
     subcollection_id: "fanzi_mix",
-    description: "{'en': 'Semi-Permanent Fantasy Color.', 'es': 'Color de Fantasía Semi-Permanente.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["direct dyes / pigments"],
     benefit_claims: [],
@@ -303,7 +304,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "styling",
     subcollection: "Geometry",
     subcollection_id: "geometry",
-    description: "{'en': 'Curls Definition Cream. Elasticity. Anti-Frizz.', 'es': 'Definición de Rizos. Elasticidad. Efecto Anti-Frizz.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: [],
     benefit_claims: ["define los rizos con textura cremosa", "aporta elasticidad", "control del frizz"],
@@ -324,7 +325,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "styling",
     subcollection: "Geometry",
     subcollection_id: "geometry",
-    description: "{'en': 'Curls Definition Gel. Elasticity. Anti-Frizz.', 'es': 'Gel Definición de Rizos para el Cabello. Elasticidad. Efecto Anti-Frizz.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: [],
     benefit_claims: ["define los rizos", "aporta elasticidad", "efecto anti-frizz"],
@@ -345,7 +346,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "restore",
     subcollection: "Green 100",
     subcollection_id: "green_100",
-    description: "{'en': 'Vegetable Serum for Hair Extremely Dry, Porous and Chemically Processed. Green Product.', 'es': 'Serum Vegetal para Cabello Extremadamente Reseco, Poroso y Químicamente Procesado. Producto Verde.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["vegetable extracts"],
     benefit_claims: ["restaura la hebra seca y porosa", "nutre con activos vegetales", "favorece la suavidad y flexibilidad"],
@@ -366,7 +367,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "moisture",
     subcollection: "Humit",
     subcollection_id: "humit",
-    description: "{'en': 'High Moisturizing Conditioning Mask. Dry and Damaged Hair.', 'es': 'Mascarilla Acondicionadora Pro-Humectación. Cabello Seco y Maltratado.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: [],
     benefit_claims: ["hidratación intensa", "acondiciona", "suaviza y aporta brillo"],
@@ -387,7 +388,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "moisture",
     subcollection: "Humit",
     subcollection_id: "humit",
-    description: "{'en': 'High Moisturizing Shampoo. Dry and Damaged Hair.', 'es': 'Champú Acondicionador Pro-Humectación. Cabello Seco y Maltratado.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: [],
     benefit_claims: ["humectación intensa", "acondiciona mientras limpia", "suaviza la hebra seca"],
@@ -408,7 +409,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "moisture",
     subcollection: "Hyaloneurine",
     subcollection_id: "hyaloneurine",
-    description: "{'en': 'Anti-Aging Serum. Hyaluronic Acid & Elastin. Face & Hair.', 'es': 'Suero Antiedad. Ácido Hialurónico & Elastina. Cara y Cabello.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["hyaluronic acid", "elastin"],
     benefit_claims: ["hidrata cara y cabello", "favorece la elasticidad", "contribuye al aspecto antiedad de la piel", "nutre y suaviza la hebra capilar"],
@@ -429,7 +430,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "restore",
     subcollection: "Kerasin HB",
     subcollection_id: "kerasin_hb",
-    description: "{'en': 'Leave-in Repair Treatment for Damaged Hair. Keratin + Hyaluronic Acid + Biotin.', 'es': 'Tratamiento Pro-Reparación sin Enjuague para Cabello Dañado. Keratina + Ácido Hialurónico + Biotina.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["keratin", "hyaluronic acid", "biotin"],
     benefit_claims: ["repara sin enjuague", "fortalece la hebra", "nutre con keratina y biotina"],
@@ -450,7 +451,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "restore",
     subcollection: "Kerasin HB",
     subcollection_id: "kerasin_hb",
-    description: "{'en': 'Repair Mask for Damaged Hair. Keratin + Hyaluronic Acid + Biotin.', 'es': 'Mascarilla Pro-Reparación para Cabello Dañado. Keratina + Ácido Hialurónico + Biotina.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["keratin", "hyaluronic acid", "biotin"],
     benefit_claims: ["repara intensamente", "aporta keratina y biotina", "restaura la hebra maltratada"],
@@ -471,7 +472,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "restore",
     subcollection: "Kerasin HB",
     subcollection_id: "kerasin_hb",
-    description: "{'en': 'Repair Shampoo for Damaged Hair. Keratin + Hyaluronic Acid + Biotin.', 'es': 'Champú Reparador para Cabello Dañado. Keratina + Ácido Hialurónico + Biotina.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["keratin", "hyaluronic acid", "biotin"],
     benefit_claims: ["repara", "fortalece", "nutre la hebra capilar"],
@@ -492,7 +493,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "styling",
     subcollection: "Styling",
     subcollection_id: "styling",
-    description: "{'en': 'Web Effect Paste. Light Hold.', 'es': 'Pasta Efecto Telaraña. Fijación Ligera.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: [],
     benefit_claims: ["fijación ligera", "efecto telaraña", "define y da textura"],
@@ -513,7 +514,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "styling",
     subcollection: "Styling",
     subcollection_id: "styling",
-    description: "{'en': 'Thermal Protective Cream for Temporary Hair Straightening.', 'es': 'Crema Protectora Térmica para Alaciado Temporal.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["thermal protective complex"],
     benefit_claims: ["protege del calor", "favorece el alaciado temporal", "suaviza la hebra"],
@@ -534,7 +535,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "scalp",
     subcollection: "Melanin",
     subcollection_id: "melanin",
-    description: "{'en': 'Hair Lotion for Hair. Peptide Technology. Anti Gray Effect.', 'es': 'Loción Capilar para el Cabello. Tecnología de Péptidos. Efecto Anti-Canas.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["peptides"],
     benefit_claims: ["efecto anti-canas", "tecnología de péptidos", "favorece el aspecto más joven del cabello"],
@@ -555,7 +556,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "scalp",
     subcollection: "Menthol Ice",
     subcollection_id: "menthol_ice",
-    description: "{'en': 'Refreshing Hair Shampoo. Strengthens, Voluminizing.', 'es': 'Champú Refrescante. Fortalecedor, Voluminizador.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["menthol"],
     benefit_claims: ["refresca el cuero cabelludo", "fortalece", "contribuye al volumen"],
@@ -576,7 +577,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "styling",
     subcollection: "Styling",
     subcollection_id: "styling",
-    description: "{'en': 'Styling Gel Cream. Platinum Hair Nuance.', 'es': 'Crema Gel. Matizante Platinado.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["platinum toning pigments"],
     benefit_claims: ["moldea y estiliza", "matiza tonos no deseados en cabello platinado", "fijación con efecto matizante"],
@@ -597,7 +598,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "styling",
     subcollection: "Styling",
     subcollection_id: "styling",
-    description: "{'en': 'Hair Shine Serum. Thermal Protection. Shine. Flexibility. Silkness.', 'es': 'Suero de Brillo para Cabello. Protección Térmica. Luminosidad. Flexibilidad. Sedosidad.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: [],
     benefit_claims: ["brillo instantáneo", "protección térmica", "flexibilidad y sedosidad"],
@@ -618,7 +619,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "pro_salon_peroxide",
     subcollection: "Neuroxide",
     subcollection_id: "neuroxide",
-    description: "{'en': 'Cream Developer. Available in 5, 10, 20, 30 and 40 volumes.', 'es': 'Peróxido en Crema. Disponible en 5, 10, 20, 30 y 40 volúmenes.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: [],
     benefit_claims: [],
@@ -639,7 +640,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "color_rescue",
     subcollection: "Plattina",
     subcollection_id: "plattina",
-    description: "{'en': 'Nuancing Shampoo. Platinum Hair.', 'es': 'Champú Matizador. Cabello Platinado.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["platinum toning pigments"],
     benefit_claims: ["matiza tonos no deseados", "mantiene el platino brillante", "limpia sin dañar el color"],
@@ -660,7 +661,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "pro_salon_bleaching",
     subcollection: "Plattina White",
     subcollection_id: "plattina_white",
-    description: "{'en': 'Hair Bleaching Powder. Non-Volatile. Capillary Nanotribology. Formula 1+3.', 'es': 'Polvo Decolorante para el Cabello. No Volátil. Nanotribología Capilar. Fórmula 1+3.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["bleaching agents", "nanotribology complex"],
     benefit_claims: [],
@@ -681,7 +682,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "pro_salon_bleaching",
     subcollection: "Pro Filus",
     subcollection_id: "pro_filus",
-    description: "{'en': 'Hair Bleaching Powder Protector. Highly Processed Hair.', 'es': 'Polvo Protector para Decoloraciones. Cabello Altamente Procesado.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["protective complex for bleaching"],
     benefit_claims: [],
@@ -702,7 +703,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "pro_salon",
     subcollection: "Pro Salon",
     subcollection_id: "pro_salon",
-    description: "{'en': 'Color Remover for Permanent Haircolor.', 'es': 'Extractor de Color para Tinte de Oxidación.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: [],
     benefit_claims: ["extrae el color de oxidación", "prepara para recoloración"],
@@ -723,7 +724,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "styling",
     subcollection: "Styling",
     subcollection_id: "styling",
-    description: "{'en': 'Conditioning and Shine Spray for Hair.', 'es': 'Spray de Brillo y Acondicionamiento para el Cabello.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: [],
     benefit_claims: ["brillo instantáneo", "acondiciona el cabello", "acabado luminoso"],
@@ -744,7 +745,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "color_rescue",
     subcollection: "Revenant Color",
     subcollection_id: "revenant_color",
-    description: "{'en': 'Nourishing and Color Intensifier Mask that helps to Repair and Nourish Hair.', 'es': 'Mascarilla Intensificadora de Color que Ayuda a Reparar el Cabello.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["color pigments", "nourishing complex"],
     benefit_claims: ["intensifica el color", "nutre la hebra", "ayuda a reparar el cabello"],
@@ -765,7 +766,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "styling",
     subcollection: "Styling",
     subcollection_id: "styling",
-    description: "{'en': 'Thermal Protector and Repair Treatment.', 'es': 'Protector Térmico. Tratamiento que ayuda a Reparar el Cabello.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["thermal protective complex"],
     benefit_claims: ["protege del calor", "ayuda a reparar", "dual action: protector + tratamiento"],
@@ -786,7 +787,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "pro_salon_colour",
     subcollection: "Total Violet",
     subcollection_id: "total_violet",
-    description: "{'en': 'Pure Violet Pigment Concentrate.', 'es': 'Concentrado de Pigmento Violeta.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["pure violet pigment concentrate"],
     benefit_claims: [],
@@ -807,7 +808,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "color_rescue",
     subcollection: "Total Violet",
     subcollection_id: "total_violet",
-    description: "{'en': 'Nuancing Conditioning Mask. Yellow Hair Tones Neutralizer.', 'es': 'Mascarilla Acondicionadora Matizante. Neutralizante de Visos Amarillos.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["violet pigments"],
     benefit_claims: ["neutraliza tonos amarillos", "acondiciona", "matiza"],
@@ -828,7 +829,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "color_rescue",
     subcollection: "Total Violet",
     subcollection_id: "total_violet",
-    description: "{'en': 'Nuancing Shampoo. Neutralizes Yellow Tones.', 'es': 'Champú Matizador. Neutraliza Visos Amarillos.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: ["violet pigments"],
     benefit_claims: ["neutraliza visos amarillos", "matiza", "cuida el color"],
@@ -849,7 +850,7 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
     collection_id: "restore",
     subcollection: "Velvety Control",
     subcollection_id: "velvety_control",
-    description: "{'en': 'Deep Nourishing Hair Treatment. Leave In.', 'es': 'Tratamiento Pro Hidratación y Reparación. Sin Enjuague.'}",
+    description: "[object Object]",
     description_enhanced: null,
     key_ingredients: [],
     benefit_claims: ["hidratación profunda sin enjuague", "pro reparación", "control del frizz y suavidad"],
@@ -864,7 +865,6 @@ const NEURONE_PRODUCTS: CatalogProduct[] = [
   },
 ];
 
-// Build structured collections from flat product list
 function buildCollections(products: CatalogProduct[]): CatalogCollection[] {
   const colMap = new Map<string, CatalogCollection>();
   for (const p of products) {
@@ -884,8 +884,6 @@ function buildCollections(products: CatalogProduct[]): CatalogCollection[] {
 }
 
 export const NEURONE_CATALOG: CatalogCollection[] = buildCollections(NEURONE_PRODUCTS);
-
-// ── CATALOG BY BRAND ────────────────────────────────────────────────────────
 
 export const CATALOG_BY_BRAND: Partial<Record<BrandId, CatalogCollection[]>> = {
   neuroneCosmetics: NEURONE_CATALOG,

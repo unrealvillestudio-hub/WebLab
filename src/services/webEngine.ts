@@ -140,6 +140,12 @@ REGLAS ESTRICTAS:
 - Botones con cursor:pointer y padding generoso.
 - NO incluyas <script>, NO incluyas frameworks externos.
 - La sección debe ser copy-paste directo en un bloque "Custom HTML" de ${platform === 'shopify' ? 'Shopify' : 'WordPress'}.
+IMÁGENES DE BLUEPRINT:
+- Cuando el contexto incluya image_filename de un producto, úsalo como: <img src="{{ 'FILENAME' | asset_url }}" alt="NOMBRE_PRODUCTO" ...> (Shopify) o <img src="[IMAGE:FILENAME]" alt="..."> (WP).
+- Para BP_PERSON: coloca el <img> en secciones hero/about con class="person-bp-img".
+- Para BP_LOCATION: coloca el <img> en secciones gallery/hero como background o decorativo.
+- Para BP_PRODUCT: coloca el <img> inmediatamente junto al nombre/descripción del producto.
+- Si el precio del contexto es "0.00" o "[PRECIO]": escribe <span class="product-price">[PRECIO]</span> — NO pongas $0.00.
 EJEMPLO DE ESTRUCTURA:
 <section class="hero-section" style="padding:80px 20px;text-align:center;background:#fff;">
   <h1 class="hero-title" style="font-size:2.5rem;font-weight:700;color:#1a1a1a;margin-bottom:16px;">...</h1>
@@ -158,6 +164,12 @@ REGLAS ESTRICTAS:
 - CSS debe ir dentro de <style> al inicio del archivo.
 - El archivo debe ser autosuficiente: funciona al subirlo como nueva sección en el theme editor de Shopify.
 - Nombre de sección en schema: "${sectionLabel}" con class: "section-${sectionId}".
+IMÁGENES DE BLUEPRINT EN LIQUID:
+- Para imágenes de producto (BP_PRODUCT image_filename): usa {{ section.settings.product_image | img_url: '800x' | img_tag }} y agrega al schema: { "type": "image_picker", "id": "product_image", "label": "Imagen producto" }.
+- Para BP_PERSON: { "type": "image_picker", "id": "person_image", "label": "Imagen persona" }.
+- Para BP_LOCATION: { "type": "image_picker", "id": "location_image", "label": "Imagen locación" }.
+- Para precio: usa {{ section.settings.product_price }} con default "[PRECIO]" — NUNCA hardcodees $0.00.
+- Para precio en schema: { "type": "text", "id": "product_price", "label": "Precio", "default": "" }.
 ESTRUCTURA BASE:
 <style>
   .section-${sectionId} { ... }
@@ -186,7 +198,11 @@ ESTRUCTURA BASE:
 - Si la sección es FAQ: 5 preguntas con respuestas de 2–3 líneas cada una
 - Si la sección es TESTIMONIALS: 3 testimonios realistas en primera persona de clientes del perfil de la marca
 - Si la sección es FEATURES: lista de 4–6 puntos con ícono emoji + título corto + descripción de 1 línea
-- No incluyas instrucciones, meta-comentarios ni placeholders. Solo el contenido final.
+- IMÁGENES DE BLUEPRINT: cuando el contexto incluya image_filename de productos, insértalos como: ![NOMBRE_PRODUCTO](images/FILENAME) — colócalos estratégicamente junto al producto/sección relevante.
+- Para BP_PERSON: insertar referencia ![Nombre](images/filename) en secciones hero/about.
+- Para BP_LOCATION: insertar referencia al final de hero o en sección gallery.
+- Si el precio del contexto es "0.00": escríbelo como **[PRECIO]** — NO pongas $0.00.
+- No incluyas instrucciones, meta-comentarios ni placeholders ajenos al contenido. Solo el contenido final.
 - Formato: Markdown limpio (## para subtítulos, **negrita** para énfasis)
 - Respeta ESTRICTAMENTE cualquier nota de compliance si fue proporcionada`;
 }

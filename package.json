@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "catalog:update": "ts-node --esm scripts/generate_catalog.ts",
+    "catalog:update:local": "ts-node --esm scripts/generate_catalog.ts --local ../BluePrints/products"
   },
   "dependencies": {
     "clsx": "^2.1.1",

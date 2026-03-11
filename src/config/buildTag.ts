@@ -4,4 +4,4 @@
 //   MAJOR = cambio arquitectónico
 //   MINOR = sesión de trabajo con features nuevas
 
-export const BUILD_TAG = "WL v2.2";
+export const BUILD_TAG = "WL v2.3";
