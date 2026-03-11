@@ -4,7 +4,7 @@ import {
   Globe, LayoutTemplate, ShoppingCart, Play, Square,
   ChevronRight, Copy, Check, Download, Trash2, BookOpen,
   AlertCircle, CheckCircle2, FileText, RotateCcw, Zap,
-  Database, RefreshCw, Code2, FileCode, FileType, PenLine, Rss,
+  Database, RefreshCw, Code2, FileCode, FileType, PenLine, Rss, Layers, X,
 } from 'lucide-react';
 import { BRAND_LIST, getBrandById, BrandId } from '../../config/brands';
 import { BRAND_CONTEXTS } from '../../config/brandContexts';
@@ -21,6 +21,8 @@ import { cn, Badge, Spinner } from '../../ui/components';
 import { BlueprintPanel } from '../../ui/BlueprintPanel';
 import { useBlueprintStore } from '../../store/useBlueprintStore';
 import { EcomProductSelector, BlueprintImageTogglesPanel, buildEcomPromptContext } from './EcomProductSelector';
+import { ThemePicker } from './ThemePicker';
+import { getThemeById, buildThemePromptBlock } from '../../config/themeCatalog';
 
 // ── TABS ───────────────────────────────────────────────────────────────────────
 type MainTab = 'generator' | 'blog';
@@ -235,6 +237,8 @@ export default function WebGeneratorModule() {
   const [platform, setPlatform]                   = useState<WebPlatform>("wordpress");
   const [outputMode, setOutputMode]               = useState<WebOutputMode>("markdown");
   const [superAggro, setSuperAggro]               = useState(false);
+  const [selectedThemeId, setSelectedThemeId]     = useState<string | null>(null);
+  const [showThemePicker, setShowThemePicker]     = useState(false);
   const [dbPromptMode, setDbPromptMode]           = useState(false);
   const [dbPromptText, setDbPromptText]           = useState('');
   const [autoFilled, setAutoFilled]               = useState(false);
@@ -347,7 +351,12 @@ export default function WebGeneratorModule() {
       ? buildEcomPromptContext(ecomCtx, brandId)
       : '';
 
-    const fullContext = extraContext + ecomContext + (filteredBpContext || '');
+    // Theme context injection
+    const themeContext = selectedThemeId
+      ? '\n\n' + buildThemePromptBlock(getThemeById(selectedThemeId)!, superAggro)
+      : '';
+
+    const fullContext = extraContext + ecomContext + themeContext + (filteredBpContext || '');
 
     try {
       const output = await runWebPack({
@@ -470,6 +479,17 @@ export default function WebGeneratorModule() {
 
   return (
     <div className="space-y-4">
+      {/* ── THEME PICKER OVERLAY ── */}
+      <AnimatePresence>
+        {showThemePicker && (
+          <ThemePicker
+            currentThemeId={selectedThemeId}
+            aggroMode={superAggro}
+            onSelect={(id) => setSelectedThemeId(id)}
+            onClose={() => setShowThemePicker(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── MAIN TABS ── */}
       <div className="flex gap-1 bg-zinc-900 border border-zinc-800 rounded-xl p-1 w-fit">
@@ -890,6 +910,25 @@ export default function WebGeneratorModule() {
                 </div>
               )}
               <div className="flex gap-2 shrink-0 items-center">
+                {/* PICK THEME */}
+                <button
+                  onClick={() => setShowThemePicker(true)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all border",
+                    selectedThemeId
+                      ? "border-[var(--accent)]/50 text-[var(--accent)] bg-[var(--accent)]/10"
+                      : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600"
+                  )}
+                  style={selectedThemeId ? { borderColor: getThemeById(selectedThemeId)?.palette.accent + '50', color: getThemeById(selectedThemeId)?.palette.accent, background: getThemeById(selectedThemeId)?.palette.accent + '15' } : {}}
+                >
+                  <Layers size={12} />
+                  {selectedThemeId ? (
+                    <span className="flex items-center gap-1">
+                      {getThemeById(selectedThemeId)?.name}
+                      <X size={9} className="opacity-60" onClick={e => { e.stopPropagation(); setSelectedThemeId(null); }} />
+                    </span>
+                  ) : 'Theme'}
+                </button>
                 {/* SUPER AGGRO */}
                 <button
                   onClick={() => setSuperAggro(v => !v)}

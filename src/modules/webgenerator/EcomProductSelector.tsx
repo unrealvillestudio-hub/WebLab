@@ -9,6 +9,11 @@ import {
 } from 'lucide-react';
 import { getCatalog, CatalogProduct, CatalogCollection } from '../../config/productCatalog';
 import type { EcomProductContext, EcomListingMode, BlueprintImageToggles } from '../../core/types';
+import {
+  resolveProductImageUrl,
+  resolveProductImagePair,
+  getBrandLogoUrls,
+} from '../../config/brandAssets';
 import { cn } from '../../ui/components';
 
 // ── API enhance call ──────────────────────────────────────────────────────────
@@ -588,23 +593,35 @@ export function EcomProductSelector({
 }
 
 // ── buildEcomPromptContext ─────────────────────────────────────────────────────
-// Serializa el EcomProductContext en texto para inyectar en el prompt
+// Serializa el EcomProductContext en texto para inyectar en el prompt.
+// Resuelve image_filename → full CDN/raw URLs via brandAssets resolver.
+// Multi-brand: el brandId determina la ruta de assets automáticamente.
 export function buildEcomPromptContext(ctx: EcomProductContext, brandId: string): string {
   const catalog = getCatalog(brandId);
   const parts: string[] = [];
+
+  // ── Brand logo URLs (siempre disponibles para todos los packs) ─────────────
+  const logos = getBrandLogoUrls(brandId);
+  parts.push(`── BRAND ASSETS ──`);
+  parts.push(`Logo (dark bg): ${logos.white}`);
+  parts.push(`Logo (light bg): ${logos.blue}`);
+  parts.push(`Aro degradado: ${logos.aro_degradado}`);
+  parts.push(`Aro curve: ${logos.aro_curve}`);
 
   if (ctx.collectionId) {
     const col = catalog.find(c => c.id === ctx.collectionId);
     if (col) {
       parts.push(`── COLLECTION SELECCIONADA: ${col.label} ──`);
       parts.push(`Subcollections (líneas): ${col.subcollections.map(s => s.label).join(', ')}`);
-      // Product list with image filenames
+      // Product list with resolved full image URLs
       const prodLines = col.products.map(p => {
         const b2b = (p as any).b2b_only ? ' [B2B]' : '';
-        const img = p.image_filename ? ` | img: ${p.image_filename}` : '';
         const il = (p as any).imagelab;
+        const urls = resolveProductImagePair(brandId, il?.image_usage, p.image_filename);
+        const imgInfo = urls.standard ? ` | img_standard: ${urls.standard}` : '';
+        const imgDark = urls.hasDark  ? ` | img_campaign: ${urls.campaign}` : '';
         const color = il?.dominant_hex ? ` | color: ${il.dominant_hex}` : '';
-        return `• ${p.display_name}${b2b}${img}${color}`;
+        return `• ${p.display_name}${b2b}${imgInfo}${imgDark}${color}`;
       });
       parts.push(`Productos (${col.products.length}):\n${prodLines.join('\n')}`);
       if (ctx.collectionDescriptionEnhanced) {
@@ -617,10 +634,12 @@ export function buildEcomPromptContext(ctx: EcomProductContext, brandId: string)
     const prods = catalog.flatMap(c => c.products).filter(p => ctx.selectedProductIds!.includes(p.id));
     parts.push(`── PRODUCTOS SELECCIONADOS (${prods.length}) ──`);
     prods.forEach(p => {
-      const img = p.image_filename ? ` | img: ${p.image_filename}` : '';
       const il = (p as any).imagelab;
+      const urls = resolveProductImagePair(brandId, il?.image_usage, p.image_filename);
+      const imgInfo = urls.standard ? ` | img_standard: ${urls.standard}` : '';
+      const imgDark = urls.hasDark  ? ` | img_campaign: ${urls.campaign}` : '';
       const color = il?.dominant_hex ? ` | color: ${il.dominant_hex}` : '';
-      parts.push(`• ${p.display_name} [${p.subcollection}]${img}${color} — ${p.description.slice(0, 100)}`);
+      parts.push(`• ${p.display_name} [${p.subcollection}]${imgInfo}${imgDark}${color} — ${p.description.slice(0, 100)}`);
     });
   }
 
@@ -640,22 +659,19 @@ export function buildEcomPromptContext(ctx: EcomProductContext, brandId: string)
       if (prod.benefit_claims.length) parts.push(`Benefit claims (usar textualmente en copy): ${prod.benefit_claims.join(' · ')}`);
       if (prod.hair_type.length) parts.push(`Hair type objetivo: ${prod.hair_type.join(', ')}`);
 
-      // Image context — filename + imagelab palette/mood
-      if (prod.image_filename) {
-        parts.push(`Imagen del producto: ${prod.image_filename}`);
-      }
+      // Image context — full resolved URLs (standard + campaign)
       const il = (prod as any).imagelab;
+      const urls = resolveProductImagePair(brandId, il?.image_usage, prod.image_filename);
+      if (urls.standard) parts.push(`Imagen producto (standard/shopify): ${urls.standard}`);
+      if (urls.hasDark)  parts.push(`Imagen producto (campaign/landing dark bg): ${urls.campaign}`);
       if (il) {
         const colorInfo = [
-          il.dominant_hex ? `color dominante: ${il.dominant_hex}` : '',
-          il.accent_hex   ? `acento: ${il.accent_hex}` : '',
-          il.mood         ? `mood visual: ${il.mood}` : '',
+          il.dominant_hex    ? `color dominante: ${il.dominant_hex}` : '',
+          il.accent_hex      ? `acento: ${il.accent_hex}` : '',
+          il.mood            ? `mood visual: ${il.mood}` : '',
           il.packaging_style ? `packaging: ${il.packaging_style}` : '',
         ].filter(Boolean).join(' · ');
         if (colorInfo) parts.push(`Visual: ${colorInfo}`);
-        if (il.image_usage?.standard?.background) {
-          parts.push(`Fondo imagen estándar: ${il.image_usage.standard.background}`);
-        }
       }
 
       // Cross-sell context
