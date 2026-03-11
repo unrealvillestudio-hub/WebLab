@@ -1,4 +1,4 @@
-// UNRLVL — WebLab v1.1 Core Types
+// UNRLVL — WebLab v2.2 Core Types
 
 export type WebModuleId = "web" | "landing" | "ecommerce";
 
@@ -70,6 +70,34 @@ export interface ProductSpec {
   targetAudience: string;
   price?: string;
   complianceNotes?: string;
+}
+
+// ── ECOMMERCE PRODUCT CONTEXT ─────────────────────────────────────────────────
+
+export type EcomListingMode = 'bulk' | 'select';
+
+export interface EcomProductContext {
+  // Collection Page
+  collectionId?: string;       // null = "Todas las collections"
+  collectionLabel?: string;
+  collectionDescription?: string;
+  collectionDescriptionEnhanced?: string;
+
+  // Product Listing
+  listingMode?: EcomListingMode;   // 'bulk' | 'select'
+  selectedProductIds?: string[];   // for 'select' mode
+
+  // Product Page (single product)
+  productId?: string;
+  productDescription?: string;
+  productDescriptionEnhanced?: string;
+}
+
+// ── BLUEPRINT IMAGE TOGGLES ───────────────────────────────────────────────────
+
+export interface BlueprintImageToggles {
+  usePersonBP: boolean;
+  useLocationBP: boolean;
 }
   export type WebOutputMode = 'markdown' | 'html' | 'liquid';
 export interface WebOutput {

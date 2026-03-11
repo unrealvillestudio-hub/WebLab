@@ -16,10 +16,11 @@ import {
   WebOutputMode, BlogSpec, BlogPostType,
 } from '../../services/webEngine';
 import { useWebOutputStore } from '../../store/useWebOutputStore';
-import { WebModuleId, WebLanguage, WebTone, WebPlatform, WebOutput } from '../../core/types';
+import { WebModuleId, WebLanguage, WebTone, WebPlatform, WebOutput, EcomProductContext, BlueprintImageToggles } from '../../core/types';
 import { cn, Badge, Spinner } from '../../ui/components';
 import { BlueprintPanel } from '../../ui/BlueprintPanel';
 import { useBlueprintStore } from '../../store/useBlueprintStore';
+import { EcomProductSelector, BlueprintImageTogglesPanel, buildEcomPromptContext } from './EcomProductSelector';
 
 // ── TABS ───────────────────────────────────────────────────────────────────────
 type MainTab = 'generator' | 'blog';
@@ -243,6 +244,12 @@ export default function WebGeneratorModule() {
   const [productBenefits, setProductBenefits]     = useState('');
   const [productAudience, setProductAudience]     = useState('');
   const [productCompliance, setProductCompliance] = useState('');
+
+  // ── Ecommerce product context (replaces generic productSpec for ecommerce) ──
+  const [ecomCtx, setEcomCtx]                     = useState<EcomProductContext>({});
+  const [githubToken, setGithubToken]             = useState('');
+  // ── Blueprint image toggles ──
+  const [bpToggles, setBpToggles]                 = useState<BlueprintImageToggles>({ usePersonBP: true, useLocationBP: true });
   const [isGenerating, setIsGenerating]           = useState(false);
   const [liveSections, setLiveSections]           = useState<WebOutput["sections"]>([]);
   const [currentSection, setCurrentSection]       = useState('');
@@ -324,8 +331,23 @@ export default function WebGeneratorModule() {
     } : undefined;
 
     // Combinar contexto de marca + blueprints activos (invisible para el usuario)
-    const bpContext = getSlotContext();
-    const fullContext = extraContext + (bpContext || '');
+    // Filtrar BPs según toggles: si usePersonBP=false excluir BP_PERSON, idem Location
+    const rawBpContext = getSlotContext();
+    let filteredBpContext = rawBpContext || '';
+    if (!bpToggles.usePersonBP) {
+      // Strip BP_PERSON block — simple heuristic, works with current slot format
+      filteredBpContext = filteredBpContext.replace(/BP_PERSON[^─]*──[^─]*/g, '');
+    }
+    if (!bpToggles.useLocationBP) {
+      filteredBpContext = filteredBpContext.replace(/BP_LOCATION[^─]*──[^─]*/g, '');
+    }
+
+    // E-commerce product context injection
+    const ecomContext = activeModule === 'ecommerce'
+      ? buildEcomPromptContext(ecomCtx, brandId)
+      : '';
+
+    const fullContext = extraContext + ecomContext + (filteredBpContext || '');
 
     try {
       const output = await runWebPack({
@@ -374,6 +396,8 @@ export default function WebGeneratorModule() {
     setProductBenefits('');
     setProductAudience(ctx?.productAudience ?? '');
     setProductCompliance(ctx?.productCompliance ?? '');
+    setEcomCtx({});
+    setBpToggles({ usePersonBP: true, useLocationBP: true });
     setAutoFilled(!!ctx);
     setResult(null);
     setError('');
@@ -703,33 +727,48 @@ export default function WebGeneratorModule() {
               </AnimatePresence>
 
               {(activeModule === "ecommerce" || activeModule === "landing") && (
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="col-span-2">
-                    <input
-                      value={productName}
-                      onChange={e => setProductName(e.target.value)}
-                      placeholder="Nombre del producto o servicio"
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50"
+                <div className="space-y-3">
+                  {/* E-Commerce: smart product/collection selector */}
+                  {activeModule === "ecommerce" ? (
+                    <EcomProductSelector
+                      packId={packId}
+                      brandId={brandId}
+                      brandContext={extraContext}
+                      value={ecomCtx}
+                      onChange={setEcomCtx}
+                      githubToken={githubToken}
                     />
-                  </div>
-                  <input
-                    value={productBenefits}
-                    onChange={e => setProductBenefits(e.target.value)}
-                    placeholder="Beneficios clave (separados por coma)"
-                    className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50"
-                  />
-                  <input
-                    value={productAudience}
-                    onChange={e => setProductAudience(e.target.value)}
-                    placeholder="Audiencia objetivo"
-                    className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50"
-                  />
-                  <input
-                    value={productCompliance}
-                    onChange={e => setProductCompliance(e.target.value)}
-                    placeholder="Restricciones / compliance (opcional)"
-                    className="col-span-2 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50"
-                  />
+                  ) : (
+                    /* Landing: generic product inputs */
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="col-span-2">
+                        <input
+                          value={productName}
+                          onChange={e => setProductName(e.target.value)}
+                          placeholder="Nombre del producto o servicio"
+                          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50"
+                        />
+                      </div>
+                      <input
+                        value={productBenefits}
+                        onChange={e => setProductBenefits(e.target.value)}
+                        placeholder="Beneficios clave (separados por coma)"
+                        className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50"
+                      />
+                      <input
+                        value={productAudience}
+                        onChange={e => setProductAudience(e.target.value)}
+                        placeholder="Audiencia objetivo"
+                        className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50"
+                      />
+                      <input
+                        value={productCompliance}
+                        onChange={e => setProductCompliance(e.target.value)}
+                        placeholder="Restricciones / compliance (opcional)"
+                        className="col-span-2 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50"
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -749,6 +788,22 @@ export default function WebGeneratorModule() {
                   ↑ Contexto estándar ignorado — DB Prompt activo
                 </p>
               )}
+            </div>
+
+            {/* ── PANEL BLUEPRINT IMAGE TOGGLES + TOKEN ── */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
+              <BlueprintImageTogglesPanel value={bpToggles} onChange={setBpToggles} />
+              {/* GitHub token — needed for Push Enhanced */}
+              <div className="space-y-1">
+                <p className="text-[10px] uppercase font-bold text-zinc-600 tracking-widest">GitHub Token (sesión)</p>
+                <input
+                  type="password"
+                  value={githubToken}
+                  onChange={e => setGithubToken(e.target.value)}
+                  placeholder="ghp_... · Requerido para Push Enhanced Description"
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-zinc-400 placeholder:text-zinc-700 outline-none focus:border-accent/50 font-mono"
+                />
+              </div>
             </div>
 
             {/* ── PANEL BLUEPRINTS ACTIVOS ── */}
