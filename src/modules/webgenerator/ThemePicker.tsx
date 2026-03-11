@@ -1,17 +1,16 @@
 // ── ThemePicker.tsx ───────────────────────────────────────────────────────────
-// WebLab v2.3 — Theme Picker
+// WebLab v2.5 — Theme Picker
 // Full-screen theme selection experience.
 // 30 themes × 3 types: E-Commerce · Landing · Web
-// Each theme includes live palette preview + 3 layout views: Home / Collection / Product
-// AGGRO mode indicator on every theme card.
+// v2.5: Full-page realistic preview, Eye→Preview (bug fixed), structure-first architecture
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X, ShoppingCart, LayoutTemplate, Globe,
   ChevronRight, Zap, Check, ArrowLeft, Eye,
-  Home, Grid, Package,
+  Home, Grid, Package, Maximize2,
 } from 'lucide-react';
 import {
   ThemeIdentity, ThemeType,
@@ -36,24 +35,18 @@ const TYPE_TABS: { id: ThemeType; label: string; icon: React.ElementType; accent
   { id: 'web',       label: 'Web',        icon: Globe,          accent: '#3B82F6' },
 ];
 
-// ── Mini Preview Renderer ─────────────────────────────────────────────────────
-// Renders a live wireframe-style preview using actual theme palette
+// ── Mini Preview Renderer (wireframe) ────────────────────────────────────────
 function ThemePreview({ theme, mode }: { theme: ThemeIdentity; mode: PreviewMode }) {
   const p = theme.palette;
   const isSans = theme.typography.style === 'sans' || theme.typography.style === 'display';
-
-  // Font URL injection
   const fontFamily = `"${theme.typography.display}", ${isSans ? 'sans-serif' : 'serif'}`;
 
   return (
     <div className="relative w-full h-full overflow-hidden" style={{ background: p.bg, fontFamily }}>
-      {/* ── Link to load font (only in preview context, lightweight) */}
       {/* Navbar */}
       <div className="flex items-center justify-between px-3 py-2 border-b"
         style={{ borderColor: p.rule, background: p.surface }}>
-        <div className="flex items-center gap-2">
-          <div className="w-14 h-2 rounded-sm opacity-80" style={{ background: p.accent }} />
-        </div>
+        <div className="w-14 h-2 rounded-sm opacity-80" style={{ background: p.accent }} />
         <div className="flex gap-2">
           {['', '', ''].map((_, i) => (
             <div key={i} className="w-8 h-1.5 rounded-sm opacity-40" style={{ background: p.text }} />
@@ -61,7 +54,6 @@ function ThemePreview({ theme, mode }: { theme: ThemeIdentity; mode: PreviewMode
         </div>
         <div className="w-10 h-4 rounded-sm" style={{ background: p.accent }} />
       </div>
-
       {mode === 'home' && <HomePreviewContent theme={theme} />}
       {mode === 'collection' && <CollectionPreviewContent theme={theme} />}
       {mode === 'product' && <ProductPreviewContent theme={theme} />}
@@ -73,19 +65,14 @@ function HomePreviewContent({ theme }: { theme: ThemeIdentity }) {
   const p = theme.palette;
   return (
     <div className="flex flex-col h-full">
-      {/* Hero */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-3 relative overflow-hidden"
-        style={{ background: p.bg }}>
-        {/* BG accent blob */}
-        <div className="absolute inset-0 opacity-10"
-          style={{ background: `radial-gradient(ellipse at 60% 40%, ${p.accent}, transparent 60%)` }} />
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-3 relative overflow-hidden" style={{ background: p.bg }}>
+        <div className="absolute inset-0 opacity-10" style={{ background: `radial-gradient(ellipse at 60% 40%, ${p.accent}, transparent 60%)` }} />
         <div className="w-24 h-1.5 rounded mb-2 opacity-90" style={{ background: p.accent }} />
         <div className="w-32 h-4 rounded mb-1.5 opacity-80" style={{ background: p.text }} />
         <div className="w-24 h-4 rounded mb-3 opacity-60" style={{ background: p.text }} />
         <div className="w-16 h-1 rounded mb-3 opacity-40" style={{ background: p.muted }} />
         <div className="w-20 h-5 rounded-sm" style={{ background: p.accent }} />
       </div>
-      {/* Features row */}
       <div className="flex gap-1.5 px-3 py-2" style={{ background: p.surface }}>
         {[p.accent, p.accent2, p.muted].map((c, i) => (
           <div key={i} className="flex-1 flex flex-col items-center gap-1 py-1.5 rounded"
@@ -95,7 +82,6 @@ function HomePreviewContent({ theme }: { theme: ThemeIdentity }) {
           </div>
         ))}
       </div>
-      {/* Product strip */}
       <div className="flex gap-1.5 px-3 pb-2 pt-1">
         {[0, 1, 2, 3].map(i => (
           <div key={i} className="flex-1 rounded overflow-hidden" style={{ border: `1px solid ${p.rule}` }}>
@@ -115,7 +101,6 @@ function CollectionPreviewContent({ theme }: { theme: ThemeIdentity }) {
   const p = theme.palette;
   return (
     <div className="flex h-full">
-      {/* Sidebar filters */}
       <div className="w-16 border-r flex flex-col gap-1.5 p-2" style={{ borderColor: p.rule, background: p.surface }}>
         <div className="h-1 w-full rounded opacity-50" style={{ background: p.text }} />
         <div className="h-px w-full opacity-20" style={{ background: p.text }} />
@@ -126,7 +111,6 @@ function CollectionPreviewContent({ theme }: { theme: ThemeIdentity }) {
           </div>
         ))}
       </div>
-      {/* Grid */}
       <div className="flex-1 p-2">
         <div className="flex items-center justify-between mb-2">
           <div className="h-1.5 w-16 rounded opacity-60" style={{ background: p.text }} />
@@ -154,14 +138,11 @@ function ProductPreviewContent({ theme }: { theme: ThemeIdentity }) {
   const p = theme.palette;
   return (
     <div className="flex h-full">
-      {/* Product image */}
       <div className="w-2/5 relative overflow-hidden" style={{ background: p.surface }}>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-16 h-20 rounded opacity-30" style={{ background: p.accent }} />
         </div>
-        <div className="absolute inset-0 opacity-15"
-          style={{ background: `radial-gradient(circle at 50% 60%, ${p.accent}, transparent 65%)` }} />
-        {/* Thumbnail strip */}
+        <div className="absolute inset-0 opacity-15" style={{ background: `radial-gradient(circle at 50% 60%, ${p.accent}, transparent 65%)` }} />
         <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
           {[0, 1, 2].map(i => (
             <div key={i} className="w-4 h-4 rounded"
@@ -169,14 +150,12 @@ function ProductPreviewContent({ theme }: { theme: ThemeIdentity }) {
           ))}
         </div>
       </div>
-      {/* Product info */}
       <div className="flex-1 flex flex-col p-3 gap-1.5">
         <div className="h-1.5 w-20 rounded opacity-50" style={{ background: p.muted }} />
         <div className="h-3 w-full rounded opacity-80" style={{ background: p.text }} />
         <div className="h-2 w-3/4 rounded opacity-60" style={{ background: p.text }} />
         <div className="h-1 w-full rounded opacity-30" style={{ background: p.muted }} />
         <div className="h-1 w-4/5 rounded opacity-30" style={{ background: p.muted }} />
-        <div className="h-1 w-3/5 rounded opacity-30" style={{ background: p.muted }} />
         <div className="h-3 w-12 rounded opacity-90 mt-1" style={{ background: p.accent }} />
         <div className="flex gap-1 mt-1">
           {[0, 1, 2].map(i => (
@@ -192,10 +171,415 @@ function ProductPreviewContent({ theme }: { theme: ThemeIdentity }) {
   );
 }
 
+// ── Full-Page Realistic Preview ───────────────────────────────────────────────
+function buildPreviewHTML(theme: ThemeIdentity): string {
+  const p = theme.palette;
+  const isLight = theme.structure.colorMode === 'light';
+  const hasCarousel = theme.structure.enhancers.includes('image-carousel');
+  const hasParallax = theme.structure.enhancers.includes('parallax');
+  const hasSticky = theme.structure.enhancers.includes('sticky-header');
+  const hasFloat = theme.structure.enhancers.includes('floating-cta');
+  const header = theme.structure.headerStyle;
+
+  const picIds = [10, 20, 30, 40, 50, 60, 70, 80];
+  const img = (id: number, w = 800, h = 500) => `https://picsum.photos/seed/${id}/${w}/${h}`;
+
+  const isSans = theme.typography.style === 'sans' || theme.typography.style === 'display';
+  const fontStack = `'${theme.typography.display}', ${isSans ? 'sans-serif' : 'serif'}`;
+  const bodyStack = `'${theme.typography.body}', sans-serif`;
+
+  const navBg = isLight ? p.surface : p.surface;
+  const textOpacity = isLight ? '0.75' : '0.6';
+
+  const carouselScript = hasCarousel ? `
+    let ci = 0;
+    const slides = document.querySelectorAll('.cs');
+    function nextSlide() {
+      slides[ci].style.opacity = '0';
+      ci = (ci + 1) % slides.length;
+      slides[ci].style.opacity = '1';
+    }
+    setInterval(nextSlide, 3500);
+  ` : '';
+
+  const scrollRevealScript = `
+    const els = document.querySelectorAll('.sr');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('sr-vis'); obs.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    els.forEach(el => obs.observe(el));
+  `;
+
+  const parallaxScript = hasParallax ? `
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      document.querySelectorAll('.parallax-bg').forEach(el => {
+        (el as HTMLElement).style.transform = 'translateY(' + (y * 0.28) + 'px)';
+      });
+    });
+  ` : '';
+
+  const stickyScript = hasSticky ? `
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 60) { nav.style.backdropFilter='blur(20px)'; nav.style.boxShadow='0 2px 24px rgba(0,0,0,0.18)'; }
+      else { nav.style.backdropFilter='none'; nav.style.boxShadow='none'; }
+    });
+  ` : '';
+
+  const floatScript = hasFloat ? `
+    const fab = document.getElementById('fab');
+    window.addEventListener('scroll', () => {
+      fab.style.opacity = window.scrollY > window.innerHeight * 0.3 ? '1' : '0';
+      fab.style.pointerEvents = window.scrollY > window.innerHeight * 0.3 ? 'all' : 'none';
+    });
+  ` : '';
+
+  // Hero HTML based on headerStyle
+  let heroSection = '';
+  if (header === 'hero-cinematic' || header === 'hero-fullbleed') {
+    heroSection = `
+    <section class="hero-cinematic" style="position:relative;height:92vh;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+      <div class="parallax-bg" style="position:absolute;inset:-20%;background:url('${img(picIds[0],1400,900)}') center/cover no-repeat;transition:transform 0s linear;"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(to bottom right,${p.bg}E0,${p.bg}A0);"></div>
+      ${hasCarousel ? `
+        <div style="position:absolute;inset:0;">
+          ${picIds.slice(0,3).map((id, i) => `<div class="cs" style="position:absolute;inset:0;background:url('${img(id,1400,900)}') center/cover;opacity:${i===0?1:0};transition:opacity 1.2s ease;"></div>`).join('')}
+          <div style="position:absolute;inset:0;background:linear-gradient(to right,${p.bg}D0,${p.bg}60 60%,transparent);"></div>
+        </div>` : ''}
+      <div style="position:relative;z-index:2;text-align:left;padding:0 8vw;max-width:700px;">
+        <p class="sr" style="font-family:${bodyStack};font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;color:${p.accent};margin-bottom:1.5rem;opacity:0.9;">Identidad de Marca</p>
+        <h1 class="sr" style="font-family:${fontStack};font-size:clamp(2.8rem,6vw,5rem);font-weight:${theme.typography.displayWeight};line-height:1.05;color:${p.text};margin-bottom:1.5rem;letter-spacing:-0.02em;">
+          Tu Marca.<br/><em style="color:${p.accent};font-style:normal;">Sin Límites.</em>
+        </h1>
+        <p class="sr" style="font-family:${bodyStack};font-size:1.05rem;line-height:1.7;color:${p.text};opacity:${textOpacity};max-width:480px;margin-bottom:2.5rem;">
+          Una propuesta visual construida sobre datos reales, estrategia y diseño de alto nivel. Cada píxel tiene un propósito.
+        </p>
+        <div class="sr" style="display:flex;gap:1rem;flex-wrap:wrap;">
+          <button style="background:${p.accent};color:${p.bg};border:none;padding:0.9rem 2.2rem;font-family:${bodyStack};font-size:0.85rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;border-radius:4px;">Ver Portafolio</button>
+          <button style="background:transparent;color:${p.text};border:1px solid ${p.text}40;padding:0.9rem 2.2rem;font-family:${bodyStack};font-size:0.85rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;border-radius:4px;">Contactar</button>
+        </div>
+      </div>
+    </section>`;
+  } else if (header === 'hero-split') {
+    heroSection = `
+    <section style="display:grid;grid-template-columns:1fr 1fr;min-height:88vh;">
+      <div style="display:flex;flex-direction:column;justify-content:center;padding:8vw 5vw 8vw 8vw;background:${p.bg};">
+        <p class="sr" style="font-family:${bodyStack};font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;color:${p.accent};margin-bottom:1.5rem;">Enfoque Estratégico</p>
+        <h1 class="sr" style="font-family:${fontStack};font-size:clamp(2.2rem,4.5vw,4rem);font-weight:${theme.typography.displayWeight};line-height:1.08;color:${p.text};margin-bottom:1.5rem;">
+          Construido<br/>Para <em style="color:${p.accent};font-style:normal;">Crecer</em>
+        </h1>
+        <p class="sr" style="font-family:${bodyStack};font-size:1rem;line-height:1.75;color:${p.text};opacity:${textOpacity};margin-bottom:2.5rem;">
+          Sistemas de identidad que trabajan en todos los puntos de contacto. Diseño que convierte.
+        </p>
+        <button class="sr" style="background:${p.accent};color:${p.bg};border:none;padding:0.85rem 2rem;font-family:${bodyStack};font-size:0.8rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;width:fit-content;border-radius:4px;">Comenzar Ahora</button>
+      </div>
+      <div style="position:relative;overflow:hidden;">
+        <img src="${img(picIds[1],800,900)}" style="width:100%;height:100%;object-fit:cover;" alt="" />
+        <div style="position:absolute;inset:0;background:${p.bg}30;"></div>
+      </div>
+    </section>`;
+  } else if (header === 'hero-editorial') {
+    heroSection = `
+    <section style="padding:12vh 8vw 8vh;background:${p.bg};border-bottom:1px solid ${p.rule};">
+      <p class="sr" style="font-family:${bodyStack};font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:${p.muted};margin-bottom:3rem;">Vol. 01 — Identidad Visual</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:end;">
+        <h1 class="sr" style="font-family:${fontStack};font-size:clamp(3rem,6vw,5.5rem);font-weight:${theme.typography.displayWeight};line-height:1.0;color:${p.text};letter-spacing:-0.03em;">
+          Diseño<br/>que<br/><span style="color:${p.accent};">Habla.</span>
+        </h1>
+        <div>
+          <p class="sr" style="font-family:${bodyStack};font-size:1.05rem;line-height:1.8;color:${p.text};opacity:${textOpacity};margin-bottom:2rem;">
+            Una identidad visual no es un logo. Es el sistema completo que comunica quién eres antes de que digas una palabra.
+          </p>
+          <a href="#" style="font-family:${bodyStack};font-size:0.8rem;letter-spacing:0.15em;text-transform:uppercase;color:${p.accent};text-decoration:none;border-bottom:1px solid ${p.accent};padding-bottom:3px;">Leer más →</a>
+        </div>
+      </div>
+      <img src="${img(picIds[2],1200,500)}" class="sr" style="width:100%;height:45vh;object-fit:cover;margin-top:5rem;border-radius:2px;" alt="" />
+    </section>`;
+  } else {
+    // hero-text-only / hero-minimal
+    heroSection = `
+    <section style="padding:16vh 10vw 10vh;background:${p.bg};text-align:center;">
+      <p class="sr" style="font-family:${bodyStack};font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:${p.muted};margin-bottom:2rem;">Soluciones de Marca</p>
+      <h1 class="sr" style="font-family:${fontStack};font-size:clamp(3.5rem,8vw,7rem);font-weight:${theme.typography.displayWeight};line-height:0.95;color:${p.text};letter-spacing:-0.04em;max-width:900px;margin:0 auto 2.5rem;">
+        Ideas que<br/><span style="color:${p.accent};">Escalan</span>
+      </h1>
+      <p class="sr" style="font-family:${bodyStack};font-size:1.1rem;line-height:1.7;color:${p.text};opacity:${textOpacity};max-width:500px;margin:0 auto 3rem;">
+        Creamos sistemas visuales que crecen con tu negocio. De startup a categoría.
+      </p>
+      <button class="sr" style="background:${p.accent};color:${p.bg};border:none;padding:1rem 2.5rem;font-family:${bodyStack};font-size:0.85rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;border-radius:4px;">Explorar</button>
+    </section>`;
+  }
+
+  // Cards section
+  const cardLayout = theme.structure.cardLayout;
+  let cardsSection = '';
+  if (cardLayout === 'scroll-horizontal') {
+    cardsSection = `
+    <section class="sr" style="padding:6rem 0;background:${p.surface};overflow:hidden;">
+      <h2 style="font-family:${fontStack};font-size:1.8rem;font-weight:${theme.typography.displayWeight};color:${p.text};margin:0 8vw 3rem;letter-spacing:-0.02em;">Proyectos Recientes</h2>
+      <div style="display:flex;gap:1.5rem;overflow-x:auto;padding:0 8vw 2rem;scroll-snap-type:x mandatory;scrollbar-width:none;cursor:grab;">
+        ${picIds.map((id, i) => `
+          <div style="flex:0 0 340px;scroll-snap-align:start;border-radius:8px;overflow:hidden;background:${p.bg};border:1px solid ${p.rule};">
+            <img src="${img(id,340,220)}" style="width:100%;height:220px;object-fit:cover;" alt="" />
+            <div style="padding:1.5rem;">
+              <p style="font-family:${bodyStack};font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:${p.accent};margin-bottom:0.5rem;">Proyecto 0${i+1}</p>
+              <h3 style="font-family:${fontStack};font-size:1.1rem;font-weight:600;color:${p.text};margin-bottom:0.5rem;">Identidad de Marca</h3>
+              <p style="font-family:${bodyStack};font-size:0.85rem;line-height:1.6;color:${p.text};opacity:${textOpacity};">Sistema visual completo.</p>
+            </div>
+          </div>`).join('')}
+      </div>
+    </section>`;
+  } else if (cardLayout === 'grid-masonry') {
+    cardsSection = `
+    <section class="sr" style="padding:6rem 8vw;background:${p.surface};">
+      <h2 style="font-family:${fontStack};font-size:2rem;font-weight:${theme.typography.displayWeight};color:${p.text};margin-bottom:3rem;letter-spacing:-0.02em;">Servicios</h2>
+      <div style="columns:3;gap:1.5rem;">
+        ${picIds.slice(0,6).map((id, i) => `
+          <div class="sr" style="break-inside:avoid;margin-bottom:1.5rem;border-radius:8px;overflow:hidden;background:${p.bg};border:1px solid ${p.rule};">
+            <img src="${img(id, 400, i % 3 === 0 ? 300 : 220)}" style="width:100%;object-fit:cover;" alt="" />
+            <div style="padding:1.25rem;">
+              <p style="font-family:${bodyStack};font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:${p.accent};margin-bottom:0.4rem;">Servicio 0${i+1}</p>
+              <h3 style="font-family:${fontStack};font-size:1rem;font-weight:600;color:${p.text};">Branding & Identidad</h3>
+            </div>
+          </div>`).join('')}
+      </div>
+    </section>`;
+  } else if (cardLayout === 'list-editorial') {
+    cardsSection = `
+    <section class="sr" style="padding:6rem 8vw;background:${p.surface};">
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:4rem;align-items:start;">
+        <div>
+          <h2 style="font-family:${fontStack};font-size:2rem;font-weight:${theme.typography.displayWeight};color:${p.text};letter-spacing:-0.02em;position:sticky;top:120px;">Qué<br/>Hacemos</h2>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          ${['Identidad Visual', 'Diseño Web', 'Estrategia de Marca', 'Campañas Digitales'].map((s, i) => `
+            <div class="sr" style="display:flex;gap:2rem;align-items:flex-start;padding:2.5rem 0;border-bottom:1px solid ${p.rule};">
+              <span style="font-family:${bodyStack};font-size:0.65rem;color:${p.muted};opacity:0.5;padding-top:6px;">0${i+1}</span>
+              <div style="flex:1;">
+                <h3 style="font-family:${fontStack};font-size:1.4rem;font-weight:${theme.typography.displayWeight};color:${p.text};margin-bottom:0.75rem;">${s}</h3>
+                <p style="font-family:${bodyStack};font-size:0.9rem;line-height:1.75;color:${p.text};opacity:${textOpacity};">Soluciones diseñadas para tu industria. Entregamos resultados medibles con un enfoque sistemático.</p>
+              </div>
+              <span style="color:${p.accent};font-size:1.2rem;margin-top:4px;">→</span>
+            </div>`).join('')}
+        </div>
+      </div>
+    </section>`;
+  } else if (cardLayout === 'cards-overlap') {
+    cardsSection = `
+    <section class="sr" style="padding:6rem 8vw;background:${p.surface};position:relative;overflow:hidden;">
+      <h2 style="font-family:${fontStack};font-size:2rem;font-weight:${theme.typography.displayWeight};color:${p.text};margin-bottom:4rem;letter-spacing:-0.02em;">Portfolio</h2>
+      <div style="position:relative;height:480px;">
+        ${picIds.slice(0,3).map((id, i) => `
+          <div style="position:absolute;top:${i*30}px;left:${i*60}px;width:360px;border-radius:8px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);z-index:${3-i};transform:rotate(${(i-1)*2}deg);">
+            <img src="${img(id,360,240)}" style="width:100%;height:240px;object-fit:cover;" alt="" />
+            <div style="padding:1.25rem;background:${p.bg};">
+              <h3 style="font-family:${fontStack};font-size:1rem;color:${p.text};">Proyecto ${i+1}</h3>
+            </div>
+          </div>`).join('')}
+      </div>
+    </section>`;
+  } else {
+    // grid-standard
+    cardsSection = `
+    <section class="sr" style="padding:6rem 8vw;background:${p.surface};">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3rem;">
+        <h2 style="font-family:${fontStack};font-size:2rem;font-weight:${theme.typography.displayWeight};color:${p.text};letter-spacing:-0.02em;">Proyectos</h2>
+        <a href="#" style="font-family:${bodyStack};font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;color:${p.accent};text-decoration:none;">Ver todos →</a>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;">
+        ${picIds.slice(0,6).map((id, i) => `
+          <div class="sr" style="border-radius:8px;overflow:hidden;background:${p.bg};border:1px solid ${p.rule};">
+            <div style="position:relative;overflow:hidden;">
+              <img src="${img(id,400,280)}" style="width:100%;height:220px;object-fit:cover;transition:transform 0.5s ease;" alt="" />
+            </div>
+            <div style="padding:1.25rem;">
+              <p style="font-family:${bodyStack};font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:${p.accent};margin-bottom:0.4rem;">Categoría</p>
+              <h3 style="font-family:${fontStack};font-size:1rem;font-weight:600;color:${p.text};margin-bottom:0.5rem;">Identidad 0${i+1}</h3>
+              <p style="font-family:${bodyStack};font-size:0.82rem;line-height:1.6;color:${p.text};opacity:${textOpacity};">Sistema visual completo con todos los puntos de contacto.</p>
+            </div>
+          </div>`).join('')}
+      </div>
+    </section>`;
+  }
+
+  const statsSection = `
+  <section class="sr" style="padding:5rem 8vw;background:${p.bg};display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;border-top:1px solid ${p.rule};border-bottom:1px solid ${p.rule};">
+    ${[['120+','Proyectos'],['8','Años'],['98%','Satisfacción'],['40+','Marcas']].map(([n,l]) => `
+      <div style="text-align:center;">
+        <div style="font-family:${fontStack};font-size:3rem;font-weight:${theme.typography.displayWeight};color:${p.accent};line-height:1;">${n}</div>
+        <div style="font-family:${bodyStack};font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:${p.muted};margin-top:0.5rem;">${l}</div>
+      </div>`).join('')}
+  </section>`;
+
+  const ctaSection = `
+  <section class="sr" style="padding:8rem 8vw;background:${p.surface};text-align:center;">
+    <h2 style="font-family:${fontStack};font-size:clamp(2rem,4vw,3.5rem);font-weight:${theme.typography.displayWeight};color:${p.text};margin-bottom:1.5rem;letter-spacing:-0.02em;">¿Listo para<br/><span style="color:${p.accent};">empezar</span>?</h2>
+    <p style="font-family:${bodyStack};font-size:1rem;line-height:1.7;color:${p.text};opacity:${textOpacity};max-width:450px;margin:0 auto 2.5rem;">Hablemos de tu proyecto. Sin compromisos — solo una conversación estratégica.</p>
+    <button style="background:${p.accent};color:${p.bg};border:none;padding:1rem 2.5rem;font-family:${bodyStack};font-size:0.85rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;border-radius:4px;">Agendar Llamada</button>
+  </section>`;
+
+  const footer = `
+  <footer style="background:${isLight ? p.surface : p.bg};border-top:1px solid ${p.rule};padding:4rem 8vw;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-family:${fontStack};font-size:1.4rem;font-weight:${theme.typography.displayWeight};color:${p.text};margin-bottom:0.5rem;">${theme.name}</div>
+        <div style="font-family:${bodyStack};font-size:0.75rem;color:${p.muted};letter-spacing:0.1em;">STUDIO · ${new Date().getFullYear()}</div>
+      </div>
+      <div style="display:flex;gap:2rem;">
+        ${['Inicio','Proyectos','Servicios','Contacto'].map(l => `<a href="#" style="font-family:${bodyStack};font-size:0.8rem;color:${p.muted};text-decoration:none;letter-spacing:0.05em;">${l}</a>`).join('')}
+      </div>
+    </div>
+  </footer>`;
+
+  const floatBtn = hasFloat ? `
+  <button id="fab" style="position:fixed;bottom:2rem;right:2rem;z-index:999;background:${p.accent};color:${p.bg};border:none;padding:0.9rem 1.8rem;font-family:${bodyStack};font-size:0.75rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;border-radius:100px;box-shadow:0 8px 32px ${p.accent}60;opacity:0;transition:opacity 0.4s;pointer-events:none;">
+    Contactar ↑
+  </button>` : '';
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>${theme.name} — Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="${theme.typography.googleFontsUrl}" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:${p.bg};color:${p.text};font-family:${bodyStack};overflow-x:hidden;}
+  .sr{opacity:0;transform:translateY(24px);transition:opacity 0.65s ease,transform 0.65s ease;}
+  .sr-vis{opacity:1;transform:translateY(0);}
+  img{display:block;max-width:100%;}
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-track{background:${p.bg};}
+  ::-webkit-scrollbar-thumb{background:${p.accent}50;border-radius:3px;}
+</style>
+</head>
+<body>
+  <nav id="nav" style="position:${hasSticky ? 'sticky' : 'relative'};top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:1.25rem 8vw;background:${navBg};border-bottom:1px solid ${p.rule};transition:backdrop-filter 0.3s,box-shadow 0.3s;">
+    <div style="font-family:${fontStack};font-size:1.25rem;font-weight:${theme.typography.displayWeight};color:${p.text};letter-spacing:-0.01em;">${theme.name}</div>
+    <div style="display:flex;gap:2rem;">
+      ${['Inicio','Servicios','Portfolio','Contacto'].map(l => `<a href="#" style="font-family:${bodyStack};font-size:0.82rem;color:${p.text};opacity:0.7;text-decoration:none;transition:opacity 0.2s;">${l}</a>`).join('')}
+    </div>
+    <button style="background:${p.accent};color:${p.bg};border:none;padding:0.6rem 1.4rem;font-family:${bodyStack};font-size:0.75rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;border-radius:4px;">CTA</button>
+  </nav>
+  ${heroSection}
+  ${statsSection}
+  ${cardsSection}
+  ${ctaSection}
+  ${footer}
+  ${floatBtn}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    ${scrollRevealScript}
+    ${carouselScript}
+    ${parallaxScript}
+    ${stickyScript}
+    ${floatScript}
+  });
+</script>
+</body>
+</html>`;
+}
+
+function ThemeFullPreview({ theme, isSelected, onSelect, onClose }: {
+  theme: ThemeIdentity;
+  isSelected: boolean;
+  onSelect: () => void;
+  onClose: () => void;
+}) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const p = theme.palette;
+
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    const html = buildPreviewHTML(theme);
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (doc) {
+      doc.open();
+      doc.write(html);
+      doc.close();
+    }
+  }, [theme]);
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.97 }}
+      transition={{ duration: 0.25 }}
+      className="fixed inset-0 z-[200] flex flex-col"
+      style={{ background: '#050508' }}
+    >
+      {/* ── Top bar ── */}
+      <div className="shrink-0 flex items-center justify-between px-5 py-3 border-b"
+        style={{ borderColor: 'rgba(255,255,255,0.08)', background: '#0A0A10' }}>
+        <div className="flex items-center gap-3">
+          <button onClick={onClose}
+            className="flex items-center gap-2 text-zinc-500 hover:text-zinc-200 transition-colors text-sm">
+            <ArrowLeft size={15} />
+            <span className="font-medium">Volver</span>
+          </button>
+          <div className="w-px h-4 bg-zinc-800" />
+          <span className="text-zinc-300 text-sm font-bold uppercase tracking-widest">{theme.name}</span>
+          <span className="text-zinc-600 text-xs">{theme.tagline}</span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {/* Structure badges */}
+          <div className="flex items-center gap-1.5">
+            {theme.structure.enhancers.slice(0,3).map(e => (
+              <span key={e} className="text-[9px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider"
+                style={{ background: `${p.accent}15`, color: p.accent }}>
+                {e.replace('-', ' ')}
+              </span>
+            ))}
+          </div>
+          <div className="w-px h-4 bg-zinc-800" />
+
+          {/* Select button */}
+          <button
+            onClick={() => { onSelect(); onClose(); }}
+            className="flex items-center gap-2 px-5 py-2 rounded-lg font-bold text-sm uppercase tracking-wider transition-all hover:opacity-90"
+            style={{ background: isSelected ? '#444' : p.accent, color: p.bg }}>
+            {isSelected ? <><Check size={14} /> Activo</> : <>Usar Theme <ChevronRight size={14} /></>}
+          </button>
+
+          <button onClick={onClose}
+            className="p-2 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/60 transition-colors">
+            <X size={18} />
+          </button>
+        </div>
+      </div>
+
+      {/* ── iframe preview ── */}
+      <div className="flex-1 relative overflow-hidden" style={{ background: '#000' }}>
+        <iframe
+          ref={iframeRef}
+          title={`Preview ${theme.name}`}
+          className="w-full h-full border-0"
+          sandbox="allow-scripts allow-same-origin"
+        />
+      </div>
+    </motion.div>
+  );
+}
+
 // ── Theme Card ────────────────────────────────────────────────────────────────
 function ThemeCard({
   theme, isSelected, aggroMode, previewMode,
-  onSelect, onHover,
+  onSelect, onHover, onOpenPreview,
 }: {
   theme: ThemeIdentity;
   isSelected: boolean;
@@ -203,9 +587,9 @@ function ThemeCard({
   previewMode: PreviewMode;
   onSelect: () => void;
   onHover: () => void;
+  onOpenPreview: () => void;
 }) {
   const p = theme.palette;
-
   const moodTags = theme.mood.slice(0, 2).map(m => m.toUpperCase());
 
   return (
@@ -219,36 +603,54 @@ function ThemeCard({
       className={cn(
         'group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200',
         'border',
-        isSelected
-          ? 'ring-2 scale-[1.01]'
-          : 'hover:scale-[1.005] hover:shadow-2xl'
+        isSelected ? 'ring-2 scale-[1.01]' : 'hover:scale-[1.005] hover:shadow-2xl'
       )}
       style={{
         borderColor: isSelected ? p.accent : `${p.accent}30`,
         boxShadow: isSelected ? `0 0 0 2px ${p.accent}, 0 8px 32px ${p.accent}30` : undefined,
         background: p.bg,
       }}
-      onClick={onSelect}
     >
       {/* Preview window */}
       <div className="h-36 relative overflow-hidden">
         <ThemePreview theme={theme} mode={previewMode} />
-        {/* Overlay on hover */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center"
+
+        {/* Hover overlay — two separate actions */}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           style={{ background: `${p.bg}CC` }}>
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center"
-              style={{ background: p.accent }}>
-              {isSelected
-                ? <Check size={16} style={{ color: p.bg }} />
-                : <Eye size={16} style={{ color: p.bg }} />
-              }
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: p.accent }}>
-              {isSelected ? 'ACTIVO' : 'SELECCIONAR'}
-            </span>
+          <div className="absolute inset-0 flex items-center justify-center gap-3">
+            {/* PREVIEW button */}
+            <button
+              onClick={(e) => { e.stopPropagation(); onOpenPreview(); }}
+              className="flex flex-col items-center gap-1.5 hover:scale-110 transition-transform"
+              title="Ver preview completo">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ background: p.bg, border: `2px solid ${p.accent}` }}>
+                <Maximize2 size={14} style={{ color: p.accent }} />
+              </div>
+              <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: p.accent }}>
+                Preview
+              </span>
+            </button>
+
+            {/* SELECT button */}
+            <button
+              onClick={(e) => { e.stopPropagation(); onSelect(); }}
+              className="flex flex-col items-center gap-1.5 hover:scale-110 transition-transform"
+              title="Seleccionar theme">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ background: p.accent }}>
+                {isSelected
+                  ? <Check size={14} style={{ color: p.bg }} />
+                  : <ChevronRight size={14} style={{ color: p.bg }} />}
+              </div>
+              <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: p.accent }}>
+                {isSelected ? 'Activo' : 'Elegir'}
+              </span>
+            </button>
           </div>
         </div>
+
         {/* Selected badge */}
         {isSelected && (
           <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider"
@@ -279,8 +681,19 @@ function ThemeCard({
             </p>
           </div>
         </div>
+        {/* Structure badge */}
+        <div className="flex items-center gap-1 mb-2 mt-1">
+          <span className="text-[8px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider"
+            style={{ background: `${p.accent}20`, color: p.accent }}>
+            {theme.structure.headerStyle.replace('hero-', '')}
+          </span>
+          <span className="text-[8px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider"
+            style={{ background: `${p.text}10`, color: p.muted }}>
+            {theme.structure.colorMode}
+          </span>
+        </div>
         {/* Palette swatch */}
-        <div className="flex gap-1 mt-2">
+        <div className="flex gap-1 mt-1">
           {theme.previewColors.map((c, i) => (
             <div key={i} className="flex-1 h-1.5 rounded-full" style={{ background: c }} />
           ))}
@@ -305,13 +718,14 @@ function ThemeCard({
 
 // ── Theme Detail Panel ────────────────────────────────────────────────────────
 function ThemeDetailPanel({
-  theme, aggroMode, previewMode, setPreviewMode, onSelect, isSelected,
+  theme, aggroMode, previewMode, setPreviewMode, onSelect, onOpenPreview, isSelected,
 }: {
   theme: ThemeIdentity;
   aggroMode: boolean;
   previewMode: PreviewMode;
   setPreviewMode: (m: PreviewMode) => void;
   onSelect: () => void;
+  onOpenPreview: () => void;
   isSelected: boolean;
 }) {
   const p = theme.palette;
@@ -325,7 +739,7 @@ function ThemeDetailPanel({
     <div className="flex flex-col h-full rounded-2xl overflow-hidden"
       style={{ background: p.bg, border: `1px solid ${p.accent}30` }}>
       {/* Preview area */}
-      <div className="relative" style={{ height: '260px' }}>
+      <div className="relative" style={{ height: '240px' }}>
         <ThemePreview theme={theme} mode={previewMode} />
         {/* View selector */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1 p-1 rounded-full"
@@ -343,6 +757,14 @@ function ThemeDetailPanel({
             </button>
           ))}
         </div>
+        {/* Full preview button */}
+        <button
+          onClick={onOpenPreview}
+          className="absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all hover:opacity-90"
+          style={{ background: `${p.bg}DD`, color: p.accent, border: `1px solid ${p.accent}40` }}>
+          <Maximize2 size={9} />
+          Full Preview
+        </button>
       </div>
 
       {/* Theme info */}
@@ -365,16 +787,40 @@ function ThemeDetailPanel({
           )}
         </div>
 
+        {/* Structure */}
+        <div className="mb-3 p-2.5 rounded-lg" style={{ background: `${p.accent}08`, border: `1px solid ${p.accent}20` }}>
+          <p className="text-[9px] uppercase font-bold tracking-widest mb-2 opacity-40" style={{ color: p.text }}>
+            Estructura del Theme
+          </p>
+          <div className="flex flex-wrap gap-1">
+            <span className="text-[8px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider" style={{ background: `${p.accent}25`, color: p.accent }}>
+              {theme.structure.headerStyle}
+            </span>
+            <span className="text-[8px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider" style={{ background: `${p.text}10`, color: p.muted }}>
+              {theme.structure.cardLayout}
+            </span>
+            <span className="text-[8px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider" style={{ background: `${p.text}10`, color: p.muted }}>
+              {theme.structure.colorMode}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1 mt-1.5">
+            {theme.structure.enhancers.map(e => (
+              <span key={e} className="text-[7px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider" style={{ background: `${p.accent}10`, color: p.accent, opacity: 0.7 }}>
+                {e}
+              </span>
+            ))}
+          </div>
+        </div>
+
         {/* Palette */}
         <div className="mb-3">
           <p className="text-[9px] uppercase font-bold tracking-widest mb-1.5 opacity-40" style={{ color: p.text }}>
-            Paleta
+            Paleta de referencia
           </p>
           <div className="flex gap-1.5">
             {Object.entries(p).filter(([k]) => ['bg','surface','text','accent','accent2'].includes(k)).map(([key, hex]) => (
               <div key={key} className="flex flex-col items-center gap-1">
-                <div className="w-7 h-7 rounded-md shadow-sm"
-                  style={{ background: hex, border: `1px solid ${p.rule}` }} />
+                <div className="w-7 h-7 rounded-md shadow-sm" style={{ background: hex, border: `1px solid ${p.rule}` }} />
                 <span className="text-[7px] opacity-40 font-mono" style={{ color: p.text }}>{key}</span>
               </div>
             ))}
@@ -406,17 +852,6 @@ function ThemeDetailPanel({
           </p>
         </div>
 
-        {/* Layout DNA */}
-        <div className="mb-3">
-          <p className="text-[9px] uppercase font-bold tracking-widest mb-1 opacity-40" style={{ color: p.text }}>
-            Layout DNA
-          </p>
-          <p className="text-[10px] leading-snug opacity-60" style={{ color: p.text }}>
-            {theme.layoutDNA.slice(0, 120)}...
-          </p>
-        </div>
-
-        {/* AGGRO mode description */}
         {aggroMode && theme.aggro.unlocked && (
           <div className="mb-3 p-2 rounded-lg" style={{ background: '#FF440010', border: '1px solid #FF440030' }}>
             <p className="text-[9px] uppercase font-bold tracking-widest mb-1" style={{ color: '#FF4400' }}>
@@ -428,7 +863,6 @@ function ThemeDetailPanel({
           </div>
         )}
 
-        {/* Designer note */}
         <div className="p-2.5 rounded-lg" style={{ background: `${p.accent}10`, border: `1px solid ${p.accent}20` }}>
           <p className="text-[9px] italic leading-snug" style={{ color: p.accent }}>
             "{theme.designerNote}"
@@ -437,16 +871,18 @@ function ThemeDetailPanel({
       </div>
 
       {/* CTA */}
-      <div className="p-3" style={{ background: p.surface, borderTop: `1px solid ${p.rule}` }}>
+      <div className="p-3 flex gap-2" style={{ background: p.surface, borderTop: `1px solid ${p.rule}` }}>
+        <button
+          onClick={onOpenPreview}
+          className="flex-1 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all hover:opacity-90 flex items-center justify-center gap-1.5"
+          style={{ background: `${p.accent}15`, color: p.accent, border: `1px solid ${p.accent}30` }}>
+          <Eye size={12} /> Full Preview
+        </button>
         <button
           onClick={onSelect}
-          className="w-full py-3 rounded-xl font-bold text-sm uppercase tracking-widest transition-all hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-2"
+          className="flex-1 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-1.5"
           style={{ background: isSelected ? p.muted : p.accent, color: p.bg }}>
-          {isSelected ? (
-            <><Check size={14} /> THEME ACTIVO</>
-          ) : (
-            <>USAR {theme.name} <ChevronRight size={14} /></>
-          )}
+          {isSelected ? <><Check size={12} /> Activo</> : <>Usar <ChevronRight size={12} /></>}
         </button>
       </div>
     </div>
@@ -455,20 +891,21 @@ function ThemeDetailPanel({
 
 // ── Main ThemePicker Component ────────────────────────────────────────────────
 export function ThemePicker({ currentThemeId, aggroMode, onSelect, onClose }: ThemePickerProps) {
-  const [activeType, setActiveType]       = useState<ThemeType>('ecommerce');
-  const [previewMode, setPreviewMode]     = useState<PreviewMode>('home');
-  const [hoveredTheme, setHoveredTheme]   = useState<ThemeIdentity | null>(null);
-  const [detailTheme, setDetailTheme]     = useState<ThemeIdentity | null>(null);
+  const [activeType, setActiveType]           = useState<ThemeType>('ecommerce');
+  const [previewMode, setPreviewMode]         = useState<PreviewMode>('home');
+  const [hoveredTheme, setHoveredTheme]       = useState<ThemeIdentity | null>(null);
+  const [detailTheme, setDetailTheme]         = useState<ThemeIdentity | null>(null);
+  const [fullPreviewTheme, setFullPreviewTheme] = useState<ThemeIdentity | null>(null);
 
   const themes = getThemesByType(activeType);
   const panelTheme = detailTheme ?? hoveredTheme ?? themes[0];
 
-  // Close on Escape
+  // Close on Escape (only if no full preview open — that handles its own Escape)
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape' && !fullPreviewTheme) onClose(); };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
+  }, [onClose, fullPreviewTheme]);
 
   const handleSelect = useCallback((themeId: string) => {
     onSelect(themeId);
@@ -476,185 +913,168 @@ export function ThemePicker({ currentThemeId, aggroMode, onSelect, onClose }: Th
   }, [onSelect, onClose]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex flex-col"
-      style={{ background: '#0A0A0F' }}
-    >
-      {/* ── Header ── */}
-      <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b"
-        style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onClose}
-            className="flex items-center gap-2 text-zinc-500 hover:text-zinc-200 transition-colors text-sm"
-          >
-            <ArrowLeft size={16} />
-            <span className="font-medium">Volver al Generator</span>
-          </button>
-          <div className="w-px h-5 bg-zinc-800" />
-          <div>
-            <h1 className="text-white font-black text-lg uppercase tracking-widest leading-none">
-              THEME PICKER
-            </h1>
-            <p className="text-zinc-600 text-[10px] uppercase tracking-widest mt-0.5">
-              30 identidades · WebLab v2.3
-            </p>
-          </div>
-        </div>
-
-        {/* Type tabs */}
-        <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-          {TYPE_TABS.map(tab => (
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex flex-col"
+        style={{ background: '#0A0A0F' }}
+      >
+        {/* ── Header ── */}
+        <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b"
+          style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+          <div className="flex items-center gap-3">
             <button
-              key={tab.id}
-              onClick={() => { setActiveType(tab.id); setHoveredTheme(null); setDetailTheme(null); }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all"
-              style={{
-                background: activeType === tab.id ? tab.accent + '20' : 'transparent',
-                color: activeType === tab.id ? tab.accent : '#555',
-                border: activeType === tab.id ? `1px solid ${tab.accent}40` : '1px solid transparent',
-              }}>
-              <tab.icon size={12} />
-              {tab.label}
-              <span className="text-[9px] opacity-60">({getThemesByType(tab.id).length})</span>
+              onClick={onClose}
+              className="flex items-center gap-2 text-zinc-500 hover:text-zinc-200 transition-colors text-sm">
+              <ArrowLeft size={16} />
+              <span className="font-medium">Volver al Generator</span>
             </button>
-          ))}
-        </div>
-
-        {/* Aggro indicator */}
-        <div className="flex items-center gap-3">
-          {aggroMode && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
-              style={{ background: '#FF440015', color: '#FF4400', border: '1px solid #FF440030' }}>
-              <Zap size={11} className="fill-orange-500" />
-              MODO AGGRO ACTIVO
+            <div className="w-px h-5 bg-zinc-800" />
+            <div>
+              <h1 className="text-white font-black text-lg uppercase tracking-widest leading-none">
+                THEME PICKER
+              </h1>
+              <p className="text-zinc-600 text-[10px] uppercase tracking-widest mt-0.5">
+                30 identidades · Paleta de marca tiene prioridad · Estructura define el output
+              </p>
             </div>
-          )}
-          {/* Preview mode switcher */}
-          <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.04)' }}>
-            {([
-              { id: 'home' as PreviewMode, icon: Home, label: 'Home' },
-              { id: 'collection' as PreviewMode, icon: Grid, label: 'Collection' },
-              { id: 'product' as PreviewMode, icon: Package, label: 'Product' },
-            ]).map(v => (
-              <button key={v.id}
-                onClick={() => setPreviewMode(v.id)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition-all"
+          </div>
+
+          {/* Type tabs */}
+          <div className="flex items-center gap-2">
+            {TYPE_TABS.map(tab => (
+              <button key={tab.id}
+                onClick={() => { setActiveType(tab.id); setHoveredTheme(null); setDetailTheme(null); }}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-widest transition-all"
                 style={{
-                  background: previewMode === v.id ? 'rgba(255,255,255,0.1)' : 'transparent',
-                  color: previewMode === v.id ? '#fff' : '#444',
+                  background: activeType === tab.id ? `${tab.accent}20` : 'transparent',
+                  color: activeType === tab.id ? tab.accent : '#4a4a5a',
+                  border: `1px solid ${activeType === tab.id ? tab.accent + '40' : 'transparent'}`,
                 }}>
-                <v.icon size={10} />
-                {v.label}
+                <tab.icon size={13} />
+                {tab.label}
               </button>
             ))}
           </div>
+
           <button onClick={onClose} className="p-2 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800/50 transition-colors">
             <X size={18} />
           </button>
         </div>
-      </div>
 
-      {/* ── Body ── */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Theme grid */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {/* Section header */}
-          <div className="flex items-center gap-3 mb-5">
-            {(() => {
-              const tab = TYPE_TABS.find(t => t.id === activeType)!;
-              return (
-                <>
-                  <tab.icon size={18} style={{ color: tab.accent }} />
-                  <span className="text-sm font-bold uppercase tracking-widest" style={{ color: tab.accent }}>
-                    {tab.label} Themes
-                  </span>
-                  <span className="text-zinc-600 text-xs">— {themes.length} identidades disponibles</span>
-                  {currentThemeId && themes.some(t => t.id === currentThemeId) && (
-                    <div className="ml-auto flex items-center gap-1 text-[10px] text-zinc-500">
-                      <Check size={10} className="text-emerald-400" />
-                      Theme activo en esta categoría
-                    </div>
-                  )}
-                </>
-              );
-            })()}
-          </div>
+        {/* ── Body ── */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Theme grid */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex items-center gap-3 mb-5">
+              {(() => {
+                const tab = TYPE_TABS.find(t => t.id === activeType)!;
+                return (
+                  <>
+                    <tab.icon size={18} style={{ color: tab.accent }} />
+                    <span className="text-sm font-bold uppercase tracking-widest" style={{ color: tab.accent }}>
+                      {tab.label} Themes
+                    </span>
+                    <span className="text-zinc-600 text-xs">— {themes.length} identidades · hover para preview rápido · <span style={{ color: tab.accent }}>Maximize</span> para full preview</span>
+                    {currentThemeId && themes.some(t => t.id === currentThemeId) && (
+                      <div className="ml-auto flex items-center gap-1 text-[10px] text-zinc-500">
+                        <Check size={10} className="text-emerald-400" />
+                        Theme activo en esta categoría
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeType}
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.2 }}
-              className="grid gap-3"
-              style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' }}
-            >
-              {themes.map((theme) => (
-                <ThemeCard
-                  key={theme.id}
-                  theme={theme}
-                  isSelected={currentThemeId === theme.id}
-                  aggroMode={aggroMode}
-                  previewMode={previewMode}
-                  onSelect={() => handleSelect(theme.id)}
-                  onHover={() => { setHoveredTheme(theme); }}
-                />
-              ))}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* ── Detail panel ── */}
-        <div className="w-72 shrink-0 p-4 border-l overflow-y-auto"
-          style={{ borderColor: 'rgba(255,255,255,0.06)', background: '#080810' }}>
-          <AnimatePresence mode="wait">
-            {panelTheme && (
+            <AnimatePresence mode="wait">
               <motion.div
-                key={panelTheme.id}
+                key={activeType}
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="h-full"
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+                className="grid gap-3"
+                style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' }}
               >
-                <ThemeDetailPanel
-                  theme={panelTheme}
-                  aggroMode={aggroMode}
-                  previewMode={previewMode}
-                  setPreviewMode={setPreviewMode}
-                  isSelected={currentThemeId === panelTheme.id}
-                  onSelect={() => handleSelect(panelTheme.id)}
-                />
+                {themes.map((theme) => (
+                  <ThemeCard
+                    key={theme.id}
+                    theme={theme}
+                    isSelected={currentThemeId === theme.id}
+                    aggroMode={aggroMode}
+                    previewMode={previewMode}
+                    onSelect={() => handleSelect(theme.id)}
+                    onHover={() => { setHoveredTheme(theme); }}
+                    onOpenPreview={() => setFullPreviewTheme(theme)}
+                  />
+                ))}
               </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
+            </AnimatePresence>
+          </div>
 
-      {/* ── Footer stat bar ── */}
-      <div className="shrink-0 flex items-center justify-between px-6 py-2 border-t"
-        style={{ borderColor: 'rgba(255,255,255,0.05)', background: '#050508' }}>
-        <div className="flex items-center gap-4 text-[10px] text-zinc-600 uppercase tracking-widest">
-          <span>10 E-Commerce</span>
-          <span>·</span>
-          <span>10 Landing</span>
-          <span>·</span>
-          <span>10 Web</span>
+          {/* ── Detail panel ── */}
+          <div className="w-72 shrink-0 p-4 border-l overflow-y-auto"
+            style={{ borderColor: 'rgba(255,255,255,0.06)', background: '#080810' }}>
+            <AnimatePresence mode="wait">
+              {panelTheme && (
+                <motion.div
+                  key={panelTheme.id}
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="h-full"
+                >
+                  <ThemeDetailPanel
+                    theme={panelTheme}
+                    aggroMode={aggroMode}
+                    previewMode={previewMode}
+                    setPreviewMode={setPreviewMode}
+                    isSelected={currentThemeId === panelTheme.id}
+                    onSelect={() => handleSelect(panelTheme.id)}
+                    onOpenPreview={() => setFullPreviewTheme(panelTheme)}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
-        <div className="flex items-center gap-4 text-[10px] text-zinc-600 uppercase tracking-widest">
-          <span className="text-orange-600/60">⚡ Todos soportan modo AGGRO</span>
-          <span>·</span>
-          <span>E-Commerce &amp; Landing = Edge by default</span>
+
+        {/* ── Footer stat bar ── */}
+        <div className="shrink-0 flex items-center justify-between px-6 py-2 border-t"
+          style={{ borderColor: 'rgba(255,255,255,0.05)', background: '#050508' }}>
+          <div className="flex items-center gap-4 text-[10px] text-zinc-600 uppercase tracking-widest">
+            <span>10 E-Commerce</span>
+            <span>·</span>
+            <span>10 Landing</span>
+            <span>·</span>
+            <span>10 Web</span>
+          </div>
+          <div className="flex items-center gap-4 text-[10px] text-zinc-600 uppercase tracking-widest">
+            <span className="text-orange-600/60">⚡ Todos soportan modo AGGRO</span>
+            <span>·</span>
+            <span>Paleta de marca tiene prioridad sobre el theme</span>
+          </div>
+          <div className="text-[10px] text-zinc-700 uppercase tracking-widest">
+            WEBLAB v2.5 · UNRLVL STUDIO
+          </div>
         </div>
-        <div className="text-[10px] text-zinc-700 uppercase tracking-widest">
-          WEBLAB v2.3 · UNRLVL STUDIO
-        </div>
-      </div>
-    </motion.div>
+      </motion.div>
+
+      {/* ── Full Page Preview overlay ── */}
+      <AnimatePresence>
+        {fullPreviewTheme && (
+          <ThemeFullPreview
+            theme={fullPreviewTheme}
+            isSelected={currentThemeId === fullPreviewTheme.id}
+            onSelect={() => handleSelect(fullPreviewTheme.id)}
+            onClose={() => setFullPreviewTheme(null)}
+          />
+        )}
+      </AnimatePresence>
+    </>
   );
 }

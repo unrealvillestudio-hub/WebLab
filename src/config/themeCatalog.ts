@@ -32,6 +32,12 @@ export interface ThemeIdentity {
   };
   motion: string;       // motion personality description
   layoutDNA: string;    // layout signature description
+  structure: {
+    colorMode: 'dark' | 'light';
+    headerStyle: 'hero-cinematic' | 'hero-editorial' | 'hero-split' | 'hero-fullbleed' | 'hero-minimal' | 'hero-text-only';
+    cardLayout: 'grid-standard' | 'grid-masonry' | 'scroll-horizontal' | 'list-editorial' | 'cards-overlap';
+    enhancers: string[];
+  };
   aggro: {
     unlocked: boolean;
     description: string; // what changes in AGGRO mode
@@ -76,6 +82,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#0A0A0A', '#C9A96E', '#F0EDE8', '#141414'],
     designerNote: 'Menos es más solo cuando lo que queda es perfecto. ONYX no decora — edita.',
+    structure: {
+      colorMode: 'dark',
+      headerStyle: 'hero-cinematic',
+      cardLayout: 'grid-standard',
+      enhancers: ['scroll-reveal', 'hover-reveal', 'sticky-header'],
+    },
   },
 
   {
@@ -108,6 +120,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#080C12', '#00AACC', '#E8EEF8', '#0F1520'],
     designerNote: 'PRECISION es para marcas cuyo diferenciador real es la formulación, la tecnología o el proceso. Cosmética avanzada, B2B industrial, equipamiento profesional.',
+    structure: {
+      colorMode: 'dark',
+      headerStyle: 'hero-split',
+      cardLayout: 'grid-standard',
+      enhancers: ['scroll-reveal', 'sticky-header', 'parallax'],
+    },
   },
 
   {
@@ -140,6 +158,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#F5EFE6', '#7A5C3E', '#2C2018', '#4A7C59'],
     designerNote: 'TERRA es lujo consciente. No grita — crece.',
+    structure: {
+      colorMode: 'light',
+      headerStyle: 'hero-editorial',
+      cardLayout: 'grid-masonry',
+      enhancers: ['scroll-reveal', 'hover-reveal'],
+    },
   },
 
   {
@@ -172,6 +196,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#FFF5F0', '#FF4D2E', '#1A0A06', '#FF9E6D'],
     designerNote: 'CORAL convierte la tendencia en argumento de compra. Para beauty, cosmética, moda y lifestyle que quieren estar en el momento correcto.',
+    structure: {
+      colorMode: 'light',
+      headerStyle: 'hero-fullbleed',
+      cardLayout: 'grid-standard',
+      enhancers: ['scroll-reveal', 'floating-cta'],
+    },
   },
 
   {
@@ -204,6 +234,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#1A0A12', '#C4843C', '#F2E8DC', '#8B1A3C'],
     designerNote: 'VELVET es para marcas que saben que el cliente correcto no necesita convencerse.',
+    structure: {
+      colorMode: 'dark',
+      headerStyle: 'hero-cinematic',
+      cardLayout: 'cards-overlap',
+      enhancers: ['parallax', 'hover-reveal', 'scroll-reveal'],
+    },
   },
 
   {
@@ -236,6 +272,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#FFEE00', '#0A0A00', '#FF3300', '#FFF5AA'],
     designerNote: 'SOLAR es el grito de una marca que no tiene miedo de ser vista. Literalmente.',
+    structure: {
+      colorMode: 'light',
+      headerStyle: 'hero-text-only',
+      cardLayout: 'scroll-horizontal',
+      enhancers: ['scroll-reveal', 'floating-cta'],
+    },
   },
 
   {
@@ -268,6 +310,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#0C0C14', '#9B8EC4', '#DDD8F0', '#5A4E8A'],
     designerNote: 'PHANTOM vende lo que no se puede tocar: el deseo de pertenecer a algo invisible.',
+    structure: {
+      colorMode: 'dark',
+      headerStyle: 'hero-cinematic',
+      cardLayout: 'grid-masonry',
+      enhancers: ['parallax', 'scroll-reveal', 'image-carousel'],
+    },
   },
 
   {
@@ -300,6 +348,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#1C1C1C', '#FF4400', '#E8E8E8', '#2C2C2C'],
     designerNote: 'CONCRETE es para marcas que entienden que la autenticidad es el lujo más escaso.',
+    structure: {
+      colorMode: 'dark',
+      headerStyle: 'hero-split',
+      cardLayout: 'grid-standard',
+      enhancers: ['scroll-reveal', 'sticky-header'],
+    },
   },
 
   {
@@ -332,6 +386,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#030F18', '#00E5CC', '#D8F0FF', '#0076A8'],
     designerNote: 'BIOLUX convierte la química en deseo. El laboratorio como escaparate.',
+    structure: {
+      colorMode: 'dark',
+      headerStyle: 'hero-split',
+      cardLayout: 'grid-standard',
+      enhancers: ['scroll-reveal', 'parallax', 'floating-cta'],
+    },
   },
 
   {
@@ -364,6 +424,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#F8F6F0', '#1A3A6C', '#1A1E2C', '#C4A448'],
     designerNote: 'BLUEPRINT es para marcas que entienden que la confianza se construye con precisión, no con promesas.',
+    structure: {
+      colorMode: 'light',
+      headerStyle: 'hero-editorial',
+      cardLayout: 'list-editorial',
+      enhancers: ['scroll-reveal', 'hover-reveal'],
+    },
   },
 
   // ════════════════════════════════════════════════════════
@@ -400,6 +466,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#000000', '#FF2200', '#FFFFFF', '#FF6600'],
     designerNote: 'IGNITION es la máquina de conversión más simple posible. Porque simple no significa fácil.',
+    structure: {
+      colorMode: 'dark',
+      headerStyle: 'hero-fullbleed',
+      cardLayout: 'grid-standard',
+      enhancers: ['scroll-reveal', 'floating-cta', 'sticky-header'],
+    },
   },
 
   {
@@ -432,6 +504,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#F8F9FC', '#1A4FD6', '#0F1628', '#00A878'],
     designerNote: 'TRUST es para cualquier negocio real que tiene resultados verificables. El diseño que mejor convierte no se ve — se siente como una decisión obvia.',
+    structure: {
+      colorMode: 'light',
+      headerStyle: 'hero-split',
+      cardLayout: 'grid-standard',
+      enhancers: ['scroll-reveal', 'sticky-header'],
+    },
   },
 
   {
@@ -464,6 +542,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#FAFAF5', '#1A1A14', '#C4A448', '#F0EFE8'],
     designerNote: 'IVORY es para marcas que saben que su cliente ya decidió. Solo necesita el contexto correcto.',
+    structure: {
+      colorMode: 'light',
+      headerStyle: 'hero-editorial',
+      cardLayout: 'list-editorial',
+      enhancers: ['scroll-reveal', 'hover-reveal'],
+    },
   },
 
   {
@@ -496,6 +580,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#0A0A0A', '#E8FF00', '#F5F5F5', '#FF3300'],
     designerNote: 'KINETIC convierte la energía de la marca en energía de conversión.',
+    structure: {
+      colorMode: 'dark',
+      headerStyle: 'hero-text-only',
+      cardLayout: 'scroll-horizontal',
+      enhancers: ['scroll-reveal', 'floating-cta', 'sticky-header'],
+    },
   },
 
   {
@@ -528,6 +618,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#020E18', '#FF6B00', '#D0E8F8', '#00AAFF'],
     designerNote: 'DEEP SIGNAL convierte la evidencia en deseo.',
+    structure: {
+      colorMode: 'dark',
+      headerStyle: 'hero-cinematic',
+      cardLayout: 'grid-standard',
+      enhancers: ['parallax', 'scroll-reveal', 'floating-cta'],
+    },
   },
 
   {
@@ -560,6 +656,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#F8FAF5', '#2A6A30', '#162010', '#8B5E3C'],
     designerNote: 'BLOOM PROTOCOL es para marcas que entienden que la salud es el nuevo lujo.',
+    structure: {
+      colorMode: 'light',
+      headerStyle: 'hero-editorial',
+      cardLayout: 'grid-masonry',
+      enhancers: ['scroll-reveal', 'hover-reveal'],
+    },
   },
 
   {
@@ -592,6 +694,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#08080A', '#C8B48A', '#F0ECE4', '#111116'],
     designerNote: 'RESERVE es para joyería, relojes, cosmética ultra-premium, inmobiliaria exclusiva y servicios de alto valor. No convence — confirma.',
+    structure: {
+      colorMode: 'dark',
+      headerStyle: 'hero-cinematic',
+      cardLayout: 'list-editorial',
+      enhancers: ['parallax', 'scroll-reveal', 'hover-reveal'],
+    },
   },
 
   {
@@ -624,6 +732,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#0C0C14', '#FF5F1F', '#F0F0F8', '#FFB800'],
     designerNote: 'LAUNCH es para nuevos productos, temporadas, servicios y colecciones. El lanzamiento es un evento — el diseño debe tratarlo como tal.',
+    structure: {
+      colorMode: 'dark',
+      headerStyle: 'hero-fullbleed',
+      cardLayout: 'grid-standard',
+      enhancers: ['scroll-reveal', 'floating-cta', 'image-carousel'],
+    },
   },
 
   {
@@ -656,6 +770,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#0C0800', '#D4AF37', '#F5E8C8', '#8B7320'],
     designerNote: 'GOLDEN AGE es para marcas que entienden que el legado es el mejor argumento de venta.',
+    structure: {
+      colorMode: 'dark',
+      headerStyle: 'hero-cinematic',
+      cardLayout: 'list-editorial',
+      enhancers: ['parallax', 'scroll-reveal', 'hover-reveal'],
+    },
   },
 
   {
@@ -688,6 +808,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#F4F2EC', '#2A4A8A', '#1C1C18', '#8A6A2A'],
     designerNote: 'AUTHORITY es para consultoras, agencias, distribuidores B2B, servicios profesionales y cualquier negocio donde la confianza institucional determina la decisión de compra.',
+    structure: {
+      colorMode: 'light',
+      headerStyle: 'hero-split',
+      cardLayout: 'list-editorial',
+      enhancers: ['scroll-reveal', 'sticky-header'],
+    },
   },
 
   // ════════════════════════════════════════════════════════
@@ -724,6 +850,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#FAFAF8', '#D4272A', '#1A1814', '#F2F0EA'],
     designerNote: 'EDITORIAL convierte la marca en un medio de comunicación con autoridad propia.',
+    structure: {
+      colorMode: 'light',
+      headerStyle: 'hero-editorial',
+      cardLayout: 'list-editorial',
+      enhancers: ['scroll-reveal', 'hover-reveal'],
+    },
   },
 
   {
@@ -756,6 +888,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#F8F8F4', '#FF5F00', '#202018', '#EFEEEA'],
     designerNote: 'STUDIO muestra que el mejor portfolio es el que hace sentir al cliente que el trabajo ya está hecho.',
+    structure: {
+      colorMode: 'light',
+      headerStyle: 'hero-split',
+      cardLayout: 'grid-masonry',
+      enhancers: ['scroll-reveal', 'hover-reveal', 'parallax'],
+    },
   },
 
   {
@@ -788,6 +926,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#0C0C0A', '#D4A84B', '#F0EDE8', '#8A6A30'],
     designerNote: 'FOUNDING STORY es para empresas familiares, marcas con historia, distribuidores con trayectoria y cualquier negocio cuyo origen sea un diferenciador real de confianza.',
+    structure: {
+      colorMode: 'dark',
+      headerStyle: 'hero-cinematic',
+      cardLayout: 'list-editorial',
+      enhancers: ['parallax', 'scroll-reveal'],
+    },
   },
 
   {
@@ -820,6 +964,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#F2F0E8', '#C07830', '#1C2030', '#E8E4D8'],
     designerNote: 'ATLAS es para marcas que entienden que la confianza se construye a lo largo del tiempo, no de una landing.',
+    structure: {
+      colorMode: 'light',
+      headerStyle: 'hero-editorial',
+      cardLayout: 'list-editorial',
+      enhancers: ['scroll-reveal', 'hover-reveal'],
+    },
   },
 
   {
@@ -852,6 +1002,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#F0EDE4', '#8B3A1A', '#2A2420', '#E4E0D4'],
     designerNote: 'ARCHIVE convierte la historia de la marca en su argumento más moderno.',
+    structure: {
+      colorMode: 'light',
+      headerStyle: 'hero-editorial',
+      cardLayout: 'list-editorial',
+      enhancers: ['scroll-reveal', 'hover-reveal'],
+    },
   },
 
   {
@@ -884,6 +1040,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#F5F7FA', '#0060FF', '#1A1E2C', '#00CC88'],
     designerNote: 'SIGNAL sabe que la mejor conversión es la que el usuario no recuerda haber hecho.',
+    structure: {
+      colorMode: 'light',
+      headerStyle: 'hero-split',
+      cardLayout: 'grid-standard',
+      enhancers: ['scroll-reveal', 'sticky-header', 'floating-cta'],
+    },
   },
 
   {
@@ -916,6 +1078,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#F2F8F0', '#3A7A48', '#1A2C18', '#7A5C3E'],
     designerNote: 'GREENHOUSE convierte el wellness en la identidad central de la marca.',
+    structure: {
+      colorMode: 'light',
+      headerStyle: 'hero-editorial',
+      cardLayout: 'grid-masonry',
+      enhancers: ['scroll-reveal', 'hover-reveal'],
+    },
   },
 
   {
@@ -948,6 +1116,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#080808', '#D4C4A8', '#EEE8DC', '#111111'],
     designerNote: 'OBSIDIAN no es para todos. Eso es exactamente el punto.',
+    structure: {
+      colorMode: 'dark',
+      headerStyle: 'hero-cinematic',
+      cardLayout: 'list-editorial',
+      enhancers: ['parallax', 'scroll-reveal', 'hover-reveal'],
+    },
   },
 
   {
@@ -980,6 +1154,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#0A0A0A', '#E8380A', '#F5F5F5', '#F5A623'],
     designerNote: 'PERFORMANCE es para marcas de fitness, equipamiento deportivo, automotive, suplementos y cualquier categoría donde el resultado medible es el argumento central de venta.',
+    structure: {
+      colorMode: 'dark',
+      headerStyle: 'hero-fullbleed',
+      cardLayout: 'grid-standard',
+      enhancers: ['scroll-reveal', 'floating-cta', 'sticky-header'],
+    },
   },
 
   {
@@ -1012,6 +1192,12 @@ export const THEME_CATALOG: ThemeIdentity[] = [
     },
     previewColors: ['#FFFFFF', '#FF3366', '#1A1A1A', '#3366FF'],
     designerNote: 'CANVAS es para marcas que entienden que la creatividad es el único diferenciador real.',
+    structure: {
+      colorMode: 'light',
+      headerStyle: 'hero-split',
+      cardLayout: 'grid-masonry',
+      enhancers: ['scroll-reveal', 'hover-reveal', 'floating-cta'],
+    },
   },
 ];
 
@@ -1032,19 +1218,40 @@ export function getAllThemeIds(): string[] {
 /** Build the theme prompt injection for the web engine */
 export function buildThemePromptBlock(theme: ThemeIdentity, aggro: boolean): string {
   const mode = aggro ? 'AGGRO' : 'STANDARD';
+  const enhancerList = theme.structure.enhancers.join(', ');
   return `── THEME: ${theme.name} [${mode}] ──
-Tagline del tema: "${theme.tagline}"
-Paleta:
+PRINCIPIO FUNDAMENTAL: La paleta de la MARCA (definida en el brandContext arriba) tiene PRIORIDAD ABSOLUTA.
+Los colores del theme son referencia de ambiente — el output debe usar los tokens de color de la marca.
+Si no hay brandContext con paleta definida, usa la paleta del theme como fallback.
+
+ESTRUCTURA (esto es lo que el theme define — aplica siempre):
+  Modo base: ${theme.structure.colorMode === 'dark' ? 'OSCURO — fondos profundos, alto contraste' : 'CLARO — fondos limpios, tipografía protagonista'}
+  Header: ${theme.structure.headerStyle}
+  Layout de cards/secciones: ${theme.structure.cardLayout}
+  Enhancers activos: ${enhancerList}
+
+ENHANCERS — instrucciones de implementación:
+${theme.structure.enhancers.includes('scroll-reveal') ? '  • scroll-reveal: elementos aparecen con IntersectionObserver — opacity 0→1, translateY 20px→0, staggered 100ms entre items' : ''}
+${theme.structure.enhancers.includes('hover-reveal') ? '  • hover-reveal: en cards, overlay de info aparece en hover con transition 200ms' : ''}
+${theme.structure.enhancers.includes('parallax') ? '  • parallax: imágenes hero con translateY(calc(var(--scrollY) * 0.3)) via JS scroll listener' : ''}
+${theme.structure.enhancers.includes('sticky-header') ? '  • sticky-header: navbar position:sticky top:0, añade backdrop-blur + shadow al hacer scroll' : ''}
+${theme.structure.enhancers.includes('floating-cta') ? '  • floating-cta: botón CTA flotante en mobile (position:fixed bottom-6 right-6) que aparece después de 30% de scroll' : ''}
+${theme.structure.enhancers.includes('image-carousel') ? '  • image-carousel: hero con slider automático — transición crossfade 4s, dots de navegación, touch swipe' : ''}
+${theme.structure.enhancers.includes('scroll-horizontal') ? '  • scroll-horizontal: sección de cards con overflow-x:auto, scroll-snap, cursor grab' : ''}
+
+LAYOUT DNA: ${theme.layoutDNA}
+MOTION: ${theme.motion}
+
+TIPOGRAFÍA DEL THEME (úsala si la marca no especifica tipografía propia, o como complemento):
+  Display: ${theme.typography.display} (weight: ${theme.typography.displayWeight})
+  Body: ${theme.typography.body}
+  Google Fonts URL: ${theme.typography.googleFontsUrl}
+
+PALETA DE REFERENCIA (fallback si no hay brandContext):
   bg: ${theme.palette.bg} | surface: ${theme.palette.surface}
   text: ${theme.palette.text} | accent: ${theme.palette.accent}
   accent2: ${theme.palette.accent2} | muted: ${theme.palette.muted}
-  rule (borders): ${theme.palette.rule}
-Tipografía:
-  Display: ${theme.typography.display} (weight: ${theme.typography.displayWeight})
-  Body: ${theme.typography.body}
-  Google Fonts: ${theme.typography.googleFontsUrl}
-Motion: ${theme.motion}
-Layout DNA: ${theme.layoutDNA}
+
 Filosofía de diseño: ${theme.designerNote}
 ${aggro ? `\n⚡ MODO AGGRO ACTIVADO:\n${theme.aggro.description}\nPUSHA los límites. El cliente aceptó el riesgo. No te contengas.` : ''}`;
 }
