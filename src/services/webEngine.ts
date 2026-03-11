@@ -135,7 +135,7 @@ REGLAS ESTRICTAS:
 - Devuelve SOLO el bloque HTML de esta sección, sin <!DOCTYPE>, sin <html>, sin <head>, sin <body>.
 - Usa clases descriptivas (hero-section, hero-title, hero-subtitle, cta-button, etc.)
 - CSS inline en style="" para colores, tipografía y espaciado base.
-- Paleta neutra: fondo blanco o #f9f9f9, texto #1a1a1a, acento #000 — el cliente ajustará colores.
+- PALETA: Si el contexto incluye "color dominante: #XXXXXX" de un producto, usa ese hex como color de acento (botones, bordes, highlights). Si no, usa paleta neutra: fondo blanco o #f9f9f9, texto #1a1a1a, acento #000.
 - Responsive: usa max-width, padding proporcionales.
 - Botones con cursor:pointer y padding generoso.
 - NO incluyas <script>, NO incluyas frameworks externos.
@@ -256,6 +256,14 @@ ${productSpec.complianceNotes ? `RESTRICCIONES DE COMPLIANCE: ${productSpec.comp
   const brandBlueprintBlock = getBrandBlueprintBlock(brand.id as any);
   const brandCtx = BRAND_CONTEXTS[brand.id as keyof typeof BRAND_CONTEXTS];
 
+  // productCatalogContext (texto estático legacy) se omite cuando el extraContext ya
+  // contiene el bloque dinámico del EcomProductSelector (evita duplicación y datos stale)
+  const hasEcomContext = extraContext.includes('── CONTEXTO E-COMMERCE');
+  const catalogContextBlock =
+    !hasEcomContext && brandCtx?.productCatalogContext
+      ? `${brandCtx.productCatalogContext}\n\n`
+      : '';
+
   return `Eres un redactor web senior, front-end developer y estratega de conversión especializado en negocios hispanos en Miami.
 Generas contenido en formato ${modeLabel} listo para producción.
 Tu estándar no es copy "correcto" — es copy que convierte. Directo, específico, que incomoda al lector lo suficiente para que actúe.
@@ -273,7 +281,7 @@ OUTPUT MODE: ${modeLabel}
 
 ${productBlock}
 
-${brandBlueprintBlock ? `${brandBlueprintBlock}\n\n` : ""}${brandCtx?.complianceBlock ? `${brandCtx.complianceBlock}\n\n` : ""}${brandCtx?.productCatalogContext ? `${brandCtx.productCatalogContext}\n\n` : ""}${extraContext ? `CONTEXTO DE MARCA / DB_VARIABLES:\n${extraContext}` : ""}
+${brandBlueprintBlock ? `${brandBlueprintBlock}\n\n` : ""}${brandCtx?.complianceBlock ? `${brandCtx.complianceBlock}\n\n` : ""}${catalogContextBlock}${extraContext ? `CONTEXTO DE MARCA / DB_VARIABLES:\n${extraContext}` : ""}
 
 ── ESTÁNDAR DE COPY BASE (SIEMPRE APLICA) ──────────────────────────────────────
 ADN UNRLVL: Todo copy producido aquí sigue estas reglas por defecto. No son opcionales.
@@ -455,6 +463,13 @@ export async function runWebPack(params: {
     const section = PAGE_SECTIONS[sectionId as keyof typeof PAGE_SECTIONS];
     if (!section) continue;
 
+    // Build accumulated prior-sections block for coherence
+    const priorBlock = sections.length > 0
+      ? `\n── SECCIONES YA GENERADAS (mantén coherencia — no repitas, continúa la narrativa) ──\n` +
+        sections.map(s => `[${s.label}]\n${s.content.slice(0, 400)}${s.content.length > 400 ? '…' : ''}`).join('\n\n') +
+        `\n────────────────────────────────────────────────────────────────────────────────\n`
+      : '';
+
     const prompt = buildSectionPrompt({
       brand: params.brand,
       pack: params.pack,
@@ -463,7 +478,7 @@ export async function runWebPack(params: {
       tone: params.tone,
       platform: params.platform,
       productSpec: params.productSpec,
-      extraContext: resolvedContext,
+      extraContext: resolvedContext + priorBlock,
       superAggro,
       outputMode,
     });

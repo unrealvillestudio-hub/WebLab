@@ -169,7 +169,13 @@ function generateTS(products: BPProduct[]): string {
     lines.push(`    collection_id: "${slugify(col)}",`);
     lines.push(`    subcollection: "${esc(sub)}",`);
     lines.push(`    subcollection_id: "${slugify(sub)}",`);
-    lines.push(`    description: "${esc(p.description ?? '')}",`);
+    // description is {en, es} dict in BP schema — extract ES preferentially
+    const rawDesc = p.description;
+    const descText: string =
+      typeof rawDesc === 'object' && rawDesc !== null
+        ? (rawDesc as any).es ?? (rawDesc as any).en ?? ''
+        : String(rawDesc ?? '');
+    lines.push(`    description: "${esc(descText)}",`);
     lines.push(`    description_enhanced: ${JSON.stringify(p.description_enhanced ?? null)},`);
     lines.push(`    key_ingredients: ${arr(p.key_ingredients ?? [])},`);
     lines.push(`    benefit_claims: ${arr(p.benefit_claims ?? [])},`);

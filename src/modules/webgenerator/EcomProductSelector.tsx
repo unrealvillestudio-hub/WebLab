@@ -597,8 +597,16 @@ export function buildEcomPromptContext(ctx: EcomProductContext, brandId: string)
     const col = catalog.find(c => c.id === ctx.collectionId);
     if (col) {
       parts.push(`── COLLECTION SELECCIONADA: ${col.label} ──`);
-      parts.push(`Productos (${col.products.length}): ${col.products.map(p => p.display_name).join(', ')}`);
       parts.push(`Subcollections (líneas): ${col.subcollections.map(s => s.label).join(', ')}`);
+      // Product list with image filenames
+      const prodLines = col.products.map(p => {
+        const b2b = (p as any).b2b_only ? ' [B2B]' : '';
+        const img = p.image_filename ? ` | img: ${p.image_filename}` : '';
+        const il = (p as any).imagelab;
+        const color = il?.dominant_hex ? ` | color: ${il.dominant_hex}` : '';
+        return `• ${p.display_name}${b2b}${img}${color}`;
+      });
+      parts.push(`Productos (${col.products.length}):\n${prodLines.join('\n')}`);
       if (ctx.collectionDescriptionEnhanced) {
         parts.push(`\nDESCRIPCIÓN COLLECTION (Enhanced):\n${ctx.collectionDescriptionEnhanced}`);
       } else if (ctx.collectionDescription) {
@@ -609,20 +617,61 @@ export function buildEcomPromptContext(ctx: EcomProductContext, brandId: string)
     const prods = catalog.flatMap(c => c.products).filter(p => ctx.selectedProductIds!.includes(p.id));
     parts.push(`── PRODUCTOS SELECCIONADOS (${prods.length}) ──`);
     prods.forEach(p => {
-      parts.push(`• ${p.display_name} [${p.subcollection}] — ${p.description.slice(0, 120)}...`);
+      const img = p.image_filename ? ` | img: ${p.image_filename}` : '';
+      const il = (p as any).imagelab;
+      const color = il?.dominant_hex ? ` | color: ${il.dominant_hex}` : '';
+      parts.push(`• ${p.display_name} [${p.subcollection}]${img}${color} — ${p.description.slice(0, 100)}`);
     });
   }
 
   if (ctx.productId) {
-    const prod = catalog.flatMap(c => c.products).find(p => p.id === ctx.productId);
+    const allProds = catalog.flatMap(c => c.products);
+    const prod = allProds.find(p => p.id === ctx.productId);
     if (prod) {
       parts.push(`── PRODUCTO: ${prod.display_name} ──`);
       parts.push(`Collection: ${prod.collection} > ${prod.subcollection}`);
-      parts.push(`Precio: $${prod.price}${prod.msrp !== '0.00' ? ` (MSRP $${prod.msrp})` : ''}`);
       parts.push(`Formato: ${prod.format} — ${prod.size}`);
-      if (prod.key_ingredients.length) parts.push(`Ingredientes clave: ${prod.key_ingredients.join(', ')}`);
-      if (prod.benefit_claims.length) parts.push(`Benefits: ${prod.benefit_claims.join(', ')}`);
-      if (prod.hair_type.length) parts.push(`Hair type: ${prod.hair_type.join(', ')}`);
+      if (prod.key_ingredients.length) {
+        parts.push(`Ingredientes clave: ${prod.key_ingredients.join(', ')}`);
+      } else {
+        // Ingredientes no documentados aún — inferir desde descripción y claims
+        parts.push(`Ingredientes clave: no documentados (inferir del nombre del producto y claims para el copy)`);
+      }
+      if (prod.benefit_claims.length) parts.push(`Benefit claims (usar textualmente en copy): ${prod.benefit_claims.join(' · ')}`);
+      if (prod.hair_type.length) parts.push(`Hair type objetivo: ${prod.hair_type.join(', ')}`);
+
+      // Image context — filename + imagelab palette/mood
+      if (prod.image_filename) {
+        parts.push(`Imagen del producto: ${prod.image_filename}`);
+      }
+      const il = (prod as any).imagelab;
+      if (il) {
+        const colorInfo = [
+          il.dominant_hex ? `color dominante: ${il.dominant_hex}` : '',
+          il.accent_hex   ? `acento: ${il.accent_hex}` : '',
+          il.mood         ? `mood visual: ${il.mood}` : '',
+          il.packaging_style ? `packaging: ${il.packaging_style}` : '',
+        ].filter(Boolean).join(' · ');
+        if (colorInfo) parts.push(`Visual: ${colorInfo}`);
+        if (il.image_usage?.standard?.background) {
+          parts.push(`Fondo imagen estándar: ${il.image_usage.standard.background}`);
+        }
+      }
+
+      // Cross-sell context
+      const crossSell = (prod as any).cross_sell as string[] | undefined;
+      if (crossSell?.length) {
+        const csNames = crossSell
+          .map(id => allProds.find(p => p.id === id)?.display_name)
+          .filter(Boolean);
+        if (csNames.length) parts.push(`Cross-sell (mencionar si aplica): ${csNames.join(', ')}`);
+      }
+
+      // B2B audience tone override
+      if ((prod as any).b2b_only) {
+        parts.push(`\n⚠️ AUDIENCIA B2B — ESTILISTA PROFESIONAL:\nEste producto es exclusivo para profesionales. El copy debe:\n- Hablar al estilista, no al consumidor final.\n- Usar terminología técnica sin explicar lo básico (el estilista ya sabe).\n- Enfatizar resultados en servicio (rendimiento, consistencia, reputación con clientes).\n- Tone: par a par — no "tú puedes lograr", sino "los estilistas que trabajan con esto".\n- PROHIBIDO: lenguaje de self-care, rutina personal, "para ti y tu cabello".`);
+      }
+
       if (ctx.productDescriptionEnhanced) {
         parts.push(`\nDESCRIPCIÓN (Enhanced):\n${ctx.productDescriptionEnhanced}`);
       } else if (ctx.productDescription) {
