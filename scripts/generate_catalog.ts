@@ -54,6 +54,18 @@ interface BPProduct {
   image_filename: string;
   format: string;
   size: string;
+  cross_sell?: string[];
+  imagelab?: {
+    dominant_hex?: string;
+    accent_hex?: string;
+    mood?: string;
+    packaging_style?: string;
+    image_usage?: {
+      standard?: { filename?: string; background?: string };
+      campaign?: { filename?: string; background?: string };
+      dark_available?: boolean;
+    };
+  };
 }
 
 // ── Fetch from GitHub API ─────────────────────────────────────────────────────
@@ -138,6 +150,18 @@ function generateTS(products: BPProduct[]): string {
     `  image_filename: string;`,
     `  format: string;`,
     `  size: string;`,
+    `  cross_sell?: string[];`,
+    `  imagelab?: {`,
+    `    dominant_hex?: string;`,
+    `    accent_hex?: string;`,
+    `    mood?: string;`,
+    `    packaging_style?: string;`,
+    `    image_usage?: {`,
+    `      standard?: { filename?: string; background?: string };`,
+    `      campaign?: { filename?: string; background?: string };`,
+    `      dark_available?: boolean;`,
+    `    };`,
+    `  };`,
     `}`,
     ``,
     `export interface CatalogSubcollection {`,
@@ -187,6 +211,14 @@ function generateTS(products: BPProduct[]): string {
     lines.push(`    image_filename: "${esc(p.image_filename ?? '')}",`);
     lines.push(`    format: "${esc(p.format ?? '')}",`);
     lines.push(`    size: "${esc(p.size ?? '')}",`);
+    // cross_sell
+    if (p.cross_sell?.length) {
+      lines.push(`    cross_sell: ${JSON.stringify(p.cross_sell)},`);
+    }
+    // imagelab — full object passthrough
+    if (p.imagelab) {
+      lines.push(`    imagelab: ${JSON.stringify(p.imagelab)},`);
+    }
     lines.push(`  },`);
   }
 

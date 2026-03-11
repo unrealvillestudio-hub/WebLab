@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "catalog:update": "ts-node --esm scripts/generate_catalog.ts",
-    "catalog:update:local": "ts-node --esm scripts/generate_catalog.ts --local ../BluePrints/products"
+    "catalog:update:local": "ts-node --esm scripts/generate_catalog.ts --local ../BluePrints/products",
+    "sync:catalog": "ts-node --esm scripts/generate_catalog.ts --local ../BluePrints/products",
+    "sync:catalog:remote": "ts-node --esm scripts/generate_catalog.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",

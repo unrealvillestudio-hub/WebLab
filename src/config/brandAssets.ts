@@ -11,6 +11,22 @@
 export const BLUEPRINTS_RAW_BASE =
   'https://raw.githubusercontent.com/unrealvillestudio-hub/BluePrints/main';
 
+// ── Environment override ──────────────────────────────────────────────────────
+// To switch to a CDN (Shopify, Cloudflare R2, etc.) set this env var
+// in your deployment without touching any other file:
+//
+//   VITE_ASSETS_BASE_URL=https://cdn.shopify.com/s/files/1/xxxx/yyyy/files
+//
+// The resolver appends /{productsPath}/{filename} automatically.
+// If not set, falls back to GitHub raw (works for HTML outputs + dev).
+const ENV_ASSETS_BASE = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_ASSETS_BASE_URL)
+  ?? (typeof process !== 'undefined' && process.env?.ASSETS_BASE_URL)
+  ?? null;
+
+export function getAssetsBase(): string {
+  return ENV_ASSETS_BASE ?? BLUEPRINTS_RAW_BASE;
+}
+
 // ── Brand asset path configuration ───────────────────────────────────────────
 interface BrandAssetsConfig {
   /** Path prefix inside the BluePrints repo for product images */
@@ -62,7 +78,7 @@ export const BRAND_LOGOS = {
 export function resolveProductImageUrl(brandId: string, filename: string | null | undefined): string {
   if (!filename) return '';
   const config = BRAND_ASSETS_CONFIG[brandId] ?? BRAND_ASSETS_CONFIG['NeuroneCosmetics'];
-  return `${BLUEPRINTS_RAW_BASE}/${config.productsPath}/${filename}`;
+  return `${getAssetsBase()}/${config.productsPath}/${filename}`;
 }
 
 /**
@@ -70,7 +86,7 @@ export function resolveProductImageUrl(brandId: string, filename: string | null 
  */
 export function resolveBrandAssetUrl(brandId: string, filename: string): string {
   const config = BRAND_ASSETS_CONFIG[brandId] ?? BRAND_ASSETS_CONFIG['NeuroneCosmetics'];
-  return `${BLUEPRINTS_RAW_BASE}/${config.brandPath}/${filename}`;
+  return `${getAssetsBase()}/${config.brandPath}/${filename}`;
 }
 
 /**
