@@ -142,15 +142,15 @@ export const BRANDS: Record<BrandId, Brand> = {
   },
   forumPhs: {
     id: 'forumPhs',
-    name: 'Forum PH\'s',
-    shortName: 'ForumPHs',
+    name: 'ForumPHs',
+    shortName: 'FPHs',
     owner: 'Sam',
-    color: '#2563EB',
-    secondaryColor: '#1E3A8A',
-    emoji: '🔵',
-    description: 'Marca en construcción. Dominio: forumphs.com',
-    market: 'TBD',
-    channels: ['web', 'shopify'],
+    color: '#5C3472',          // Amatista — color institucional
+    secondaryColor: '#C4622D', // Terra — acento, énfasis slogan
+    emoji: '🟣',
+    description: 'Administración de Propiedad Horizontal · Panamá · Desde 2015',
+    market: 'Panamá',
+    channels: ['web'],
   },
 }
 

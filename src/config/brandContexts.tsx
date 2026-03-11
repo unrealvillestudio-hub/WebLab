@@ -259,16 +259,48 @@ export const BRAND_CONTEXTS: Partial<Record<BrandId, BrandAutoContext>> = {
   },
 
   forumPhs: {
-    defaultPlatform: 'shopify',
+    defaultPlatform: 'wordpress',
     extraContext:
-      'Forum PH\'s — marca nueva en desarrollo. Dominio: forumphs.com. ' +
-      'Categoría y productos pendientes de definir. ' +
-      'Tono profesional, moderno, orientado al mercado US/Florida.',
+      'ForumPHs (FPHs) — administración de propiedad horizontal, Panamá, fundada 2015. ' +
+      'Portafolio: ~1.500 unidades, 7 propiedades. ' +
+      'GM y representante legal: Ivette Flores (Abogada). ' +
+      'Web: forumphs.com. Marco legal: Ley 284 de 2022 (Propiedad Horizontal, Panamá). ' +
+      'POSICIONAMIENTO: ForumPHs no vende "administración de edificios" — vende gestión patrimonial sistémica. ' +
+      'Diferenciador: estándar único de calidad para todos los clientes, pricing value-based, SLAs auditables. ' +
+      'Slogan invariable: "Construiste tu patrimonio. Nosotros le construimos un sistema." ' +
+      'La segunda parte ("Nosotros le construimos un sistema.") lleva énfasis visual en color Terra (#C4622D). ' +
+      'SERVICIOS CORE: gestión administrativa, servicio jurídico, gestión contable, Actas de Asamblea, ' +
+      'Document Factory, reportes SLA mensuales, gestión de morosidad. ' +
+      'SLA: Urgente (inmediato), Prioritario (horas), Regular (días hábiles). ' +
+      'AUDIENCIA: Juntas Directivas y propietarios de Propiedades Horizontales en Panamá. ' +
+      'NOMBRE ANTERIOR: PHAS — no usar como identificador activo, solo como contexto histórico.',
     productAudience:
-      'Por definir según categoría de producto.',
+      'Juntas Directivas y propietarios de Propiedades Horizontales en Panamá. ' +
+      'Perfil: tomadores de decisión con activos patrimoniales inmobiliarios, ' +
+      'interesados en gestión profesional, transparencia financiera y cumplimiento legal.',
     productCompliance:
-      'Sin restricciones de compliance definidas aún. Aplicar criterios generales de honestidad y FTC.',
-    complianceBlock: '',
+      'Marco legal: Ley No. 284 de 14 de febrero de 2022. Territorio: Panamá. ' +
+      'Ivette Flores es la única GM activa y firmante oficial. ' +
+      'Roberto González ya no forma parte de la empresa — no mencionar como representante.',
+    complianceBlock:
+      '── REGLAS DE MARCA FORUMPHS ─────────────────────────────────────────────\n' +
+      'NOMBRE: Siempre "ForumPHs" — capital F, PH en caps, s minúscula.\n' +
+      'SIGLA: FPHs. EXCEPCIÓN: "FORUMPHS" solo en Cinzel (labels, tags, eyebrow-caps).\n\n' +
+      'SLOGAN INVARIABLE (no acortar, no parafrasear):\n' +
+      '  "Construiste tu patrimonio. Nosotros le construimos un sistema."\n' +
+      '  — Parte 1: voz del propietario (tono atenuado)\n' +
+      '  — Parte 2: promesa ForumPHs (énfasis en Terra #C4622D)\n\n' +
+      'PALETA AMATISTA CARBON:\n' +
+      '  Amatista (#5C3472) · Amatista Dark (#3A1F4A) · Amatista Light (#EAD9F5)\n' +
+      '  Terra (#C4622D) · Carbon (#1C2233) · Carbon Dark (#0E1018)\n' +
+      '  Ink (#1A1612) · Stone (#6B6460) · Parchment (#F0EDE8)\n\n' +
+      'TIPOGRAFÍA: EB Garamond (display/slogan) · Cormorant Garamond (editorial) · Cinzel (labels) · DM Sans (body/UI)\n\n' +
+      'PROHIBIDO:\n' +
+      '  ✗ Usar colores fuera de la paleta Amatista Carbon\n' +
+      '  ✗ Acortar o parafrasear el slogan\n' +
+      '  ✗ Referir a Roberto González como representante activo\n' +
+      '  ✗ Usar posicionamiento "PHAS" o "OS of your PH" en materiales nuevos\n' +
+      '────────────────────────────────────────────────────────────────────────',
   },
 
   unrealilleStudio: {
