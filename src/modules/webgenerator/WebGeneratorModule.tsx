@@ -129,6 +129,17 @@ function SectionCard({ section, live, aggro, outputMode }: {
               {preview ? 'Código' : 'Preview'}
             </button>
           )}
+          {mode === 'liquid' && (
+            <button
+              onClick={() => setPreview(p => !p)}
+              className={cn(
+                "p-1.5 rounded-md text-zinc-500 transition-colors text-[10px] px-2",
+                preview ? "bg-cyan-500/20 text-cyan-400" : "hover:bg-white/10 hover:text-zinc-300"
+              )}
+            >
+              {preview ? 'Liquid' : 'Preview'}
+            </button>
+          )}
           <CopyButton text={section.content} />
           <ChevronRight size={14} className={cn("text-zinc-600 transition-transform", expanded && "rotate-90")} />
         </div>
@@ -145,6 +156,31 @@ function SectionCard({ section, live, aggro, outputMode }: {
                   className="rounded-lg overflow-auto bg-white p-2"
                   style={{ maxHeight: '400px' }}
                   dangerouslySetInnerHTML={{ __html: section.content }}
+                />
+              ) : mode === 'liquid' && preview ? (
+                <div
+                  className="rounded-lg overflow-auto bg-white p-2"
+                  style={{ maxHeight: '400px' }}
+                  dangerouslySetInnerHTML={{
+                    __html: (() => {
+                      // Strip Liquid tags para preview estático
+                      const stripped = section.content
+                        .replace(/{%-?\s*schema\s*-?%}[\s\S]*?{%-?\s*endschema\s*-?%}/gi, '')
+                        .replace(/{%-?\s*style\s*-?%}([\s\S]*?){%-?\s*endstyle\s*-?%}/gi, '<style>$1</style>')
+                        .replace(/{%-?.*?-?%}/g, '')
+                        .replace(/\{\{-?\s*(section\.settings\.\w+)\s*-?\}\}/g, (_, k) => {
+                          const key = k.replace('section.settings.', '');
+                          const defaults: Record<string,string> = {
+                            heading: '[Título]', subheading: '[Subtítulo]', body_text: '[Cuerpo de texto]',
+                            cta_label: 'Solicitar información', cta_url: '#', background_color: '#ffffff',
+                            text_color: '#1a1a1a', eyebrow: '[Eyebrow]', heading2: '[Título 2]',
+                          };
+                          return defaults[key] ?? `[${key}]`;
+                        })
+                        .replace(/\{\{.*?\}\}/g, '[…]');
+                      return stripped;
+                    })()
+                  }}
                 />
               ) : (
                 <pre className={cn(
@@ -1003,6 +1039,27 @@ export default function WebGeneratorModule() {
                     title={`Exportar .${getFileExtension(activeOutputMode)}`}
                   >
                     <Download size={13} />
+                  </button>
+                )}
+                {/* Export Clean — sin banner AGGRO, listo para publicar */}
+                {result && result.superAggro && (
+                  <button
+                    onClick={() => {
+                      const resolvedMode = ((result as any).outputMode as WebOutputMode) ?? outputMode;
+                      const ext  = getFileExtension(resolvedMode);
+                      const mime = getMimeType(resolvedMode);
+                      const content = buildExportFile(result.sections, resolvedMode, false); // superAggro=false → sin banner
+                      const blob = new Blob([content], { type: mime });
+                      const a = document.createElement('a');
+                      a.href = URL.createObjectURL(blob);
+                      a.download = `weblab_${brand?.id}_${pack?.id}_AGGRO_CLEAN_${Date.now()}.${ext}`;
+                      a.click();
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-emerald-400 text-xs font-bold transition-colors"
+                    title="Export sin advertencia AGGRO — listo para publicar"
+                  >
+                    <Download size={13} />
+                    <span>CLEAN</span>
                   </button>
                 )}
                 {/* Save Draft */}

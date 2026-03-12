@@ -140,6 +140,7 @@ REGLAS ESTRICTAS:
 - Botones con cursor:pointer y padding generoso.
 - NO incluyas <script>, NO incluyas frameworks externos.
 - La sección debe ser copy-paste directo en un bloque "Custom HTML" de ${platform === 'shopify' ? 'Shopify' : 'WordPress'}.
+- ⛔ PROHIBIDO incluir después del HTML: notas de producción, tablas markdown, comentarios sobre decisiones de diseño, explicaciones, resúmenes ni ningún texto fuera del bloque HTML. El output termina con la etiqueta de cierre de la sección (</section> o </div>). NADA más.
 
 SISTEMA DE GRIDS RESPONSIVE — OBLIGATORIO:
 El documento final ya incluye este CSS base. DEBES usarlo en lugar de inline grid-template-columns:
@@ -181,6 +182,7 @@ REGLAS ESTRICTAS:
 - CSS debe ir dentro de <style> al inicio del archivo.
 - El archivo debe ser autosuficiente: funciona al subirlo como nueva sección en el theme editor de Shopify.
 - Nombre de sección en schema: "${sectionLabel}" con class: "section-${sectionId}".
+- ⛔ PROHIBIDO incluir después del {% endschema %}: notas, tablas markdown, explicaciones ni ningún texto adicional. El output termina con {% endschema %}. NADA más.
 
 SISTEMA DE GRIDS RESPONSIVE — OBLIGATORIO EN LIQUID:
 Define estas clases en el <style> de tu sección y úsalas en el HTML (no inline grid-template-columns):
@@ -682,13 +684,16 @@ export function buildExportFile(
         gap: 24px !important;
       }
     }
+    /* CTA base — evita desplazamiento por herencia de margin/text-align */
+    a[class*="cta"], button[class*="cta"], .cta-button { display: inline-block; }
   </style>
 </head>
 <body>
 ${aggroWarningHtml}
 ${body}
-<footer style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:0.72rem;color:#888;text-align:center;padding:24px 16px;border-top:1px solid #e0e0e0;margin-top:48px;background:#fafafa;">
-  Designed &amp; Developed by <strong style="color:#555;">Unreal&gt;ille Studio</strong> &middot; Miami, FL
+<footer style="font-family:'DM Sans','Helvetica Neue',Arial,sans-serif;font-size:0.75rem;color:#888;text-align:center;padding:28px 24px;border-top:1px solid #e0e0e0;margin-top:0;background:#fafafa;line-height:1.7;">
+  Designed &amp; Developed by <strong style="color:#555;">Unreal&gt;ille Studio</strong><br>
+  1303 N 46th Ave, Hollywood, FL 33021
 </footer>
 </body>
 </html>`;
