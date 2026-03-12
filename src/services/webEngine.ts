@@ -140,6 +140,23 @@ REGLAS ESTRICTAS:
 - Botones con cursor:pointer y padding generoso.
 - NO incluyas <script>, NO incluyas frameworks externos.
 - La sección debe ser copy-paste directo en un bloque "Custom HTML" de ${platform === 'shopify' ? 'Shopify' : 'WordPress'}.
+
+SISTEMA DE GRIDS RESPONSIVE — OBLIGATORIO:
+El documento final ya incluye este CSS base. DEBES usarlo en lugar de inline grid-template-columns:
+  .rg-2       → 2 columnas iguales (1fr 1fr)
+  .rg-3       → 3 columnas iguales (repeat(3, 1fr))
+  .rg-auto    → columnas automáticas responsive (auto-fit, minmax 300px)
+  .rg-contact → 2 columnas contacto (1fr 1fr)
+  .rg-contact-aggro → 2 columnas asimétricas (1fr 1.6fr)
+  A 860px o menos, TODAS colapsan a 1 columna automáticamente.
+
+PROHIBICIONES ABSOLUTAS — violan el responsive del documento:
+- ❌ NUNCA uses grid-template-columns con múltiples columnas como inline style. Usa las clases .rg-* siempre.
+- ❌ NUNCA uses position: absolute con valores negativos (left: -Npx, right: -Npx, top: -Npx) en elementos decorativos.
+- ❌ NUNCA uses width fijo > 100% o min-width > 100% en ningún elemento.
+- ❌ NUNCA añadas elementos decorativos con dimensiones que excedan el viewport (ej: width: 400px en posición absoluta).
+- ✅ SÍ puedes usar position: relative en contenedores y position: absolute SOLO para badges/labels internos con top/right positivos pequeños (max 30px desde el borde del contenedor padre).
+
 IMÁGENES DE BLUEPRINT:
 - Cuando el contexto incluya image_filename de un producto, úsalo como: <img src="{{ 'FILENAME' | asset_url }}" alt="NOMBRE_PRODUCTO" ...> (Shopify) o <img src="[IMAGE:FILENAME]" alt="..."> (WP).
 - Para BP_PERSON: coloca el <img> en secciones hero/about con class="person-bp-img".
@@ -421,7 +438,7 @@ async function callClaude(prompt: string, signal?: AbortSignal): Promise<string>
     body: JSON.stringify({
       prompt,
       model: CLAUDE_MODEL,
-      max_tokens: 4000,
+      max_tokens: 6000,
       temperature: 0.75,
     }),
   });
@@ -619,8 +636,21 @@ export function buildExportFile(
   <title>WebLab Preview — ${superAggro ? '⚠️ AGGRO — ' : ''}${sections[0]?.label ?? 'Export'}</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Helvetica Neue', Arial, sans-serif; background: #f0f0f0; }
+    html, body { margin: 0; overflow-x: hidden; width: 100%; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f0f0f0; }
     a { color: inherit; }
+    /* ── Grid system responsive — usado por todas las secciones generadas ── */
+    .rg-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 56px; }
+    .rg-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+    .rg-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px,100%), 1fr)); }
+    .rg-contact { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+    .rg-contact-aggro { display: grid; grid-template-columns: 1fr 1.6fr; gap: 64px; align-items: start; }
+    @media (max-width: 860px) {
+      .rg-2, .rg-3, .rg-auto, .rg-contact, .rg-contact-aggro {
+        grid-template-columns: 1fr !important;
+        gap: 24px !important;
+      }
+    }
   </style>
 </head>
 <body>
