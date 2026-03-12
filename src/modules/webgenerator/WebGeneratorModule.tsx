@@ -254,125 +254,18 @@ const PREVIEW_BASE_CSS = `
 
 const FIRMA_HTML = `<footer style="background:#1C2233;text-align:center;font-family:'Inter',system-ui,sans-serif;font-size:11px;letter-spacing:0.04em;color:#71717a;padding:18px 24px 20px;margin-top:0;line-height:1.6;">Designed &amp; Developed by <a href="#" style="color:#a8a8b3;font-weight:600;text-decoration:none;">Unreal&gt;ille Studio</a><br><span style="font-size:10px;color:#52525b;">1303 N 46th Ave, Hollywood, FL 33021</span></footer>`;
 
-// ── SCHEMA EXTRACTOR — dos regex independientes, sin loop de tags ───────────────
-// El loop findTag() fallaba cuando el HTML de la sección tiene {%if/for%} antes
-// del schema: adelantaba i más allá de {%endschema%} sin encontrarlo.
-// Solución: regex para abrir, regex para cerrar, independientes.
-function extractLiquidSchema(content: string): { stripped: string; defaults: Record<string, string> } {
-  const defaults: Record<string, string> = {};
-
-  // 1. Encontrar el tag de apertura {% schema %}
-  const openRe = /\{%-?\s*schema\s*-?%\}/i;
-  const openMatch = openRe.exec(content);
-  if (!openMatch) return { stripped: content, defaults };
-
-  const blockStart = openMatch.index;
-  const bodyStart  = blockStart + openMatch[0].length;
-
-  // 2. Desde bodyStart, buscar el tag de cierre {% endschema %}
-  //    Operamos en el substring para que regex no retroceda
-  const closeRe = /\{%-?\s*endschema\s*-?%\}/i;
-  const rest = content.slice(bodyStart);
-  const closeMatch = closeRe.exec(rest);
-  if (!closeMatch) {
-    // Schema sin cierre: al menos limpiar el tag de apertura
-    return {
-      stripped: content.slice(0, blockStart) + content.slice(bodyStart),
-      defaults,
-    };
-  }
-
-  const jsonRaw    = rest.slice(0, closeMatch.index).trim();
-  const blockEnd   = bodyStart + closeMatch.index + closeMatch[0].length;
-  const stripped   = content.slice(0, blockStart) + content.slice(blockEnd);
-
-  // 3. Parsear el JSON del schema
-  try {
-    const schema = JSON.parse(jsonRaw);
-    const extractSettings = (settings: any[]) => {
-      (settings ?? []).forEach((s: any) => {
-        if (!s.id) return;
-        if (s.default !== undefined && s.default !== '') {
-          defaults[s.id] = String(s.default);
-        } else if (s.label) {
-          defaults[s.id] = s.label;
-        }
-      });
-    };
-    extractSettings(schema.settings ?? []);
-    // También extraer de blocks
-    (schema.blocks ?? []).forEach((b: any) => extractSettings(b.settings ?? []));
-  } catch (e) {
-    console.warn('[WebLab Preview] Schema JSON parse error:', String(e).slice(0, 100), '\nJSON:', jsonRaw.slice(0, 200));
-  }
-
-  return { stripped, defaults };
-}
-
-// ── LIQUID → HTML PREVIEW RENDERER ────────────────────────────────────────────
-function liquidToPreviewHTML(sections: { sectionId: string; label: string; content: string }[]): string {
-  const renderedSections = sections.map(s => {
-    // 1. Extraer schema con indexOf (100% confiable, sin regex)
-    const { stripped: noSchema, defaults } = extractLiquidSchema(s.content);
-
-    // 2. Extraer <style> blocks HTML antes de stripear
-    let styles = '';
-    const styleTagMatches = noSchema.match(/<style[^>]*>[\s\S]*?<\/style>/gi);
-    if (styleTagMatches) styles = styleTagMatches.join('\n');
-
-    // 3. Strip: schema ya removido; quitar style blocks restantes + TODOS los tags {% %} (incl. multilinea)
-    let html = noSchema
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-      .replace(/\{%[\s\S]*?%\}/g, '');  // multilinea con [\s\S]
-
-    // 3b. Safety net: eliminar cualquier bloque JSON de schema que haya podido quedar
-    //     (ocurre cuando el schema no tenía cierre por truncación de tokens)
-    //     Patrón: línea que empieza con { y contiene "settings": o "name": seguido de JSON
-    html = html.replace(/^\s*\{[\s\S]*?"settings"\s*:\s*\[[\s\S]*?\]\s*\}\s*$/gm, '')
-               .replace(/^\s*\{[\s\S]*?"name"\s*:\s*"[^"]*"[\s\S]*?("settings"|"presets")[\s\S]*?\}\s*$/gm, '');
-
-    // 4. Reemplazar {{ section.settings.X | filter | filter }} con default real
-    //    Captura el id y descarta filtros opcionales
-    html = html.replace(/\{\{-?\s*section\.settings\.(\w+)[\s\S]*?-?\}\}/g, (_, key) => {
-      return defaults[key] ?? `[${key}]`;
-    });
-
-    // 5. Limpiar {{ }} restantes (forloop, block, etc.)
-    html = html.replace(/\{\{[\s\S]*?\}\}/g, '');
-
-    return `${styles}\n${html}`;
-  });
-
-  return `<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Preview — WebLab</title>
-  <style>${PREVIEW_BASE_CSS}</style>
-</head>
-<body>
-${renderedSections.join('\n\n')}
-${FIRMA_HTML}
-</body>
-</html>`;
-}
-
 // ── FULL PAGE PREVIEW MODAL ────────────────────────────────────────────────────
 function FullPagePreviewModal({
   sections,
-  outputMode,
   onClose,
 }: {
   sections: { sectionId: string; label: string; content: string }[];
-  outputMode: WebOutputMode;
   onClose: () => void;
 }) {
   const [viewport, setViewport] = useState<'desktop' | 'mobile'>('desktop');
 
   const srcdoc = useMemo(() => {
-    if (outputMode === 'liquid') return liquidToPreviewHTML(sections);
-    // HTML mode — ensambla secciones con CSS base + firma
+    // Preview siempre en HTML — Liquid solo en Landing/Ecom que no pasan por este modal
     const body = sections.map(s => s.content).join('\n\n');
     return `<!DOCTYPE html>
 <html lang="es">
@@ -387,21 +280,16 @@ ${body}
 ${FIRMA_HTML}
 </body>
 </html>`;
-  }, [sections, outputMode]);
+  }, [sections]);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col" style={{ background: 'rgba(0,0,0,0.93)' }}>
       {/* ── Top bar ── */}
       <div className="flex items-center justify-between px-5 py-2.5 border-b border-zinc-800 bg-zinc-950 shrink-0">
-        {/* Left: label + mode badge */}
+        {/* Left: label */}
         <div className="flex items-center gap-2.5 min-w-0">
           <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Preview</span>
-          <span className={cn(
-            "text-[9px] font-mono px-1.5 py-0.5 rounded shrink-0",
-            outputMode === 'liquid' ? "bg-cyan-500/15 text-cyan-400" : "bg-orange-500/15 text-orange-400"
-          )}>
-            {outputMode === 'liquid' ? 'Liquid → HTML' : 'HTML'}
-          </span>
+          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-orange-500/15 text-orange-400">HTML</span>
         </div>
 
         {/* Center: viewport toggle */}
@@ -447,7 +335,7 @@ ${FIRMA_HTML}
           }}
         >
           <iframe
-            key={`${outputMode}-${viewport}`}
+            key={viewport}
             srcDoc={srcdoc}
             title="WebLab Preview"
             style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
@@ -585,6 +473,8 @@ export default function WebGeneratorModule() {
     setError('');
     // Web e-institutional/personal siempre en WordPress — Shopify no aplica
     if (mod === 'web') setPlatform('wordpress');
+    // Web: solo HTML — Liquid no aplica en WordPress
+    if (mod === 'web') setOutputMode('html');
   };
 
   const handleReloadDB = () => {
@@ -803,7 +693,6 @@ export default function WebGeneratorModule() {
       {showPreview && result && (
         <FullPagePreviewModal
           sections={result.sections}
-          outputMode={activeOutputMode}
           onClose={() => setShowPreview(false)}
         />
       )}
@@ -903,7 +792,9 @@ export default function WebGeneratorModule() {
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 space-y-2">
               <p className="text-[10px] uppercase font-bold text-zinc-600 tracking-widest">Output Mode</p>
               <div className="space-y-1">
-                {OUTPUT_MODES.map(m => (
+                {OUTPUT_MODES
+                  .filter(m => activeModule === 'web' ? m.id === 'html' : true)
+                  .map(m => (
                   <button
                     key={m.id}
                     onClick={() => setOutputMode(m.id)}
@@ -1475,7 +1366,7 @@ export default function WebGeneratorModule() {
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 space-y-2">
               <p className="text-[10px] uppercase font-bold text-zinc-600 tracking-widest">Output Mode</p>
               <div className="space-y-1">
-                {OUTPUT_MODES.map(m => (
+                {OUTPUT_MODES.filter(m => m.id === 'html').map(m => (
                   <button key={m.id} onClick={() => setBlogOutputMode(m.id)}
                     className={cn(
                       "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all",
