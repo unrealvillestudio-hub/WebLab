@@ -181,6 +181,26 @@ REGLAS ESTRICTAS:
 - CSS debe ir dentro de <style> al inicio del archivo.
 - El archivo debe ser autosuficiente: funciona al subirlo como nueva sección en el theme editor de Shopify.
 - Nombre de sección en schema: "${sectionLabel}" con class: "section-${sectionId}".
+
+SISTEMA DE GRIDS RESPONSIVE — OBLIGATORIO EN LIQUID:
+Define estas clases en el <style> de tu sección y úsalas en el HTML (no inline grid-template-columns):
+  .s${sectionId}-rg-2       { display:grid; grid-template-columns:1fr 1fr; gap:40px 56px; }
+  .s${sectionId}-rg-3       { display:grid; grid-template-columns:repeat(3,1fr); gap:0; }
+  .s${sectionId}-rg-auto    { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr)); }
+  .s${sectionId}-rg-contact { display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start; }
+  @media(max-width:860px){
+    .s${sectionId}-rg-2,.s${sectionId}-rg-3,.s${sectionId}-rg-auto,.s${sectionId}-rg-contact {
+      grid-template-columns:1fr !important; gap:24px !important;
+    }
+  }
+Incluye SIEMPRE este bloque de media query en el <style> de la sección.
+
+PROHIBICIONES ABSOLUTAS — rompen responsive en Shopify mobile:
+- ❌ NUNCA grid-template-columns con múltiples columnas como inline style. Usa las clases .s${sectionId}-rg-* siempre.
+- ❌ NUNCA position:absolute con valores negativos (left:-Npx, right:-Npx) en decorativos.
+- ❌ NUNCA width o min-width > 100vw en ningún elemento.
+- ✅ SÍ: position:relative en contenedores, position:absolute SOLO para badges internos (top/right ≤ 30px del borde del padre).
+
 IMÁGENES DE BLUEPRINT EN LIQUID:
 - Para imágenes de producto (BP_PRODUCT image_filename): usa {{ section.settings.product_image | img_url: '800x' | img_tag }} y agrega al schema: { "type": "image_picker", "id": "product_image", "label": "Imagen producto" }.
 - Para BP_PERSON: { "type": "image_picker", "id": "person_image", "label": "Imagen persona" }.
@@ -189,7 +209,18 @@ IMÁGENES DE BLUEPRINT EN LIQUID:
 - Para precio en schema: { "type": "text", "id": "product_price", "label": "Precio", "default": "" }.
 ESTRUCTURA BASE:
 <style>
-  .section-${sectionId} { ... }
+  .section-${sectionId} { box-sizing: border-box; overflow-x: hidden; }
+  .section-${sectionId} *, .section-${sectionId} *::before, .section-${sectionId} *::after { box-sizing: border-box; }
+  /* grids responsive */
+  .s${sectionId}-rg-2 { display:grid; grid-template-columns:1fr 1fr; gap:40px 56px; }
+  .s${sectionId}-rg-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:0; }
+  .s${sectionId}-rg-auto { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr)); }
+  .s${sectionId}-rg-contact { display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start; }
+  @media(max-width:860px){
+    .s${sectionId}-rg-2,.s${sectionId}-rg-3,.s${sectionId}-rg-auto,.s${sectionId}-rg-contact {
+      grid-template-columns:1fr !important; gap:24px !important;
+    }
+  }
 </style>
 <div class="section-${sectionId}">
   <h2>{{ section.settings.heading }}</h2>

@@ -198,7 +198,20 @@ function OutputHistoryCard({ output, onLoad, onDelete }: {
 }
 
 // ── PLATFORM TOGGLE ────────────────────────────────────────────────────────────
-function PlatformToggle({ value, onChange }: { value: WebPlatform; onChange: (p: WebPlatform) => void }) {
+function PlatformToggle({ value, onChange, wordpressOnly }: {
+  value: WebPlatform;
+  onChange: (p: WebPlatform) => void;
+  wordpressOnly?: boolean;
+}) {
+  if (wordpressOnly) {
+    return (
+      <div className="flex rounded-lg overflow-hidden border border-zinc-700 opacity-75">
+        <div className="flex-1 py-1.5 text-xs font-bold text-center bg-blue-500/20 text-blue-400">
+          ⚙️ WordPress
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="flex rounded-lg overflow-hidden border border-zinc-700">
       {(['wordpress', 'shopify'] as WebPlatform[]).map(p => (
@@ -214,8 +227,7 @@ function PlatformToggle({ value, onChange }: { value: WebPlatform; onChange: (p:
         >
           {p === 'wordpress' ? '⚙️ WordPress' : '🛍️ Shopify'}
         </button>
-      ))}
-    </div>
+      ))}\n    </div>
   );
 }
 
@@ -309,6 +321,8 @@ export default function WebGeneratorModule() {
     setLiveSections([]);
     setResult(null);
     setError('');
+    // Web e-institutional/personal siempre en WordPress — Shopify no aplica
+    if (mod === 'web') setPlatform('wordpress');
   };
 
   const handleReloadDB = () => {
@@ -481,7 +495,7 @@ export default function WebGeneratorModule() {
         brand: blogBrand,
         blog: blogSpec,
         language: blogLanguage,
-        platform: (blogBrand as any).channels?.includes("shopify") ? "shopify" : "wordpress",
+        platform: "wordpress",
         outputMode: blogOutputMode,
         extraContext: blogContext || undefined,
         signal: abortRef.current.signal,
@@ -664,7 +678,7 @@ export default function WebGeneratorModule() {
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 space-y-3">
               <div className="space-y-1.5">
                 <p className="text-[10px] uppercase font-bold text-zinc-600 tracking-widest">Plataforma</p>
-                <PlatformToggle value={platform} onChange={setPlatform} />
+                <PlatformToggle value={platform} onChange={setPlatform} wordpressOnly={activeModule === 'web'} />
               </div>
               <div className="space-y-1.5">
                 <p className="text-[10px] uppercase font-bold text-zinc-600 tracking-widest">Idioma</p>
