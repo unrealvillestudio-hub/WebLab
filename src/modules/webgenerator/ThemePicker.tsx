@@ -19,7 +19,6 @@ import {
 import { cn } from '../../ui/components';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-type PreviewMode = 'home' | 'collection' | 'product';
 
 interface ThemePickerProps {
   currentThemeId: string | null;
@@ -35,137 +34,564 @@ const TYPE_TABS: { id: ThemeType; label: string; icon: React.ElementType; accent
   { id: 'web',       label: 'Web',        icon: Globe,          accent: '#3B82F6' },
 ];
 
+// ── Preview Modes by Type ────────────────────────────────────────────────────
+// E-Commerce: Home | Collection | Product
+// Web:        Home | About | Services
+// Landing:    Hero | Proof | CTA
+
+type EcommerceMode = 'home' | 'collection' | 'product';
+type WebMode       = 'home' | 'about' | 'services';
+type LandingMode   = 'hero' | 'proof' | 'cta';
+type PreviewMode   = EcommerceMode | WebMode | LandingMode;
+
+const VIEW_CONFIGS: Record<string, { id: PreviewMode; label: string; icon: React.ElementType }[]> = {
+  ecommerce: [
+    { id: 'home',       label: 'Home',       icon: Home    },
+    { id: 'collection', label: 'Collection', icon: Grid    },
+    { id: 'product',    label: 'Product',    icon: Package },
+  ],
+  web: [
+    { id: 'home',     label: 'Home',     icon: Home         },
+    { id: 'about',    label: 'About',    icon: Globe        },
+    { id: 'services', label: 'Services', icon: LayoutTemplate },
+  ],
+  landing: [
+    { id: 'hero',  label: 'Hero',  icon: Zap           },
+    { id: 'proof', label: 'Proof', icon: Check         },
+    { id: 'cta',   label: 'CTA',   icon: ChevronRight  },
+  ],
+};
+
 // ── Mini Preview Renderer (wireframe) ────────────────────────────────────────
+// Each preview reflects actual theme structure (headerStyle, cardLayout, enhancers)
 function ThemePreview({ theme, mode }: { theme: ThemeIdentity; mode: PreviewMode }) {
   const p = theme.palette;
-  const isSans = theme.typography.style === 'sans' || theme.typography.style === 'display';
-  const fontFamily = `"${theme.typography.display}", ${isSans ? 'sans-serif' : 'serif'}`;
+  const header = theme.structure.headerStyle;
 
   return (
-    <div className="relative w-full h-full overflow-hidden" style={{ background: p.bg, fontFamily }}>
-      {/* Navbar */}
-      <div className="flex items-center justify-between px-3 py-2 border-b"
-        style={{ borderColor: p.rule, background: p.surface }}>
-        <div className="w-14 h-2 rounded-sm opacity-80" style={{ background: p.accent }} />
-        <div className="flex gap-2">
-          {['', '', ''].map((_, i) => (
-            <div key={i} className="w-8 h-1.5 rounded-sm opacity-40" style={{ background: p.text }} />
-          ))}
-        </div>
-        <div className="w-10 h-4 rounded-sm" style={{ background: p.accent }} />
+    <div className="relative w-full h-full overflow-hidden flex flex-col" style={{ background: p.bg }}>
+      {/* Navbar — varies by header type */}
+      <div className="flex items-center justify-between px-2.5 py-1.5 shrink-0"
+        style={{ borderBottom: `1px solid ${p.rule}`, background: p.surface }}>
+        <div className="w-10 h-1.5 rounded-sm" style={{ background: p.accent }} />
+        {header === 'hero-editorial' ? (
+          <div className="flex gap-1.5">
+            {[0,1,2,3].map(i => <div key={i} className="w-6 h-1 rounded-sm opacity-40" style={{ background: p.text }} />)}
+          </div>
+        ) : (
+          <div className="flex gap-1.5">
+            {[0,1,2].map(i => <div key={i} className="w-7 h-1 rounded-sm opacity-40" style={{ background: p.text }} />)}
+          </div>
+        )}
+        <div className="w-8 h-3.5 rounded-sm" style={{ background: p.accent }} />
       </div>
-      {mode === 'home' && <HomePreviewContent theme={theme} />}
-      {mode === 'collection' && <CollectionPreviewContent theme={theme} />}
-      {mode === 'product' && <ProductPreviewContent theme={theme} />}
+
+      {/* Content — dispatched by mode */}
+      <div className="flex-1 overflow-hidden">
+        {/* E-COMMERCE views */}
+        {mode === 'home'       && theme.type === 'ecommerce' && <EcomHomePreview theme={theme} />}
+        {mode === 'collection' && theme.type === 'ecommerce' && <EcomCollectionPreview theme={theme} />}
+        {mode === 'product'    && theme.type === 'ecommerce' && <EcomProductPreview theme={theme} />}
+        {/* WEB views */}
+        {mode === 'home'       && theme.type === 'web' && <WebHomePreview theme={theme} />}
+        {mode === 'about'      && theme.type === 'web' && <WebAboutPreview theme={theme} />}
+        {mode === 'services'   && theme.type === 'web' && <WebServicesPreview theme={theme} />}
+        {/* LANDING views */}
+        {mode === 'hero'  && theme.type === 'landing' && <LandingHeroPreview theme={theme} />}
+        {mode === 'proof' && theme.type === 'landing' && <LandingProofPreview theme={theme} />}
+        {mode === 'cta'   && theme.type === 'landing' && <LandingCtaPreview theme={theme} />}
+      </div>
     </div>
   );
 }
 
-function HomePreviewContent({ theme }: { theme: ThemeIdentity }) {
+// ────────────────────────────────────────────────────────────────────
+// E-COMMERCE WIREFRAMES
+// ────────────────────────────────────────────────────────────────────
+function EcomHomePreview({ theme }: { theme: ThemeIdentity }) {
+  const p = theme.palette;
+  const h = theme.structure.headerStyle;
+  const l = theme.structure.cardLayout;
+
+  if (h === 'hero-cinematic' || h === 'hero-fullbleed') {
+    return (
+      <div className="flex flex-col h-full">
+        {/* Full-bleed hero image block */}
+        <div className="relative flex flex-col items-start justify-end px-3 pb-3"
+          style={{ flex: '0 0 52%', background: `linear-gradient(135deg, ${p.surface}, ${p.bg})` }}>
+          <div className="absolute inset-0 opacity-20"
+            style={{ background: `linear-gradient(to bottom right, ${p.accent}, transparent 60%)` }} />
+          <div className="w-4 h-0.5 rounded mb-1.5 relative z-10" style={{ background: p.accent }} />
+          <div className="w-24 h-2.5 rounded mb-1 relative z-10" style={{ background: p.text }} />
+          <div className="w-16 h-2 rounded mb-2 opacity-60 relative z-10" style={{ background: p.text }} />
+          <div className="w-14 h-4 rounded-sm relative z-10" style={{ background: p.accent }} />
+        </div>
+        {/* Product row */}
+        <div className="flex gap-1.5 px-2.5 py-2" style={{ flex: '0 0 26%', background: p.surface }}>
+          {[0,1,2,3].map(i => (
+            <div key={i} className="flex-1 rounded-sm overflow-hidden" style={{ border: `1px solid ${p.rule}` }}>
+              <div className="h-7" style={{ background: l === 'cards-overlap' ? `${p.accent}22` : p.bg }} />
+              <div className="px-1 pt-0.5">
+                <div className="h-0.5 rounded w-full mb-0.5" style={{ background: p.text, opacity: 0.5 }} />
+                <div className="h-0.5 rounded w-8" style={{ background: p.accent, opacity: 0.7 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Bottom accent bar */}
+        <div style={{ flex: '0 0 6%', background: p.bg, borderTop: `1px solid ${p.rule}` }} />
+      </div>
+    );
+  }
+  if (h === 'hero-split') {
+    return (
+      <div className="flex h-full">
+        <div className="flex flex-col justify-center px-2.5 py-2" style={{ flex: '0 0 50%' }}>
+          <div className="w-3 h-0.5 rounded mb-2" style={{ background: p.accent }} />
+          <div className="w-20 h-2.5 rounded mb-1" style={{ background: p.text }} />
+          <div className="w-14 h-2 rounded mb-1 opacity-60" style={{ background: p.text }} />
+          <div className="w-10 h-1 rounded mb-2.5 opacity-30" style={{ background: p.muted }} />
+          <div className="w-12 h-4 rounded-sm" style={{ background: p.accent }} />
+        </div>
+        <div className="flex-1 relative" style={{ background: p.surface }}>
+          <div className="absolute inset-0 opacity-30"
+            style={{ background: `radial-gradient(circle at 40% 40%, ${p.accent}, transparent 60%)` }} />
+          {/* Product cards 2x2 */}
+          <div className="absolute inset-2 grid grid-cols-2 gap-1">
+            {[0,1,2,3].map(i => (
+              <div key={i} className="rounded-sm" style={{ background: p.bg, border: `1px solid ${p.rule}` }} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (h === 'hero-text-only') {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex flex-col items-center justify-center px-3 py-3" style={{ flex: '0 0 44%' }}>
+          <div className="w-28 h-3 rounded mb-1.5 opacity-90" style={{ background: p.text }} />
+          <div className="w-20 h-3 rounded mb-2.5 opacity-60" style={{ background: p.accent }} />
+          <div className="w-12 h-4 rounded-sm" style={{ background: p.accent }} />
+        </div>
+        {/* Horizontal scroll cards */}
+        <div className="flex gap-1 px-2 pb-2" style={{ flex: '1', background: p.surface, alignItems: 'flex-start', paddingTop: '8px' }}>
+          {[0,1,2,3,4].map(i => (
+            <div key={i} className="rounded-sm shrink-0" style={{ width: '28%', border: `1px solid ${p.rule}`, background: p.bg }}>
+              <div className="h-9" style={{ background: i === 0 ? `${p.accent}30` : `${p.surface}` }} />
+              <div className="p-1"><div className="h-0.5 rounded w-full mb-0.5" style={{ background: p.text, opacity: 0.5 }} /></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  // editorial
+  return (
+    <div className="flex flex-col h-full px-3 py-2">
+      <div className="h-0.5 w-full mb-2 opacity-20" style={{ background: p.text }} />
+      <div className="flex gap-3 mb-2" style={{ flex: '0 0 40%' }}>
+        <div>
+          <div className="w-20 h-3 rounded mb-1" style={{ background: p.text }} />
+          <div className="w-14 h-3 rounded opacity-60" style={{ background: p.text }} />
+        </div>
+        <div className="flex-1">
+          <div className="w-full h-1 rounded mb-1 opacity-30" style={{ background: p.muted }} />
+          <div className="w-4/5 h-1 rounded opacity-30" style={{ background: p.muted }} />
+          <div className="w-12 h-3.5 rounded-sm mt-2" style={{ background: p.accent }} />
+        </div>
+      </div>
+      <div className="flex gap-1.5 flex-1">
+        {[0,1,2,3].map(i => (
+          <div key={i} className="flex-1 rounded-sm" style={{ background: p.surface, border: `1px solid ${p.rule}` }}>
+            <div className="h-8 w-full" style={{ background: p.bg }} />
+            <div className="p-1"><div className="h-0.5 rounded w-full mb-0.5" style={{ background: p.text, opacity: 0.5 }} /></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function EcomCollectionPreview({ theme }: { theme: ThemeIdentity }) {
+  const p = theme.palette;
+  const l = theme.structure.cardLayout;
+
+  if (l === 'scroll-horizontal') {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex items-center px-2.5 pt-2 pb-1.5 gap-1 shrink-0">
+          <div className="h-1 rounded-full flex-1" style={{ background: `${p.text}20` }} />
+          {[0,1,2,3].map(i => <div key={i} className="w-8 h-3 rounded-full text-[6px] flex items-center justify-center" style={{ background: i===0 ? p.accent : `${p.text}15` }} />)}
+        </div>
+        <div className="flex gap-1.5 px-2 flex-1 items-stretch pb-2" style={{ overflow: 'hidden' }}>
+          {[0,1,2,3].map(i => (
+            <div key={i} className="rounded-sm shrink-0 flex flex-col" style={{ width: '36%', border: `1px solid ${p.rule}`, background: p.surface }}>
+              <div className="flex-1" style={{ background: p.bg }} />
+              <div className="p-1 shrink-0">
+                <div className="h-0.5 rounded w-full mb-0.5" style={{ background: p.text, opacity: 0.5 }} />
+                <div className="h-0.5 rounded w-8" style={{ background: p.accent, opacity: 0.7 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  if (l === 'grid-masonry') {
+    return (
+      <div className="flex h-full gap-1.5 p-2">
+        <div className="flex flex-col gap-1.5 flex-1">
+          <div className="rounded-sm" style={{ height: '55%', background: p.surface, border: `1px solid ${p.rule}` }} />
+          <div className="rounded-sm flex-1" style={{ background: p.surface, border: `1px solid ${p.rule}` }} />
+        </div>
+        <div className="flex flex-col gap-1.5 flex-1">
+          <div className="rounded-sm" style={{ height: '35%', background: p.surface, border: `1px solid ${p.rule}` }} />
+          <div className="rounded-sm" style={{ height: '40%', background: p.surface, border: `1px solid ${p.rule}` }} />
+          <div className="rounded-sm flex-1" style={{ background: p.surface, border: `1px solid ${p.rule}` }} />
+        </div>
+      </div>
+    );
+  }
+  // default grid-standard + sidebar
+  return (
+    <div className="flex h-full">
+      <div className="w-10 shrink-0 border-r p-1.5 flex flex-col gap-1" style={{ borderColor: p.rule, background: p.surface }}>
+        <div className="h-1 w-full rounded opacity-50" style={{ background: p.text }} />
+        <div className="h-px w-full opacity-20" style={{ background: p.text }} />
+        {[0,1,2,3,4].map(i => (
+          <div key={i} className="flex items-center gap-0.5">
+            <div className="w-1.5 h-1.5 rounded-sm border" style={{ borderColor: i===1 ? p.accent : p.muted, background: i===1 ? p.accent : 'transparent' }} />
+            <div className="h-0.5 rounded flex-1 opacity-40" style={{ background: p.text }} />
+          </div>
+        ))}
+      </div>
+      <div className="flex-1 p-1.5">
+        <div className="grid grid-cols-3 gap-1 h-full content-start">
+          {[0,1,2,3,4,5].map(i => (
+            <div key={i} className="rounded-sm overflow-hidden" style={{ border: `1px solid ${p.rule}` }}>
+              <div className="h-8" style={{ background: p.surface }} />
+              <div className="p-1"><div className="h-0.5 rounded w-full mb-0.5" style={{ background: p.text, opacity: 0.5 }} /></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EcomProductPreview({ theme }: { theme: ThemeIdentity }) {
+  const p = theme.palette;
+  return (
+    <div className="flex h-full">
+      <div className="relative overflow-hidden shrink-0" style={{ width: '42%', background: p.surface }}>
+        <div className="absolute inset-0 opacity-20"
+          style={{ background: `radial-gradient(circle at 50% 55%, ${p.accent}, transparent 60%)` }} />
+        <div className="absolute inset-3 rounded-sm" style={{ background: `${p.bg}80`, border: `1px solid ${p.rule}` }} />
+        <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-0.5">
+          {[0,1,2].map(i => <div key={i} className="w-3 h-3 rounded-sm" style={{ background: i===0 ? p.accent : p.bg, border: `1px solid ${p.rule}` }} />)}
+        </div>
+      </div>
+      <div className="flex-1 flex flex-col p-2 gap-1">
+        <div className="h-1 w-16 rounded opacity-40" style={{ background: p.muted }} />
+        <div className="h-2.5 w-full rounded opacity-80" style={{ background: p.text }} />
+        <div className="h-2 w-3/4 rounded opacity-55" style={{ background: p.text }} />
+        <div className="h-3 w-10 rounded mt-0.5" style={{ background: p.accent }} />
+        <div className="flex gap-1 mt-1">
+          {[0,1,2,3].map(i => <div key={i} className="w-5 h-5 rounded-sm" style={{ background: p.surface, border: `1px solid ${p.rule}` }} />)}
+        </div>
+        <div className="mt-auto flex flex-col gap-1">
+          <div className="h-5 w-full rounded-sm" style={{ background: p.accent }} />
+          <div className="h-4 w-full rounded-sm" style={{ background: `${p.text}10`, border: `1px solid ${p.rule}` }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────
+// WEB WIREFRAMES
+// ────────────────────────────────────────────────────────────────────
+function WebHomePreview({ theme }: { theme: ThemeIdentity }) {
+  const p = theme.palette;
+  const h = theme.structure.headerStyle;
+
+  if (h === 'hero-cinematic' || h === 'hero-fullbleed') {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="relative flex-1 flex flex-col justify-end px-2.5 pb-2.5"
+          style={{ background: `linear-gradient(160deg, ${p.surface}, ${p.bg})` }}>
+          <div className="absolute top-2 right-2 flex gap-1">
+            {[0,1].map(i => <div key={i} className="w-6 h-1 rounded-sm opacity-30" style={{ background: p.text }} />)}
+          </div>
+          <div className="absolute inset-0 opacity-15"
+            style={{ background: `radial-gradient(ellipse at 30% 70%, ${p.accent}, transparent 55%)` }} />
+          <div className="w-3 h-0.5 mb-1.5 relative z-10" style={{ background: p.accent }} />
+          <div className="w-24 h-3 rounded mb-1 relative z-10" style={{ background: p.text }} />
+          <div className="w-16 h-2.5 rounded mb-2 opacity-50 relative z-10" style={{ background: p.text }} />
+          <div className="w-14 h-4 rounded-sm relative z-10" style={{ background: p.accent }} />
+        </div>
+        {/* Stats strip */}
+        <div className="flex shrink-0 px-2 py-1.5 gap-2 justify-around" style={{ background: p.surface, borderTop: `1px solid ${p.rule}` }}>
+          {[0,1,2].map(i => (
+            <div key={i} className="flex flex-col items-center gap-0.5">
+              <div className="w-6 h-2 rounded" style={{ background: p.accent, opacity: 0.8 }} />
+              <div className="w-8 h-1 rounded opacity-40" style={{ background: p.text }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  if (h === 'hero-split') {
+    return (
+      <div className="flex h-full">
+        <div className="flex flex-col justify-center px-2.5 py-2" style={{ flex: '0 0 52%' }}>
+          <div className="w-3 h-0.5 rounded mb-2" style={{ background: p.accent }} />
+          <div className="w-20 h-2.5 rounded mb-1" style={{ background: p.text }} />
+          <div className="w-24 h-2.5 rounded mb-1 opacity-70" style={{ background: p.text }} />
+          <div className="w-14 h-1 rounded mb-3 opacity-30" style={{ background: p.muted }} />
+          <div className="w-12 h-4 rounded-sm" style={{ background: p.accent }} />
+        </div>
+        <div className="flex-1 relative overflow-hidden" style={{ background: p.surface }}>
+          <div className="absolute inset-0 opacity-20"
+            style={{ background: `radial-gradient(circle at 60% 40%, ${p.accent}, transparent 60%)` }} />
+          <div className="absolute bottom-0 left-0 right-0 h-1/3" style={{ background: `linear-gradient(to top, ${p.bg}, transparent)` }} />
+        </div>
+      </div>
+    );
+  }
+  // editorial
+  return (
+    <div className="flex flex-col h-full px-2.5 py-2">
+      <div className="flex items-baseline gap-2 mb-1.5">
+        <div className="w-6 h-1 rounded-sm opacity-30" style={{ background: p.muted }} />
+        <div className="h-px flex-1 opacity-15" style={{ background: p.text }} />
+      </div>
+      <div className="flex gap-2 flex-1">
+        <div style={{ flex: '0 0 45%' }}>
+          <div className="w-full h-3 rounded mb-1" style={{ background: p.text }} />
+          <div className="w-4/5 h-3 rounded opacity-60" style={{ background: p.accent }} />
+        </div>
+        <div className="flex-1 flex flex-col justify-between">
+          <div>
+            <div className="w-full h-1 rounded mb-0.5 opacity-30" style={{ background: p.muted }} />
+            <div className="w-4/5 h-1 rounded opacity-30" style={{ background: p.muted }} />
+          </div>
+          <div className="w-12 h-3.5 rounded-sm" style={{ background: p.accent }} />
+        </div>
+      </div>
+      <div className="h-12 mt-2 rounded-sm w-full" style={{ background: p.surface, border: `1px solid ${p.rule}` }} />
+    </div>
+  );
+}
+
+function WebAboutPreview({ theme }: { theme: ThemeIdentity }) {
+  const p = theme.palette;
+  const l = theme.structure.cardLayout;
+  return (
+    <div className="flex flex-col h-full px-2.5 py-2 gap-1.5">
+      {/* Eyebrow */}
+      <div className="w-16 h-1 rounded" style={{ background: p.accent, opacity: 0.7 }} />
+      {/* Two col text */}
+      <div className="flex gap-2 flex-1">
+        <div style={{ flex: l === 'list-editorial' ? '0 0 35%' : '1' }} className="flex flex-col gap-1">
+          <div className="w-full h-2.5 rounded" style={{ background: p.text }} />
+          <div className="w-4/5 h-2.5 rounded opacity-60" style={{ background: p.text }} />
+          <div className="w-3/5 h-2 rounded opacity-60" style={{ background: p.text }} />
+        </div>
+        <div className="flex-1 flex flex-col gap-1">
+          <div className="w-full h-1 rounded opacity-30" style={{ background: p.muted }} />
+          <div className="w-full h-1 rounded opacity-30" style={{ background: p.muted }} />
+          <div className="w-4/5 h-1 rounded opacity-30" style={{ background: p.muted }} />
+          <div className="w-full h-1 rounded opacity-25" style={{ background: p.muted }} />
+          <div className="mt-auto flex items-center gap-1">
+            <div className="w-5 h-5 rounded-full" style={{ background: p.surface, border: `1px solid ${p.rule}` }} />
+            <div>
+              <div className="w-12 h-1 rounded mb-0.5" style={{ background: p.text, opacity: 0.7 }} />
+              <div className="w-8 h-0.5 rounded" style={{ background: p.muted, opacity: 0.5 }} />
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Accent rule */}
+      <div className="h-0.5 w-8 rounded" style={{ background: p.accent }} />
+    </div>
+  );
+}
+
+function WebServicesPreview({ theme }: { theme: ThemeIdentity }) {
+  const p = theme.palette;
+  const l = theme.structure.cardLayout;
+
+  if (l === 'list-editorial') {
+    return (
+      <div className="flex flex-col h-full px-2.5 py-2 gap-1">
+        <div className="w-16 h-1 rounded mb-0.5" style={{ background: p.accent, opacity: 0.7 }} />
+        {[0,1,2,3].map(i => (
+          <div key={i} className="flex items-center gap-1.5 py-1" style={{ borderBottom: `1px solid ${p.rule}` }}>
+            <div className="w-3 h-3 rounded-sm shrink-0 opacity-50" style={{ background: p.accent }} />
+            <div className="flex-1">
+              <div className="h-1.5 rounded w-4/5 mb-0.5" style={{ background: p.text, opacity: 0.7 }} />
+              <div className="h-1 rounded w-full opacity-30" style={{ background: p.muted }} />
+            </div>
+            <div className="text-[8px]" style={{ color: p.accent, opacity: 0.6 }}>→</div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (l === 'grid-masonry') {
+    return (
+      <div className="flex h-full gap-1 p-2">
+        {[0,1,2].map((_col, ci) => (
+          <div key={ci} className="flex flex-col gap-1 flex-1">
+            {[0, ci === 1 ? 1 : 0].map(i => (
+              <div key={i} className="rounded-sm p-1.5 flex flex-col gap-0.5"
+                style={{ flex: i === 0 ? '0 0 55%' : '1', background: p.surface, border: `1px solid ${p.rule}` }}>
+                <div className="w-4 h-1 rounded" style={{ background: p.accent, opacity: 0.7 }} />
+                <div className="h-1 rounded w-full opacity-50" style={{ background: p.text }} />
+                <div className="h-0.5 rounded w-4/5 opacity-25" style={{ background: p.muted }} />
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  }
+  // grid-standard
+  return (
+    <div className="flex flex-col h-full px-2.5 py-2">
+      <div className="w-16 h-1 rounded mb-2" style={{ background: p.accent, opacity: 0.7 }} />
+      <div className="grid grid-cols-2 gap-1.5 flex-1 content-start">
+        {[0,1,2,3].map(i => (
+          <div key={i} className="rounded-sm p-1.5" style={{ background: p.surface, border: `1px solid ${p.rule}` }}>
+            <div className="w-3 h-3 rounded-sm mb-1" style={{ background: p.accent, opacity: 0.5 }} />
+            <div className="h-1.5 rounded w-3/4 mb-0.5" style={{ background: p.text, opacity: 0.7 }} />
+            <div className="h-1 rounded w-full opacity-25" style={{ background: p.muted }} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────
+// LANDING WIREFRAMES  (single-page conversion flow)
+// ────────────────────────────────────────────────────────────────────
+function LandingHeroPreview({ theme }: { theme: ThemeIdentity }) {
+  const p = theme.palette;
+  const h = theme.structure.headerStyle;
+  const hasFloat = theme.structure.enhancers.includes('floating-cta');
+
+  return (
+    <div className="relative flex flex-col h-full">
+      {h === 'hero-fullbleed' || h === 'hero-cinematic' ? (
+        // Full-bleed: copy left, image fill right (or overlay)
+        <div className="flex-1 relative overflow-hidden"
+          style={{ background: `linear-gradient(135deg, ${p.bg} 60%, ${p.surface})` }}>
+          <div className="absolute inset-0 opacity-20"
+            style={{ background: `radial-gradient(ellipse at 70% 30%, ${p.accent}, transparent 55%)` }} />
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col gap-1.5">
+            <div className="w-3 h-0.5 rounded" style={{ background: p.accent }} />
+            <div className="w-24 h-3 rounded" style={{ background: p.text }} />
+            <div className="w-20 h-2 rounded opacity-60" style={{ background: p.text }} />
+            <div className="w-28 h-1 rounded opacity-40" style={{ background: p.muted }} />
+            <div className="w-28 h-1 rounded opacity-40" style={{ background: p.muted }} />
+            <div className="w-16 h-4 rounded-sm mt-1" style={{ background: p.accent }} />
+          </div>
+        </div>
+      ) : h === 'hero-split' ? (
+        <div className="flex flex-1">
+          <div className="flex flex-col justify-center px-2.5" style={{ flex: '0 0 55%' }}>
+            <div className="w-3 h-0.5 rounded mb-1.5" style={{ background: p.accent }} />
+            <div className="w-22 h-3 rounded mb-1" style={{ background: p.text }} />
+            <div className="w-16 h-2 rounded mb-2 opacity-60" style={{ background: p.text }} />
+            <div className="w-12 h-4 rounded-sm" style={{ background: p.accent }} />
+          </div>
+          <div className="flex-1" style={{ background: p.surface }}>
+            <div className="h-full w-full opacity-40"
+              style={{ background: `linear-gradient(135deg, ${p.accent}40, transparent)` }} />
+          </div>
+        </div>
+      ) : (
+        // text-only / editorial
+        <div className="flex flex-col items-center justify-center h-full px-3 py-2 text-center">
+          <div className="w-3 h-0.5 rounded mb-2 mx-auto" style={{ background: p.accent }} />
+          <div className="w-28 h-3.5 rounded mb-1" style={{ background: p.text }} />
+          <div className="w-20 h-3 rounded mb-1 opacity-70" style={{ background: p.text }} />
+          <div className="w-24 h-1 rounded mb-1 opacity-30" style={{ background: p.muted }} />
+          <div className="w-16 h-4 rounded-sm mt-2" style={{ background: p.accent }} />
+        </div>
+      )}
+      {/* Floating CTA badge */}
+      {hasFloat && (
+        <div className="absolute bottom-1.5 right-1.5 w-8 h-5 rounded-full"
+          style={{ background: p.accent, boxShadow: `0 2px 8px ${p.accent}50` }} />
+      )}
+    </div>
+  );
+}
+
+function LandingProofPreview({ theme }: { theme: ThemeIdentity }) {
+  const p = theme.palette;
+  const l = theme.structure.cardLayout;
+  return (
+    <div className="flex flex-col h-full px-2.5 py-2 gap-1.5">
+      {/* Social proof / testimonials */}
+      <div className="w-12 h-1 rounded" style={{ background: p.accent, opacity: 0.7 }} />
+      {l === 'grid-masonry' ? (
+        <div className="flex gap-1.5 flex-1">
+          {[0,1].map(ci => (
+            <div key={ci} className="flex flex-col gap-1 flex-1">
+              {[0, ci].map(i => (
+                <div key={i} className="rounded-sm p-1.5" style={{ flex: i===0 ? '0 0 55%' : '1', background: p.surface, border: `1px solid ${p.rule}` }}>
+                  <div className="flex gap-0.5 mb-1">{[0,1,2,3,4].map(s => <div key={s} className="w-1.5 h-1.5 rounded-sm" style={{ background: p.accent, opacity: 0.6 }} />)}</div>
+                  <div className="h-0.5 rounded w-full mb-0.5 opacity-30" style={{ background: p.muted }} />
+                  <div className="h-0.5 rounded w-4/5 opacity-30" style={{ background: p.muted }} />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-1.5 flex-1">
+          {/* Stats row */}
+          <div className="flex gap-2" style={{ flex: '0 0 35%' }}>
+            {[0,1,2].map(i => (
+              <div key={i} className="flex-1 rounded-sm flex flex-col items-center justify-center py-1" style={{ background: p.surface, border: `1px solid ${p.rule}` }}>
+                <div className="w-8 h-2 rounded mb-0.5" style={{ background: p.accent, opacity: 0.8 }} />
+                <div className="w-6 h-1 rounded opacity-30" style={{ background: p.text }} />
+              </div>
+            ))}
+          </div>
+          {/* Testimonial */}
+          <div className="flex-1 rounded-sm p-1.5" style={{ background: p.surface, border: `1px solid ${p.rule}` }}>
+            <div className="flex gap-0.5 mb-1">{[0,1,2,3,4].map(s => <div key={s} className="w-1.5 h-1.5 rounded-sm" style={{ background: p.accent, opacity: 0.6 }} />)}</div>
+            <div className="h-0.5 rounded w-full mb-0.5 opacity-30" style={{ background: p.muted }} />
+            <div className="h-0.5 rounded w-4/5 opacity-30" style={{ background: p.muted }} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LandingCtaPreview({ theme }: { theme: ThemeIdentity }) {
   const p = theme.palette;
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-3 relative overflow-hidden" style={{ background: p.bg }}>
-        <div className="absolute inset-0 opacity-10" style={{ background: `radial-gradient(ellipse at 60% 40%, ${p.accent}, transparent 60%)` }} />
-        <div className="w-24 h-1.5 rounded mb-2 opacity-90" style={{ background: p.accent }} />
-        <div className="w-32 h-4 rounded mb-1.5 opacity-80" style={{ background: p.text }} />
-        <div className="w-24 h-4 rounded mb-3 opacity-60" style={{ background: p.text }} />
-        <div className="w-16 h-1 rounded mb-3 opacity-40" style={{ background: p.muted }} />
+      {/* Main CTA block */}
+      <div className="flex-1 flex flex-col items-center justify-center px-3" style={{ background: p.bg }}>
+        <div className="w-24 h-2.5 rounded mb-1" style={{ background: p.text }} />
+        <div className="w-16 h-2 rounded mb-2 opacity-60" style={{ background: p.text }} />
         <div className="w-20 h-5 rounded-sm" style={{ background: p.accent }} />
       </div>
-      <div className="flex gap-1.5 px-3 py-2" style={{ background: p.surface }}>
-        {[p.accent, p.accent2, p.muted].map((c, i) => (
-          <div key={i} className="flex-1 flex flex-col items-center gap-1 py-1.5 rounded"
-            style={{ background: p.bg + '88', border: `1px solid ${p.rule}` }}>
-            <div className="w-4 h-4 rounded-full opacity-70" style={{ background: c }} />
-            <div className="w-8 h-1 rounded opacity-50" style={{ background: p.text }} />
-          </div>
-        ))}
-      </div>
-      <div className="flex gap-1.5 px-3 pb-2 pt-1">
-        {[0, 1, 2, 3].map(i => (
-          <div key={i} className="flex-1 rounded overflow-hidden" style={{ border: `1px solid ${p.rule}` }}>
-            <div className="h-8" style={{ background: p.surface }} />
-            <div className="px-1 py-1">
-              <div className="h-1 w-full rounded mb-0.5 opacity-60" style={{ background: p.text }} />
-              <div className="h-1 w-8 rounded opacity-40" style={{ background: p.accent }} />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function CollectionPreviewContent({ theme }: { theme: ThemeIdentity }) {
-  const p = theme.palette;
-  return (
-    <div className="flex h-full">
-      <div className="w-16 border-r flex flex-col gap-1.5 p-2" style={{ borderColor: p.rule, background: p.surface }}>
-        <div className="h-1 w-full rounded opacity-50" style={{ background: p.text }} />
-        <div className="h-px w-full opacity-20" style={{ background: p.text }} />
-        {[80, 60, 70, 50, 65].map((w, i) => (
-          <div key={i} className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-sm border" style={{ borderColor: i === 1 ? p.accent : p.muted, background: i === 1 ? p.accent : 'transparent' }} />
-            <div className="h-1 rounded opacity-40" style={{ background: p.text, width: `${w}%` }} />
-          </div>
-        ))}
-      </div>
-      <div className="flex-1 p-2">
-        <div className="flex items-center justify-between mb-2">
-          <div className="h-1.5 w-16 rounded opacity-60" style={{ background: p.text }} />
-          <div className="h-1.5 w-10 rounded opacity-30" style={{ background: p.muted }} />
-        </div>
-        <div className="grid grid-cols-2 gap-1.5">
-          {[0, 1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="rounded overflow-hidden" style={{ border: `1px solid ${p.rule}` }}>
-              <div className="h-10 relative" style={{ background: p.surface }}>
-                <div className="absolute bottom-1 right-1 w-4 h-1.5 rounded opacity-70" style={{ background: p.accent }} />
-              </div>
-              <div className="px-1.5 py-1">
-                <div className="h-1 w-full rounded mb-0.5 opacity-60" style={{ background: p.text }} />
-                <div className="h-1 w-6 rounded opacity-50" style={{ background: p.accent }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ProductPreviewContent({ theme }: { theme: ThemeIdentity }) {
-  const p = theme.palette;
-  return (
-    <div className="flex h-full">
-      <div className="w-2/5 relative overflow-hidden" style={{ background: p.surface }}>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-16 h-20 rounded opacity-30" style={{ background: p.accent }} />
-        </div>
-        <div className="absolute inset-0 opacity-15" style={{ background: `radial-gradient(circle at 50% 60%, ${p.accent}, transparent 65%)` }} />
-        <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
-          {[0, 1, 2].map(i => (
-            <div key={i} className="w-4 h-4 rounded"
-              style={{ background: p.bg, border: `1px solid ${i === 0 ? p.accent : p.rule}` }} />
-          ))}
-        </div>
-      </div>
-      <div className="flex-1 flex flex-col p-3 gap-1.5">
-        <div className="h-1.5 w-20 rounded opacity-50" style={{ background: p.muted }} />
-        <div className="h-3 w-full rounded opacity-80" style={{ background: p.text }} />
-        <div className="h-2 w-3/4 rounded opacity-60" style={{ background: p.text }} />
-        <div className="h-1 w-full rounded opacity-30" style={{ background: p.muted }} />
-        <div className="h-1 w-4/5 rounded opacity-30" style={{ background: p.muted }} />
-        <div className="h-3 w-12 rounded opacity-90 mt-1" style={{ background: p.accent }} />
-        <div className="flex gap-1 mt-1">
-          {[0, 1, 2].map(i => (
-            <div key={i} className="w-5 h-5 rounded" style={{ background: p.surface, border: `1px solid ${p.rule}` }} />
-          ))}
-        </div>
-        <div className="mt-auto flex flex-col gap-1">
-          <div className="h-5 w-full rounded" style={{ background: p.accent }} />
-          <div className="h-4 w-full rounded" style={{ background: `${p.text}15`, border: `1px solid ${p.rule}` }} />
-        </div>
+      {/* Form block */}
+      <div className="shrink-0 px-3 py-2" style={{ background: p.surface, borderTop: `1px solid ${p.rule}` }}>
+        <div className="w-full h-3 rounded mb-1" style={{ background: `${p.text}15`, border: `1px solid ${p.rule}` }} />
+        <div className="w-full h-3 rounded mb-1" style={{ background: `${p.text}15`, border: `1px solid ${p.rule}` }} />
+        <div className="w-full h-4 rounded-sm" style={{ background: p.accent }} />
       </div>
     </div>
   );
@@ -729,11 +1155,7 @@ function ThemeDetailPanel({
   isSelected: boolean;
 }) {
   const p = theme.palette;
-  const views: { id: PreviewMode; label: string; icon: React.ElementType }[] = [
-    { id: 'home',       label: 'Home',       icon: Home    },
-    { id: 'collection', label: 'Collection', icon: Grid    },
-    { id: 'product',    label: 'Product',    icon: Package },
-  ];
+  const views = VIEW_CONFIGS[theme.type] ?? VIEW_CONFIGS['ecommerce'];
 
   return (
     <div className="flex flex-col h-full rounded-2xl overflow-hidden"
@@ -946,7 +1368,13 @@ export function ThemePicker({ currentThemeId, aggroMode, onSelect, onClose }: Th
           <div className="flex items-center gap-2">
             {TYPE_TABS.map(tab => (
               <button key={tab.id}
-                onClick={() => { setActiveType(tab.id); setHoveredTheme(null); setDetailTheme(null); }}
+                onClick={() => {
+                  setActiveType(tab.id);
+                  setHoveredTheme(null);
+                  setDetailTheme(null);
+                  const firstView = VIEW_CONFIGS[tab.id]?.[0]?.id ?? 'home';
+                  setPreviewMode(firstView as PreviewMode);
+                }}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-widest transition-all"
                 style={{
                   background: activeType === tab.id ? `${tab.accent}20` : 'transparent',
