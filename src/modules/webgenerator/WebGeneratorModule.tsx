@@ -234,48 +234,102 @@ function OutputHistoryCard({ output, onLoad, onDelete }: {
 }
 
 // ── PLATFORM TOGGLE ────────────────────────────────────────────────────────────
+// ── SHARED PREVIEW CSS ────────────────────────────────────────────────────────
+const PREVIEW_BASE_CSS = `
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; overflow-x: hidden; width: 100%; }
+  a { color: inherit; }
+  .rg-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 56px; }
+  .rg-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+  .rg-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px,100%), 1fr)); }
+  .rg-contact { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+  .rg-contact-aggro { display: grid; grid-template-columns: 1fr 1.6fr; gap: 64px; align-items: start; }
+  @media (max-width: 860px) {
+    .rg-2, .rg-3, .rg-auto, .rg-contact, .rg-contact-aggro {
+      grid-template-columns: 1fr !important; gap: 24px !important;
+    }
+  }
+  a[class*="cta"], button[class*="cta"], .cta-button { display: inline-block; }
+`;
+
+const FIRMA_HTML = `<footer style="font-family:'Inter',sans-serif;text-align:center;font-size:10px;letter-spacing:0.05em;color:#71717a;padding:10px 24px 14px;border-top:1px solid rgba(255,255,255,0.07);margin-top:0;">Developed by <strong style="color:#a1a1aa;font-weight:600;">Unreal&gt;ille Studio</strong> · Hollywood, FL</footer>`;
+
+// ── SCHEMA EXTRACTOR — basado en indexOf, funciona con cualquier variación de tags ──
+function extractLiquidSchema(content: string): { stripped: string; defaults: Record<string, string> } {
+  const defaults: Record<string, string> = {};
+
+  // Encontrar tags {%...%} que contengan exactamente "schema" o "endschema"
+  const findTag = (str: string, keyword: string, fromIdx = 0): { start: number; end: number } | null => {
+    let i = fromIdx;
+    while (i < str.length) {
+      const open = str.indexOf('{%', i);
+      if (open === -1) break;
+      const close = str.indexOf('%}', open + 2);
+      if (close === -1) break;
+      // Contenido del tag sin dashes ni whitespace
+      const inner = str.slice(open + 2, close).replace(/^[-\s]+|[-\s]+$/g, '').trim();
+      if (inner === keyword) return { start: open, end: close + 2 };
+      i = close + 2;
+    }
+    return null;
+  };
+
+  const schemaTag    = findTag(content, 'schema');
+  const endSchemaTag = schemaTag ? findTag(content, 'endschema', schemaTag.end) : null;
+
+  if (schemaTag && endSchemaTag) {
+    const jsonRaw = content.slice(schemaTag.end, endSchemaTag.start).trim();
+    try {
+      const schema = JSON.parse(jsonRaw);
+      (schema.settings ?? []).forEach((s: any) => {
+        if (!s.id) return;
+        if (s.default !== undefined && s.default !== '') defaults[s.id] = String(s.default);
+        else if (s.label) defaults[s.id] = s.label;
+      });
+      // Extraer también de blocks si existen
+      (schema.blocks ?? []).forEach((b: any) => {
+        (b.settings ?? []).forEach((s: any) => {
+          if (s.id && s.default !== undefined && s.default !== '') {
+            defaults[s.id] = String(s.default);
+          }
+        });
+      });
+    } catch (e) {
+      console.warn('[WebLab Preview] Schema JSON parse error:', String(e).slice(0, 120));
+    }
+    const stripped = content.slice(0, schemaTag.start) + content.slice(endSchemaTag.end);
+    return { stripped, defaults };
+  }
+
+  return { stripped: content, defaults };
+}
+
 // ── LIQUID → HTML PREVIEW RENDERER ────────────────────────────────────────────
 function liquidToPreviewHTML(sections: { sectionId: string; label: string; content: string }[]): string {
   const renderedSections = sections.map(s => {
-    const content = s.content;
+    // 1. Extraer schema con indexOf (100% confiable, sin regex)
+    const { stripped: noSchema, defaults } = extractLiquidSchema(s.content);
 
-    // 1. Extraer defaults del schema
-    const schemaMatch = content.match(/{%-?\s*schema\s*-?%}([\s\S]*?){%-?\s*endschema\s*-?%}/i);
-    const defaults: Record<string, string> = {};
-    if (schemaMatch) {
-      try {
-        const schema = JSON.parse(schemaMatch[1].trim());
-        (schema.settings ?? []).forEach((setting: any) => {
-          if (setting.id && setting.default !== undefined) {
-            defaults[setting.id] = String(setting.default);
-          }
-        });
-      } catch { /* schema mal formado — continúa sin defaults */ }
-    }
-
-    // 2. Extraer <style> blocks de Liquid ({% style %} o <style>)
+    // 2. Extraer <style> blocks HTML antes de stripear
     let styles = '';
-    const styleTagMatch = content.match(/<style[^>]*>([\s\S]*?)<\/style>/gi);
-    if (styleTagMatch) styles = styleTagMatch.join('\n');
-    const liquidStyleMatch = content.match(/{%-?\s*style\s*-?%}([\s\S]*?){%-?\s*endstyle\s*-?%}/gi);
-    if (liquidStyleMatch) styles += liquidStyleMatch.map(m => m.replace(/{%-?\s*(?:end)?style\s*-?%}/g, '')).map(m => `<style>${m}</style>`).join('\n');
+    const styleTagMatches = noSchema.match(/<style[^>]*>[\s\S]*?<\/style>/gi);
+    if (styleTagMatches) styles = styleTagMatches.join('\n');
 
-    // 3. Quitar schema, style blocks, tags Liquid de control
-    let html = content
-      .replace(/{%-?\s*schema\s*-?%}[\s\S]*?{%-?\s*endschema\s*-?%}/gi, '')
-      .replace(/{%-?\s*style\s*-?%}[\s\S]*?{%-?\s*endstyle\s*-?%}/gi, '')
+    // 3. Strip: schema ya removido; quitar style blocks restantes + TODOS los tags {% %} (incl. multilinea)
+    let html = noSchema
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-      .replace(/{%-?.*?-?%}/g, '');
+      .replace(/\{%[\s\S]*?%\}/g, '');  // multilinea con [\s\S]
 
-    // 4. Reemplazar {{ section.settings.X }} con el default real
-    html = html.replace(/\{\{-?\s*section\.settings\.(\w+)\s*-?\}\}/g, (_, key) => {
+    // 4. Reemplazar {{ section.settings.X | filter | filter }} con default real
+    //    Captura el id y descarta filtros opcionales
+    html = html.replace(/\{\{-?\s*section\.settings\.(\w+)[\s\S]*?-?\}\}/g, (_, key) => {
       return defaults[key] ?? `[${key}]`;
     });
 
-    // 5. Limpiar cualquier {{ }} restante
-    html = html.replace(/\{\{.*?\}\}/g, '');
+    // 5. Limpiar {{ }} restantes (forloop, block, etc.)
+    html = html.replace(/\{\{[\s\S]*?\}\}/g, '');
 
-    return `${styles}\n<!-- ${s.label.toUpperCase()} -->\n${html}`;
+    return `${styles}\n${html}`;
   });
 
   return `<!DOCTYPE html>
@@ -284,24 +338,11 @@ function liquidToPreviewHTML(sections: { sectionId: string; label: string; conte
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Preview — WebLab</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; overflow-x: hidden; width: 100%; }
-    a { color: inherit; }
-    .rg-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 56px; }
-    .rg-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
-    .rg-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px,100%), 1fr)); }
-    .rg-contact { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
-    .rg-contact-aggro { display: grid; grid-template-columns: 1fr 1.6fr; gap: 64px; align-items: start; }
-    @media (max-width: 860px) {
-      .rg-2, .rg-3, .rg-auto, .rg-contact, .rg-contact-aggro {
-        grid-template-columns: 1fr !important; gap: 24px !important;
-      }
-    }
-  </style>
+  <style>${PREVIEW_BASE_CSS}</style>
 </head>
 <body>
 ${renderedSections.join('\n\n')}
+${FIRMA_HTML}
 </body>
 </html>`;
 }
@@ -317,116 +358,88 @@ function FullPagePreviewModal({
   onClose: () => void;
 }) {
   const [viewport, setViewport] = useState<'desktop' | 'mobile'>('desktop');
-  const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const htmlContent = useMemo(() => {
+  const srcdoc = useMemo(() => {
     if (outputMode === 'liquid') return liquidToPreviewHTML(sections);
-    // HTML mode: ensamblar secciones sin wrapper (el buildExportFile añade el wrapper)
-    // Aquí construimos un HTML limpio directamente
-    const body = sections.map(s => `<!-- ${s.label.toUpperCase()} -->\n${s.content}`).join('\n\n');
+    // HTML mode — ensambla secciones con CSS base + firma
+    const body = sections.map(s => s.content).join('\n\n');
     return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Preview — WebLab</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; overflow-x: hidden; width: 100%; }
-    a { color: inherit; }
-    .rg-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 56px; }
-    .rg-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
-    .rg-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px,100%), 1fr)); }
-    .rg-contact { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
-    .rg-contact-aggro { display: grid; grid-template-columns: 1fr 1.6fr; gap: 64px; align-items: start; }
-    @media (max-width: 860px) {
-      .rg-2, .rg-3, .rg-auto, .rg-contact, .rg-contact-aggro {
-        grid-template-columns: 1fr !important; gap: 24px !important;
-      }
-    }
-    a[class*="cta"], button[class*="cta"], .cta-button { display: inline-block; }
-  </style>
+  <style>${PREVIEW_BASE_CSS}</style>
 </head>
 <body>
 ${body}
+${FIRMA_HTML}
 </body>
 </html>`;
   }, [sections, outputMode]);
 
-  // Escribir en iframe vía srcdoc
-  const srcdoc = htmlContent;
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col"
-      style={{ background: 'rgba(0,0,0,0.92)' }}
-    >
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-zinc-800 bg-zinc-950 shrink-0">
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Preview</span>
+    <div className="fixed inset-0 z-50 flex flex-col" style={{ background: 'rgba(0,0,0,0.93)' }}>
+      {/* ── Top bar ── */}
+      <div className="flex items-center justify-between px-5 py-2.5 border-b border-zinc-800 bg-zinc-950 shrink-0">
+        {/* Left: label + mode badge */}
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Preview</span>
           <span className={cn(
-            "text-[10px] font-mono px-2 py-0.5 rounded",
+            "text-[9px] font-mono px-1.5 py-0.5 rounded shrink-0",
             outputMode === 'liquid' ? "bg-cyan-500/15 text-cyan-400" : "bg-orange-500/15 text-orange-400"
           )}>
             {outputMode === 'liquid' ? 'Liquid → HTML' : 'HTML'}
           </span>
         </div>
 
-        {/* Viewport toggle */}
-        <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-700 rounded-lg p-1">
-          <button
-            onClick={() => setViewport('desktop')}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all",
-              viewport === 'desktop' ? "bg-zinc-700 text-white" : "text-zinc-500 hover:text-zinc-300"
-            )}
-          >
-            <Monitor size={13} /> Desktop
-          </button>
-          <button
-            onClick={() => setViewport('mobile')}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all",
-              viewport === 'mobile' ? "bg-zinc-700 text-white" : "text-zinc-500 hover:text-zinc-300"
-            )}
-          >
-            <Smartphone size={13} /> Mobile
-          </button>
+        {/* Center: viewport toggle */}
+        <div className="flex items-center gap-0.5 bg-zinc-900 border border-zinc-700 rounded-lg p-0.5">
+          {(['desktop', 'mobile'] as const).map(v => (
+            <button
+              key={v}
+              onClick={() => setViewport(v)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all",
+                viewport === v ? "bg-zinc-700 text-white" : "text-zinc-500 hover:text-zinc-300"
+              )}
+            >
+              {v === 'desktop' ? <Monitor size={12} /> : <Smartphone size={12} />}
+              {v === 'desktop' ? 'Desktop' : 'Mobile'}
+            </button>
+          ))}
         </div>
 
-        {/* Close */}
+        {/* Right: close */}
         <button
           onClick={onClose}
-          className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
+          className="flex items-center justify-center w-7 h-7 rounded-full bg-zinc-800 hover:bg-red-500/20 hover:text-red-400 text-zinc-400 transition-colors"
+          title="Cerrar preview"
         >
-          <X size={15} />
+          <X size={14} />
         </button>
       </div>
 
-      {/* Canvas */}
-      <div className="flex-1 overflow-hidden flex items-start justify-center py-6 px-4">
+      {/* ── Canvas ── */}
+      <div
+        className="flex-1 overflow-hidden flex items-stretch justify-center"
+        style={{ background: viewport === 'mobile' ? '#18181b' : '#fff' }}
+      >
         <div
-          className="transition-all duration-300 shadow-2xl rounded-lg overflow-hidden bg-white"
+          className="transition-all duration-300 shadow-2xl overflow-hidden bg-white"
           style={{
             width: viewport === 'mobile' ? '390px' : '100%',
             maxWidth: viewport === 'desktop' ? '1440px' : '390px',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
+            borderRadius: viewport === 'mobile' ? '16px' : '0',
+            margin: viewport === 'mobile' ? '16px auto' : '0',
+            flex: viewport === 'desktop' ? '1' : undefined,
           }}
         >
           <iframe
-            ref={iframeRef}
+            key={`${outputMode}-${viewport}`}
             srcDoc={srcdoc}
             title="WebLab Preview"
-            style={{
-              width: '100%',
-              height: '100%',
-              border: 'none',
-              display: 'block',
-              flexGrow: 1,
-            }}
+            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
             sandbox="allow-same-origin allow-scripts"
           />
         </div>
@@ -1150,13 +1163,14 @@ export default function WebGeneratorModule() {
 
             {/* Pack summary + controls */}
             <div className={cn(
-              "border rounded-xl p-4 flex items-center gap-4 transition-colors",
+              "border rounded-xl px-4 py-3 flex flex-col gap-2 transition-colors",
               superAggro ? "bg-orange-950/20 border-orange-500/30" : "bg-zinc-900 border-zinc-800"
             )}>
               {pack && (
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-bold text-white">{pack.label}</span>
+                <>
+                  {/* Fila 1: meta-badges */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-sm font-bold text-white mr-1">{pack.label}</span>
                     <Badge color={MODULES.find(m => m.id === activeModule)?.color}>{pack.sections.length} secciones</Badge>
                     <Badge color="#FFAB00">~{estimatedWords} palabras</Badge>
                     <Badge color="#6366F1">{language}</Badge>
@@ -1164,6 +1178,7 @@ export default function WebGeneratorModule() {
                     <OutputModeBadge mode={outputMode} />
                     {superAggro && <Badge color="#f97316">⚡ SUPER AGGRO</Badge>}
                   </div>
+                  {/* Fila 2: section pills */}
                   <div className="flex gap-1 flex-wrap">
                     {pack.sections.map(sid => {
                       const s = PAGE_SECTIONS[sid as keyof typeof PAGE_SECTIONS];
@@ -1178,21 +1193,22 @@ export default function WebGeneratorModule() {
                       );
                     })}
                   </div>
-                </div>
+                </>
               )}
-              <div className="flex gap-2 shrink-0 items-center">
+              {/* Fila 3: botones — ancho completo, flex-wrap, sin competir con badges */}
+              <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
                 {/* PICK THEME */}
                 <button
                   onClick={() => setShowThemePicker(true)}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all border",
+                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border",
                     selectedThemeId
                       ? "border-[var(--accent)]/50 text-[var(--accent)] bg-[var(--accent)]/10"
                       : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600"
                   )}
                   style={selectedThemeId ? { borderColor: getThemeById(selectedThemeId)?.palette.accent + '50', color: getThemeById(selectedThemeId)?.palette.accent, background: getThemeById(selectedThemeId)?.palette.accent + '15' } : {}}
                 >
-                  <Layers size={12} />
+                  <Layers size={11} />
                   {selectedThemeId ? (
                     <span className="flex items-center gap-1">
                       {getThemeById(selectedThemeId)?.name}
@@ -1205,66 +1221,70 @@ export default function WebGeneratorModule() {
                   <button
                     onClick={() => setShowPreview(true)}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all border",
+                      "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border",
                       activeOutputMode === 'liquid'
                         ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20"
                         : "bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:border-zinc-600"
                     )}
                     title="Preview completo — desktop y mobile"
                   >
-                    <Eye size={12} /> Preview
+                    <Eye size={11} /> Preview
                   </button>
                 )}
                 {/* SUPER AGGRO */}
                 <button
                   onClick={() => setSuperAggro(v => !v)}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all border",
+                    "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border",
                     superAggro
                       ? "bg-orange-500/20 border-orange-500/50 text-orange-400"
                       : "bg-zinc-800 border-zinc-700 text-zinc-500 hover:text-zinc-300 hover:border-zinc-600"
                   )}
                 >
-                  <Zap size={12} className={superAggro ? "fill-orange-400" : ""} />
+                  <Zap size={11} className={superAggro ? "fill-orange-400" : ""} />
                   AGGRO
                 </button>
                 {/* Reset */}
                 <button
                   onClick={handleReset}
                   disabled={isGenerating}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-200 text-sm font-medium transition-colors disabled:opacity-40"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-200 text-xs font-medium transition-colors disabled:opacity-40"
                 >
-                  <RotateCcw size={13} />Reset
+                  <RotateCcw size={11} />Reset
                 </button>
+                {/* Separador visual */}
+                <div className="w-px h-5 bg-zinc-700 mx-0.5" />
                 {/* Stop / Generate */}
                 {isGenerating ? (
                   <button
                     onClick={handleStop}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-medium hover:bg-red-500/20"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium hover:bg-red-500/20"
                   >
-                    <Square size={13} />Detener
+                    <Square size={11} />Detener
                   </button>
                 ) : (
                   <button
                     onClick={handleRun}
                     disabled={!pack}
                     className={cn(
-                      "flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-bold transition-all disabled:opacity-40",
+                      "flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-40",
                       superAggro ? "bg-orange-500 hover:bg-orange-400 text-black" : "bg-accent hover:bg-accent/90 text-black"
                     )}
                   >
-                    <Play size={13} />
+                    <Play size={11} />
                     {superAggro ? '⚡ Generar AGGRO' : 'Generar'}
                   </button>
                 )}
+                {/* Separador visual */}
+                {result && <div className="w-px h-5 bg-zinc-700 mx-0.5" />}
                 {/* Export */}
                 {result && (
                   <button
                     onClick={handleExport}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs transition-colors"
                     title={`Exportar .${getFileExtension(activeOutputMode)}`}
                   >
-                    <Download size={13} />
+                    <Download size={11} />
                   </button>
                 )}
                 {/* Export Clean — sin banner AGGRO, listo para publicar */}
@@ -1274,17 +1294,17 @@ export default function WebGeneratorModule() {
                       const resolvedMode = ((result as any).outputMode as WebOutputMode) ?? outputMode;
                       const ext  = getFileExtension(resolvedMode);
                       const mime = getMimeType(resolvedMode);
-                      const content = buildExportFile(result.sections, resolvedMode, false); // superAggro=false → sin banner
+                      const content = buildExportFile(result.sections, resolvedMode, false);
                       const blob = new Blob([content], { type: mime });
                       const a = document.createElement('a');
                       a.href = URL.createObjectURL(blob);
                       a.download = `weblab_${brand?.id}_${pack?.id}_AGGRO_CLEAN_${Date.now()}.${ext}`;
                       a.click();
                     }}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-emerald-400 text-xs font-bold transition-colors"
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-emerald-400 text-xs font-bold transition-colors"
                     title="Export sin advertencia AGGRO — listo para publicar"
                   >
-                    <Download size={13} />
+                    <Download size={11} />
                     <span>CLEAN</span>
                   </button>
                 )}
@@ -1294,7 +1314,7 @@ export default function WebGeneratorModule() {
                     onClick={handleSaveDraft}
                     disabled={draftSaving || !githubToken.trim()}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                      "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all",
                       draftResult
                         ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400"
                         : draftSaving
@@ -1304,10 +1324,10 @@ export default function WebGeneratorModule() {
                     title={!githubToken.trim() ? "Requiere GitHub Token" : "Guardar borrador en Drafts repo"}
                   >
                     {draftSaving
-                      ? <><RefreshCw size={12} className="animate-spin" />Guardando...</>
+                      ? <><RefreshCw size={11} className="animate-spin" />Guardando...</>
                       : draftResult
-                        ? <><Check size={12} />Guardado</>
-                        : <><CloudUpload size={12} />Borrador</>
+                        ? <><Check size={11} />Guardado</>
+                        : <><CloudUpload size={11} />Borrador</>
                     }
                   </button>
                 )}
