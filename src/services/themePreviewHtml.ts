@@ -442,54 +442,115 @@ function fullEcom(theme: ThemeIdentity): string {
   // Promo bar
   const promo = `<div style="background:${p.accent};padding:.6rem;text-align:center;font-family:${f.b};font-size:.72rem;font-weight:600;letter-spacing:.06em;color:${p.bg};">✦ Envío Gratis en órdenes +$50 &nbsp;·&nbsp; Devolución 30 días &nbsp;·&nbsp; Pago seguro SSL</div>`;
 
-  // Hero
+  // Hero — branch by headerStyle
   let hero = '';
   if (h === 'hero-split') {
+    // SPLIT: texto izquierda, producto derecha — con precio prominente y trust signals
     hero = `<section style="display:grid;grid-template-columns:1fr 1fr;min-height:90vh;">
       <div style="display:flex;flex-direction:column;justify-content:center;padding:8vw 5vw 8vw 6vw;background:${p.bg};">
-        <p class="sr" style="font-family:${f.b};font-size:.65rem;letter-spacing:.28em;text-transform:uppercase;color:${p.accent};margin-bottom:1.4rem;">Nueva Colección · 2026</p>
-        <h1 class="sr" style="font-family:${f.d};font-size:clamp(2.4rem,4.5vw,4.2rem);font-weight:${f.w};line-height:1.04;color:${p.text};margin-bottom:1.4rem;letter-spacing:-.02em;">El Producto<br/>que Define<br/><em style="color:${p.accent};font-style:normal;">Tu Estilo.</em></h1>
-        <p class="sr" style="font-family:${f.b};font-size:1rem;line-height:1.75;color:${p.text};opacity:${o};margin-bottom:.8rem;">Formulado para los que exigen más. Sin compromisos en ingredientes, sin límites en resultados.</p>
-        <div style="display:flex;align-items:center;gap:1.2rem;margin-bottom:2rem;">
-          <span style="font-family:${f.d};font-size:2.2rem;font-weight:${f.w};color:${p.accent};">$89.99</span>
-          <div>
-            <del style="font-family:${f.b};font-size:.8rem;color:${p.muted};">$130.00</del>
-            <span style="display:block;font-family:${f.b};font-size:.62rem;font-weight:700;color:${p.accent};text-transform:uppercase;letter-spacing:.08em;">Ahorras $40.01</span>
-          </div>
+        <div class="sr" style="display:inline-flex;align-items:center;gap:.5rem;background:${p.accent}18;border:1px solid ${p.accent}30;border-radius:100px;padding:.3rem 1rem;margin-bottom:1.6rem;width:fit-content;">
+          <span style="width:6px;height:6px;background:${p.accent};border-radius:50%;"></span>
+          <span style="font-family:${f.b};font-size:.58rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:${p.accent};">Lanzamiento 2026 · Cupos limitados</span>
         </div>
+        <h1 class="sr" style="font-family:${f.d};font-size:clamp(2.4rem,4.5vw,4.2rem);font-weight:${f.w};line-height:1.04;color:${p.text};margin-bottom:1.2rem;letter-spacing:-.02em;">El Producto<br/>que Define<br/><em style="color:${p.accent};font-style:normal;">Tu Estilo.</em></h1>
+        <p class="sr" style="font-family:${f.b};font-size:1rem;line-height:1.75;color:${p.text};opacity:${o};margin-bottom:1.8rem;">Formulado para los que exigen más. Sin compromisos en ingredientes, sin límites en resultados.</p>
+        <div style="display:flex;align-items:baseline;gap:1rem;margin-bottom:.6rem;">
+          <span style="font-family:${f.d};font-size:2.4rem;font-weight:${f.w};color:${p.accent};">$89.99</span>
+          <del style="font-family:${f.b};font-size:.85rem;color:${p.muted};">$130.00</del>
+          <span style="font-family:${f.b};font-size:.65rem;font-weight:700;color:${p.accent};background:${p.accent}18;padding:2px 8px;border-radius:100px;">−31%</span>
+        </div>
+        <div style="display:flex;gap:.4rem;margin-bottom:1.8rem;">${[0,1,2,3,4].map(i=>`<span style="color:${p.accent};font-size:1rem;">${i<4?'★':'☆'}</span>`).join('')}<span style="font-family:${f.b};font-size:.72rem;color:${p.muted};margin-left:.4rem;">4.8 (2,847)</span></div>
         <div class="sr" style="display:flex;gap:1rem;margin-bottom:2rem;">
-          <button style="background:${p.accent};color:${p.bg};border:none;padding:1rem 2.4rem;font-family:${f.b};font-size:.85rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;">Comprar Ahora</button>
-          <button style="background:transparent;color:${p.text};border:1px solid ${p.rule};padding:1rem 1.8rem;font-family:${f.b};font-size:.82rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;border-radius:4px;">Ver Colección</button>
+          <button style="flex:1;background:${p.accent};color:${p.bg};border:none;padding:1rem 2rem;font-family:${f.b};font-size:.88rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:6px;">🛒 Comprar Ahora</button>
+          <button style="background:transparent;color:${p.text};border:1px solid ${p.rule};padding:1rem 1.4rem;font-family:${f.b};font-size:.82rem;border-radius:6px;">♡</button>
         </div>
-        <div style="display:flex;gap:2rem;">
-          ${['Envío en 24h','Devolución 30d','Pago Seguro'].map(t=>`<div style="display:flex;align-items:center;gap:.5rem;"><div style="width:16px;height:16px;background:${p.accent}22;border-radius:50%;display:flex;align-items:center;justify-content:center;"><div style="width:6px;height:6px;background:${p.accent};border-radius:50%;"></div></div><span style="font-family:${f.b};font-size:.7rem;color:${p.text};opacity:${o};">${t}</span></div>`).join('')}
+        <div style="display:flex;gap:2rem;padding-top:1.4rem;border-top:1px solid ${p.rule};">
+          ${['✓ Envío en 24h','✓ Devolución 30d','✓ Pago Seguro'].map(t=>`<span style="font-family:${f.b};font-size:.7rem;color:${p.text};opacity:${o};">${t}</span>`).join('')}
         </div>
       </div>
       <div style="position:relative;overflow:hidden;background:${p.surface};">
         <img src="${IMG(S.prod[0],600,800)}" style="width:100%;height:100%;object-fit:cover;" alt="Producto destacado"/>
         <div style="position:absolute;inset:0;background:${p.bg}15;"></div>
-        <div class="sr" style="position:absolute;bottom:2rem;right:2rem;background:${p.bg};border:1px solid ${p.rule};border-radius:12px;padding:1rem;min-width:160px;">
-          <div style="display:flex;gap:.3rem;margin-bottom:.4rem;">${[0,1,2,3,4].map(()=>`<div style="color:${p.accent};font-size:1rem;">★</div>`).join('')}</div>
+        <div class="sr" style="position:absolute;top:1.5rem;left:1.5rem;background:${p.accent};color:${p.bg};font-family:${f.b};font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.4rem 1rem;border-radius:100px;">Más Vendido</div>
+        <div class="sr" style="position:absolute;bottom:2rem;right:2rem;background:${p.bg}EE;backdrop-filter:blur(12px);border:1px solid ${p.rule};border-radius:14px;padding:1.2rem;min-width:160px;">
+          <div style="display:flex;gap:.2rem;margin-bottom:.5rem;">${[0,1,2,3,4].map(()=>`<span style="color:${p.accent};">★</span>`).join('')}</div>
           <p style="font-family:${f.b};font-size:.72rem;font-weight:700;color:${p.text};">4.9 / 5.0</p>
-          <p style="font-family:${f.b};font-size:.62rem;color:${p.muted};">+2,847 reseñas</p>
+          <p style="font-family:${f.b};font-size:.62rem;color:${p.muted};">+2,847 reseñas verificadas</p>
         </div>
       </div>
     </section>`;
+
+  } else if (h === 'hero-editorial') {
+    // EDITORIAL: texto grande tipográfico + producto al lado como pieza de arte
+    hero = `<section style="padding:10vh 7vw 6vh;background:${p.bg};border-bottom:1px solid ${p.rule};">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4rem;">
+        <p style="font-family:${f.b};font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;color:${p.muted};">Colección 2026 — Vol. III</p>
+        <div style="display:flex;gap:2rem;">${['Nuevo','Colecciones','Sale'].map(t=>`<a href="#" style="font-family:${f.b};font-size:.75rem;color:${p.text};opacity:.6;">${t}</a>`).join('')}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:end;">
+        <div>
+          <h1 class="sr" style="font-family:${f.d};font-size:clamp(3.5rem,7vw,6.5rem);font-weight:${f.w};line-height:.95;color:${p.text};letter-spacing:-.04em;margin-bottom:2.5rem;">La Forma<br/>de lo<br/><span style="color:${p.accent};">Esencial.</span></h1>
+          <div style="display:flex;align-items:baseline;gap:1.2rem;margin-bottom:1.5rem;">
+            <span style="font-family:${f.d};font-size:2rem;font-weight:${f.w};color:${p.accent};">$89.99</span>
+            <del style="font-family:${f.b};font-size:.85rem;color:${p.muted};">$130.00</del>
+          </div>
+          <div style="display:flex;gap:1rem;">
+            <button style="background:${p.accent};color:${p.bg};border:none;padding:1rem 2.4rem;font-family:${f.b};font-size:.85rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;">Comprar →</button>
+            <button style="background:transparent;color:${p.text};border:1px solid ${p.rule};padding:1rem 1.6rem;font-family:${f.b};font-size:.82rem;border-radius:4px;">Ver Todo</button>
+          </div>
+        </div>
+        <div style="position:relative;">
+          <img src="${IMG(S.prod[0],600,700)}" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:4px;" alt=""/>
+          <div style="position:absolute;bottom:-1.5rem;left:2rem;background:${p.bg};border:1px solid ${p.rule};padding:1rem 1.4rem;border-radius:8px;">
+            <p style="font-family:${f.b};font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:${p.muted};">Bestseller #1</p>
+            <p style="font-family:${f.d};font-size:1rem;font-weight:${f.w};color:${p.text};">Signature Collection</p>
+          </div>
+        </div>
+      </div>
+    </section>`;
+
+  } else if (h === 'hero-text-only' || h === 'hero-minimal') {
+    // TEXT-ONLY / MINIMAL: tipografía masiva + producto inmediatamente visible debajo
+    hero = `<section style="background:${p.bg};">
+      <div style="padding:12vh 8vw 6vh;text-align:center;border-bottom:1px solid ${p.rule};">
+        <p class="sr" style="font-family:${f.b};font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:${p.accent};margin-bottom:1.5rem;">Nueva Colección — Disponible Ahora</p>
+        <h1 class="sr" style="font-family:${f.d};font-size:clamp(4rem,10vw,9rem);font-weight:${f.w};line-height:.9;color:${p.text};letter-spacing:-.04em;margin-bottom:2rem;">TODO<br/><span style="color:${p.accent};">COMIENZA</span><br/>AQUÍ.</h1>
+        <p class="sr" style="font-family:${f.b};font-size:1.05rem;line-height:1.7;color:${p.text};opacity:${o};max-width:440px;margin:0 auto 2.5rem;">Sin relleno. Sin promesas vacías. Solo el mejor producto de su categoría.</p>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+          <button style="background:${p.accent};color:${p.bg};border:none;padding:1rem 2.6rem;font-family:${f.b};font-size:.9rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;">Ver Colección</button>
+          <button style="background:transparent;color:${p.text};border:1px solid ${p.rule};padding:1rem 2rem;font-family:${f.b};font-size:.85rem;border-radius:4px;">Más Vendidos →</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid ${p.rule};">
+        ${S.prod.slice(0,4).map((s,i)=>`
+          <div style="position:relative;aspect-ratio:3/4;overflow:hidden;border-right:${i<3?`1px solid ${p.rule}`:'none'};">
+            <img src="${IMG(s,320,427)}" style="width:100%;height:100%;object-fit:cover;transition:transform .4s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" alt=""/>
+            <div style="position:absolute;inset:0;background:${p.bg}00;transition:background .2s;"></div>
+            <div style="position:absolute;bottom:1.2rem;left:1.2rem;right:1.2rem;">
+              <p style="font-family:${f.b};font-size:.75rem;font-weight:700;color:${p.text};background:${p.bg}EE;backdrop-filter:blur(8px);padding:.5rem .8rem;border-radius:6px;display:inline-block;">$${[89,64,49,74][i]}.99</p>
+            </div>
+          </div>`).join('')}
+      </div>
+    </section>`;
+
   } else {
-    // cinematic / full-bleed
+    // CINEMATIC / FULL-BLEED: imagen de fondo con copy sobre overlay
     hero = `<section style="position:relative;min-height:92vh;overflow:hidden;display:flex;align-items:center;padding:0 6vw;">
       <div class="pbg" style="position:absolute;inset:-20%;z-index:0;background:url('${IMG(S.hero[0],1400,900)}') center/cover no-repeat;"></div>
       <div style="position:absolute;inset:0;background:linear-gradient(to right,${p.bg}F4,${p.bg}C0 55%,${p.bg}40);"></div>
       <div style="position:relative;z-index:2;max-width:580px;">
-        <p class="sr" style="font-family:${f.b};font-size:.65rem;letter-spacing:.28em;text-transform:uppercase;color:${p.accent};margin-bottom:1.5rem;">Colección Exclusiva</p>
-        <h1 class="sr" style="font-family:${f.d};font-size:clamp(2.8rem,6vw,5.5rem);font-weight:${f.w};line-height:1.04;color:${p.text};margin-bottom:1.5rem;letter-spacing:-.02em;">Hecho Para<br/>Los Que<br/><em style="color:${p.accent};font-style:normal;">Saben.</em></h1>
-        <p class="sr" style="font-family:${f.b};font-size:1.05rem;line-height:1.75;color:${p.text};opacity:${o};max-width:460px;margin-bottom:2.5rem;">No para todos. Para los que entienden la diferencia entre precio y valor.</p>
+        <p class="sr" style="font-family:${f.b};font-size:.65rem;letter-spacing:.28em;text-transform:uppercase;color:${p.accent};margin-bottom:1.5rem;">Colección Exclusiva · 2026</p>
+        <h1 class="sr" style="font-family:${f.d};font-size:clamp(2.8rem,6vw,5.5rem);font-weight:${f.w};line-height:1.04;color:${p.text};margin-bottom:1rem;letter-spacing:-.02em;">Hecho Para<br/>Los Que<br/><em style="color:${p.accent};font-style:normal;">Saben.</em></h1>
+        <div style="display:flex;align-items:baseline;gap:1rem;margin-bottom:1.5rem;">
+          <span style="font-family:${f.d};font-size:2.2rem;font-weight:${f.w};color:${p.accent};">$89.99</span>
+          <del style="font-family:${f.b};font-size:.85rem;color:${p.muted};">$130.00</del>
+        </div>
         <div class="sr" style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem;">
-          <button style="background:${p.accent};color:${p.bg};border:none;padding:1rem 2.4rem;font-family:${f.b};font-size:.85rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;">Ver Colección</button>
-          <button style="background:transparent;color:${p.text};border:1px solid ${p.text}40;padding:1rem 2rem;font-family:${f.b};font-size:.82rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;">Más Vendidos</button>
+          <button style="background:${p.accent};color:${p.bg};border:none;padding:1rem 2.4rem;font-family:${f.b};font-size:.85rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;">Comprar Ahora</button>
+          <button style="background:transparent;color:${p.text};border:1px solid ${p.text}40;padding:1rem 2rem;font-family:${f.b};font-size:.82rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;">Ver Colección</button>
         </div>
         <div class="sr" style="display:flex;gap:1.8rem;">
-          ${['Envío en 24h','Devolución 30d','Pago Seguro'].map(t=>`<span style="font-family:${f.b};font-size:.72rem;color:${p.text};opacity:${o};">✓ ${t}</span>`).join('')}
+          ${['✓ Envío 24h','✓ Devol. 30d','✓ Pago Seguro'].map(t=>`<span style="font-family:${f.b};font-size:.72rem;color:${p.text};opacity:${o};">${t}</span>`).join('')}
         </div>
       </div>
     </section>`;
@@ -622,85 +683,246 @@ function fullLanding(theme: ThemeIdentity): string {
   const f   = ff(theme);
   const o   = op(theme);
   const h   = theme.structure.headerStyle;
-  const isCenter = h !== 'hero-split';
+  const cl  = theme.structure.cardLayout;
 
   const nav = `<nav id="mnav" style="position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:.9rem 7vw;background:${p.surface};border-bottom:1px solid ${p.rule};">
     <div style="font-family:${f.d};font-size:1.1rem;font-weight:${f.w};color:${p.text};">BRAND</div>
-    <div style="display:flex;gap:1.8rem;">${['Servicios','Casos','Precios','Blog'].map(l=>`<a href="#" style="font-family:${f.b};font-size:.8rem;color:${p.text};opacity:.65;">${l}</a>`).join('')}</div>
-    <button style="background:${p.accent};color:${p.bg};border:none;padding:.7rem 1.6rem;font-family:${f.b};font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;">Diagnóstico Gratuito →</button>
+    <div style="display:flex;gap:1.8rem;">${['Producto','Casos','Precios','FAQ'].map(l=>`<a href="#" style="font-family:${f.b};font-size:.8rem;color:${p.text};opacity:.65;">${l}</a>`).join('')}</div>
+    <button style="background:${p.accent};color:${p.bg};border:none;padding:.7rem 1.6rem;font-family:${f.b};font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;">Empezar Gratis →</button>
   </nav>`;
 
-  const hero = isCenter
-    ? `<section style="padding:9vh 10vw 7vh;background:${p.bg};text-align:center;">
-        <div class="sr" style="display:inline-flex;align-items:center;gap:.5rem;background:${p.accent}18;border:1px solid ${p.accent}40;border-radius:100px;padding:.3rem 1rem;margin-bottom:2rem;">
-          <span style="width:6px;height:6px;background:${p.accent};border-radius:50%;display:inline-block;"></span>
-          <span style="font-family:${f.b};font-size:.6rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:${p.accent};">Solo 20 lugares · Cupos casi agotados</span>
-        </div>
-        <h1 class="sr" style="font-family:${f.d};font-size:clamp(2.6rem,6vw,5.5rem);font-weight:${f.w};line-height:1.0;color:${p.text};margin-bottom:1.6rem;letter-spacing:-.03em;">Cada día sin esto,<br/>alguien en tu empresa<br/><em style="color:${p.accent};font-style:normal;">está pagando el precio.</em></h1>
-        <p class="sr" style="font-family:${f.b};font-size:1.05rem;line-height:1.8;color:${p.text};opacity:${o};max-width:560px;margin:0 auto 2.5rem;">El sistema que le falta a tu negocio existe. No tenerlo no es un problema de dinero — es una decisión no tomada.</p>
-        <div class="sr" style="display:flex;gap:1.2rem;justify-content:center;flex-wrap:wrap;">
-          <button style="background:${p.accent};color:${p.bg};border:none;padding:1.1rem 2.8rem;font-family:${f.b};font-size:.9rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;box-shadow:0 8px 32px ${p.accent}40;">Solicitar Diagnóstico Gratuito →</button>
-          <button style="background:transparent;color:${p.text};border:1px solid ${p.rule};padding:1.1rem 2rem;font-family:${f.b};font-size:.85rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;border-radius:4px;opacity:.8;">Ver casos reales</button>
-        </div>
-        <div class="sr" style="display:flex;justify-content:center;gap:2.5rem;margin-top:3rem;">
-          ${['Sin costo','Sin compromiso','Respuesta 24h'].map(t=>`<div style="display:flex;align-items:center;gap:.5rem;"><div style="width:14px;height:14px;background:${p.accent}22;border-radius:50%;display:flex;align-items:center;justify-content:center;"><div style="width:5px;height:5px;background:${p.accent};border-radius:50%;"></div></div><span style="font-family:${f.b};font-size:.75rem;color:${p.text};opacity:${o};">${t}</span></div>`).join('')}
-        </div>
-      </section>`
-    : `<section style="display:grid;grid-template-columns:1fr 1fr;min-height:86vh;">
-        <div style="display:flex;flex-direction:column;justify-content:center;padding:8vw 5vw 8vw 7vw;background:${p.bg};">
-          <p class="sr" style="font-family:${f.b};font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;color:${p.accent};margin-bottom:1.5rem;">Para líderes que deciden</p>
-          <h1 class="sr" style="font-family:${f.d};font-size:clamp(2.2rem,4vw,3.8rem);font-weight:${f.w};line-height:1.05;color:${p.text};margin-bottom:1.4rem;letter-spacing:-.02em;">El sistema que<br/>tu negocio<br/><em style="color:${p.accent};font-style:normal;">necesitaba ayer.</em></h1>
-          <p class="sr" style="font-family:${f.b};font-size:1rem;line-height:1.8;color:${p.text};opacity:${o};margin-bottom:2.5rem;">Sin implementación interminable. Sin excusas. Resultados medibles en 72 horas.</p>
-          <button class="sr" style="background:${p.accent};color:${p.bg};border:none;padding:1.1rem 2.5rem;font-family:${f.b};font-size:.88rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;width:fit-content;">Empezar Ahora →</button>
-        </div>
-        <div style="position:relative;overflow:hidden;background:${p.surface};">
-          <img src="${IMG(S.scene[0],600,800)}" style="width:100%;height:100%;object-fit:cover;" alt=""/>
-          <div style="position:absolute;inset:0;background:${p.bg}20;"></div>
-        </div>
-      </section>`;
+  // ─── HERO: branch por headerStyle ──────────────────────────────────────────
+  let hero = '';
 
+  if (h === 'hero-fullbleed') {
+    hero = `<section style="position:relative;min-height:95vh;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 10vw;">
+      <div style="position:absolute;inset:0;background:url('${IMG(S.scene[0],1400,900)}') center/cover no-repeat;"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(to bottom,${p.bg}B0,${p.bg}E8);"></div>
+      <div style="position:relative;z-index:2;max-width:720px;">
+        <div class="sr" style="display:inline-flex;align-items:center;gap:.6rem;background:${p.accent}22;border:1px solid ${p.accent}50;border-radius:100px;padding:.35rem 1.1rem;margin-bottom:2rem;">
+          <span style="width:6px;height:6px;background:${p.accent};border-radius:50%;"></span>
+          <span style="font-family:${f.b};font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:${p.accent};">Prueba gratis 14 días · Sin tarjeta</span>
+        </div>
+        <h1 class="sr" style="font-family:${f.d};font-size:clamp(2.8rem,6vw,5.5rem);font-weight:${f.w};line-height:1.0;color:${p.text};margin-bottom:1.6rem;letter-spacing:-.03em;">Resultados reales.<br/>No promesas de<br/><em style="color:${p.accent};font-style:normal;">agencia.</em></h1>
+        <p class="sr" style="font-family:${f.b};font-size:1.05rem;line-height:1.8;color:${p.text};opacity:${o};max-width:560px;margin:0 auto 2.5rem;">El sistema que 500+ negocios usan para crecer sin depender de suerte ni de presupuesto ilimitado.</p>
+        <div class="sr" style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem;">
+          <button style="background:${p.accent};color:${p.bg};border:none;padding:1.1rem 2.8rem;font-family:${f.b};font-size:.9rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;box-shadow:0 8px 40px ${p.accent}50;">Empezar Gratis Ahora →</button>
+          <button style="background:transparent;color:${p.text};border:1px solid ${p.rule};padding:1.1rem 2rem;font-family:${f.b};font-size:.85rem;border-radius:4px;">Ver Demo en Vivo</button>
+        </div>
+        <div style="display:flex;justify-content:center;gap:2rem;">${['Sin contrato','Soporte 24/7','Cancela cuando quieras'].map(t=>`<span style="font-family:${f.b};font-size:.72rem;color:${p.text};opacity:${o};">✓ ${t}</span>`).join('')}</div>
+      </div>
+    </section>`;
+
+  } else if (h === 'hero-split') {
+    hero = `<section style="display:grid;grid-template-columns:1fr 1fr;min-height:88vh;">
+      <div style="display:flex;flex-direction:column;justify-content:center;padding:8vw 5vw 8vw 7vw;background:${p.bg};">
+        <p class="sr" style="font-family:${f.b};font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;color:${p.accent};margin-bottom:1.5rem;">Para equipos que mueven rápido</p>
+        <h1 class="sr" style="font-family:${f.d};font-size:clamp(2.2rem,4vw,3.8rem);font-weight:${f.w};line-height:1.05;color:${p.text};margin-bottom:1.4rem;letter-spacing:-.02em;">El sistema que<br/>tu equipo<br/><em style="color:${p.accent};font-style:normal;">necesitaba ayer.</em></h1>
+        <p class="sr" style="font-family:${f.b};font-size:1rem;line-height:1.8;color:${p.text};opacity:${o};margin-bottom:1.8rem;">Sin onboarding de 3 meses. Sin consultor caro. Resultados medibles en la primera semana.</p>
+        <div style="display:flex;gap:.4rem;align-items:center;margin-bottom:1.8rem;">
+          ${[0,1,2,3,4].map(()=>`<span style="color:${p.accent};font-size:1.1rem;">★</span>`).join('')}
+          <span style="font-family:${f.b};font-size:.78rem;color:${p.muted};margin-left:.5rem;">4.9 · 2,400+ reseñas</span>
+        </div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+          <button class="sr" style="background:${p.accent};color:${p.bg};border:none;padding:1.1rem 2.5rem;font-family:${f.b};font-size:.88rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;">Empezar Gratis →</button>
+          <button style="background:transparent;color:${p.text};border:1px solid ${p.rule};padding:1.1rem 1.6rem;font-family:${f.b};font-size:.85rem;border-radius:4px;">Ver Demo</button>
+        </div>
+      </div>
+      <div style="position:relative;overflow:hidden;background:${p.surface};">
+        <img src="${IMG(S.scene[0],620,820)}" style="width:100%;height:100%;object-fit:cover;" alt=""/>
+        <div style="position:absolute;top:2rem;right:2rem;background:${p.bg}EE;backdrop-filter:blur(12px);border:1px solid ${p.rule};border-radius:14px;padding:1.2rem 1.5rem;min-width:180px;">
+          <p style="font-family:${f.b};font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:${p.accent};margin-bottom:.5rem;">Esta semana</p>
+          <p style="font-family:${f.d};font-size:1.8rem;font-weight:${f.w};color:${p.text};line-height:1;">+34%</p>
+          <p style="font-family:${f.b};font-size:.72rem;color:${p.muted};">Tasa de conversión</p>
+        </div>
+      </div>
+    </section>`;
+
+  } else if (h === 'hero-editorial') {
+    hero = `<section style="padding:10vh 8vw 6vh;background:${p.bg};">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3.5rem;border-bottom:1px solid ${p.rule};padding-bottom:1.5rem;">
+        <p style="font-family:${f.b};font-size:.6rem;letter-spacing:.26em;text-transform:uppercase;color:${p.muted};">El Método — 2026</p>
+        <div style="display:flex;gap:1.8rem;">${['Cómo Funciona','Resultados','Precios'].map(t=>`<a href="#" style="font-family:${f.b};font-size:.75rem;color:${p.text};opacity:.6;">${t}</a>`).join('')}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:3fr 2fr;gap:8rem;align-items:end;">
+        <div>
+          <h1 class="sr" style="font-family:${f.d};font-size:clamp(3.2rem,7vw,6rem);font-weight:${f.w};line-height:.92;color:${p.text};letter-spacing:-.05em;margin-bottom:2.5rem;">Menos ruido.<br/>Más<br/><span style="color:${p.accent};">resultados.</span></h1>
+          <p class="sr" style="font-family:${f.b};font-size:1rem;line-height:1.8;color:${p.text};opacity:${o};max-width:420px;margin-bottom:2rem;">El único sistema que combina automatización real con estrategia humana. Sin promesas vacías.</p>
+          <button style="background:${p.accent};color:${p.bg};border:none;padding:1rem 2.5rem;font-family:${f.b};font-size:.85rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;">Acceso Inmediato</button>
+        </div>
+        <div>
+          <img src="${IMG(S.scene[1],500,580)}" style="width:100%;border-radius:8px;object-fit:cover;aspect-ratio:4/5;" alt=""/>
+          <div style="margin-top:1.2rem;padding:1.2rem;background:${p.surface};border:1px solid ${p.rule};border-radius:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;">
+              <span style="font-family:${f.b};font-size:.7rem;color:${p.muted};">Resultado promedio</span>
+              <span style="font-family:${f.b};font-size:.62rem;font-weight:700;color:${p.accent};background:${p.accent}18;padding:2px 8px;border-radius:100px;">+247%</span>
+            </div>
+            <div style="height:6px;background:${p.rule};border-radius:100px;overflow:hidden;">
+              <div style="height:100%;width:78%;background:${p.accent};border-radius:100px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>`;
+
+  } else if (h === 'hero-text-only' || h === 'hero-minimal') {
+    hero = `<section style="padding:14vh 12vw 10vh;background:${p.bg};text-align:center;border-bottom:2px solid ${p.rule};">
+      <p class="sr" style="font-family:${f.b};font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:${p.accent};margin-bottom:2rem;">La categoría tiene un nuevo estándar</p>
+      <h1 class="sr" style="font-family:${f.d};font-size:clamp(4rem,10vw,9rem);font-weight:${f.w};line-height:.88;color:${p.text};letter-spacing:-.05em;margin-bottom:2.5rem;">EL SISTEMA<br/><span style="color:${p.accent};">QUE CIERRA</span><br/>NEGOCIOS.</h1>
+      <p class="sr" style="font-family:${f.b};font-size:1.1rem;line-height:1.75;color:${p.text};opacity:${o};max-width:500px;margin:0 auto 2.5rem;">Sin vendedor estelar. Sin año de implementación. Sin excusas de "mercado difícil".</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:3rem;">
+        <button style="background:${p.accent};color:${p.bg};border:none;padding:1.1rem 2.8rem;font-family:${f.b};font-size:.9rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;">Quiero Acceso →</button>
+        <button style="background:transparent;color:${p.text};border:1px solid ${p.rule};padding:1.1rem 2rem;font-family:${f.b};font-size:.88rem;border-radius:4px;">Ver Casos Reales</button>
+      </div>
+      <div style="display:flex;justify-content:center;gap:4rem;">
+        ${[['500+','Empresas activas'],['3×','Más conversión'],['14d','Resultados promedio']].map(([n,l])=>`<div style="text-align:center;"><p style="font-family:${f.d};font-size:2.5rem;font-weight:${f.w};color:${p.accent};line-height:1;">${n}</p><p style="font-family:${f.b};font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:${p.muted};margin-top:.4rem;">${l}</p></div>`).join('')}
+      </div>
+    </section>`;
+
+  } else {
+    // hero-cinematic: imagen de fondo con copy lateral
+    hero = `<section style="position:relative;min-height:92vh;overflow:hidden;display:flex;align-items:center;padding:0 7vw;">
+      <img src="${IMG(S.scene[0],1400,920)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"/>
+      <div style="position:absolute;inset:0;background:linear-gradient(105deg,${p.bg}F2 45%,${p.bg}80 70%,transparent);"></div>
+      <div style="position:relative;z-index:2;max-width:560px;">
+        <p class="sr" style="font-family:${f.b};font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;color:${p.accent};margin-bottom:1.5rem;">Probado. Medido. Sin promesas.</p>
+        <h1 class="sr" style="font-family:${f.d};font-size:clamp(2.5rem,5vw,4.8rem);font-weight:${f.w};line-height:1.04;color:${p.text};margin-bottom:1.5rem;letter-spacing:-.03em;">El crecimiento<br/>que merecías<br/><em style="color:${p.accent};font-style:normal;">desde el primer día.</em></h1>
+        <p class="sr" style="font-family:${f.b};font-size:1rem;line-height:1.8;color:${p.text};opacity:${o};margin-bottom:2.5rem;">No vendemos "estrategia". Vendemos el sistema que la ejecuta sin que tengas que supervisar cada paso.</p>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem;">
+          <button style="background:${p.accent};color:${p.bg};border:none;padding:1rem 2.5rem;font-family:${f.b};font-size:.88rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;box-shadow:0 6px 30px ${p.accent}40;">Solicitar Demo →</button>
+          <button style="background:${p.bg}CC;color:${p.text};border:1px solid ${p.rule};padding:1rem 1.8rem;font-family:${f.b};font-size:.85rem;border-radius:4px;backdrop-filter:blur(8px);">Casos de Éxito</button>
+        </div>
+        <div style="display:flex;gap:1.5rem;">${['Sin permanencia','Soporte incluido','Cancela en 1 clic'].map(t=>`<span style="font-family:${f.b};font-size:.7rem;color:${p.text};opacity:${o};">✓ ${t}</span>`).join('')}</div>
+      </div>
+    </section>`;
+  }
+
+  // ─── TRUST BAR ─────────────────────────────────────────────────────────────
   const trust = `<section style="display:grid;grid-template-columns:repeat(4,1fr);background:${p.surface};border-top:1px solid ${p.rule};border-bottom:1px solid ${p.rule};">
-    ${[['98%','Tasa de satisfacción'],['3×','Más rápido que el estándar'],['500+','Empresas activas'],['72h','Implementación inicial']].map(([n,l],i)=>`
+    ${[['500+','Empresas activas'],['3×','Más conversión'],['98%','Retención 12 meses'],['14d','Tiempo primer resultado']].map(([n,l],i)=>`
       <div class="sr" style="padding:2.5rem;text-align:center;${i>0?`border-left:1px solid ${p.rule};`:''}">
         <div style="font-family:${f.d};font-size:2.8rem;font-weight:${f.w};color:${p.accent};line-height:1;">${n}</div>
-        <div style="font-family:${f.b};font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:${p.muted};margin-top:.6rem;">${l}</div>
+        <div style="font-family:${f.b};font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:${p.muted};margin-top:.6rem;">${l}</div>
       </div>`).join('')}
   </section>`;
 
-  const features = `<section style="padding:7rem 7vw;background:${p.bg};">
-    <div class="sr" style="text-align:center;margin-bottom:4rem;">
-      <p style="font-family:${f.b};font-size:.64rem;letter-spacing:.24em;text-transform:uppercase;color:${p.accent};margin-bottom:.8rem;">Lo Que Incluye</p>
-      <h2 style="font-family:${f.d};font-size:clamp(1.8rem,3vw,2.6rem);font-weight:${f.w};color:${p.text};letter-spacing:-.02em;">Un Sistema. No Un Servicio Más.</h2>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;">
-      ${[
-        ['Diagnóstico Profundo','Análisis de brechas en 48h. No genérico. Específico para tu realidad.'],
-        ['Implementación Guiada','Cada paso tiene un protocolo. No te dejamos solo ante la hoja en blanco.'],
-        ['Resultados Medibles','KPIs definidos desde el día 1. Si no hay datos, no hay progreso.'],
-        ['Soporte Continuo','SLAs claros. Urgente, Prioritario, Regular. Sin ambigüedad.'],
-        ['Document Factory','Todos los documentos operativos listos para usar. Estandarizados.'],
-        ['Reportes Mensuales','Rendición de cuentas real. Transparencia no es un discurso — es un documento.'],
-      ].map(([title,desc])=>`
-        <div class="sr" style="padding:2rem;background:${p.surface};border:1px solid ${p.rule};border-radius:12px;">
-          <div style="width:40px;height:40px;background:${p.accent}20;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:1.2rem;">
-            <div style="width:20px;height:20px;background:${p.accent};border-radius:4px;"></div>
-          </div>
-          <p style="font-family:${f.b};font-size:.9rem;font-weight:700;color:${p.text};margin-bottom:.6rem;">${title}</p>
-          <p style="font-family:${f.b};font-size:.82rem;line-height:1.7;color:${p.text};opacity:${o};">${desc}</p>
-        </div>`).join('')}
-    </div>
-  </section>`;
+  // ─── FEATURES: branch por cardLayout ───────────────────────────────────────
+  let features = '';
 
+  if (cl === 'list-editorial') {
+    features = `<section style="padding:7rem 7vw;background:${p.bg};">
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:6rem;align-items:start;">
+        <div>
+          <p style="font-family:${f.b};font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;color:${p.accent};margin-bottom:1rem;">El Sistema</p>
+          <h2 class="sr" style="font-family:${f.d};font-size:clamp(1.8rem,3vw,2.6rem);font-weight:${f.w};color:${p.text};letter-spacing:-.02em;line-height:1.1;margin-bottom:1.5rem;">Todo lo que<br/>necesitas.<br/>Nada de lo<br/>que no.</h2>
+          <p style="font-family:${f.b};font-size:.85rem;line-height:1.75;color:${p.text};opacity:${o};">Diseñado para escalar contigo desde el día 1. Sin configuraciones infinitas.</p>
+        </div>
+        <div>
+          ${[
+            ['01','Diagnóstico en 48h','Análisis de brechas específico para tu realidad. No un cuestionario genérico.'],
+            ['02','Implementación Asistida','Cada paso tiene un protocolo. Tu equipo no parte de cero.'],
+            ['03','Resultados Medibles','KPIs desde el día 1. Si no hay datos, no hay progreso — y lo sabemos.'],
+            ['04','Escalabilidad Incluida','El sistema crece contigo. Lo que funciona en 10 clientes, funciona en 10,000.'],
+          ].map(([n,t,d])=>`
+            <div class="sr" style="display:grid;grid-template-columns:3rem 1fr;gap:1.5rem;padding:1.8rem 0;border-bottom:1px solid ${p.rule};align-items:start;">
+              <span style="font-family:${f.d};font-size:1.4rem;font-weight:${f.w};color:${p.accent};opacity:.4;line-height:1;">${n}</span>
+              <div>
+                <p style="font-family:${f.b};font-size:.95rem;font-weight:700;color:${p.text};margin-bottom:.5rem;">${t}</p>
+                <p style="font-family:${f.b};font-size:.82rem;line-height:1.7;color:${p.text};opacity:${o};">${d}</p>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </section>`;
+
+  } else if (cl === 'grid-masonry') {
+    features = `<section style="padding:7rem 7vw;background:${p.bg};">
+      <div class="sr" style="text-align:center;margin-bottom:4rem;">
+        <p style="font-family:${f.b};font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;color:${p.accent};margin-bottom:.8rem;">Por Qué Funciona</p>
+        <h2 style="font-family:${f.d};font-size:clamp(1.8rem,3vw,2.6rem);font-weight:${f.w};color:${p.text};letter-spacing:-.02em;">Construido para resultados reales.</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
+        <div class="sr" style="background:${p.accent};border-radius:16px;padding:3rem;display:flex;flex-direction:column;justify-content:flex-end;min-height:280px;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:-2rem;right:-2rem;width:180px;height:180px;background:${p.bg}15;border-radius:50%;"></div>
+          <p style="font-family:${f.d};font-size:3.5rem;font-weight:${f.w};color:${p.bg};line-height:1;margin-bottom:.5rem;">+247%</p>
+          <p style="font-family:${f.b};font-size:.85rem;font-weight:700;color:${p.bg};margin-bottom:.3rem;">Incremento promedio en conversión</p>
+          <p style="font-family:${f.b};font-size:.75rem;color:${p.bg};opacity:.75;">En los primeros 90 días de uso</p>
+        </div>
+        <div style="display:grid;grid-template-rows:1fr 1fr;gap:1.2rem;">
+          ${[['Integración en 1 día','Sin equipo técnico. Sin meses de setup. Empieza el mismo día.'],['Soporte 24/7','Un humano real. SLA de respuesta: urgente = 1h, normal = 4h.']].map(([t,d])=>`
+            <div class="sr" style="background:${p.surface};border:1px solid ${p.rule};border-radius:16px;padding:2rem;">
+              <p style="font-family:${f.b};font-size:.95rem;font-weight:700;color:${p.text};margin-bottom:.5rem;">${t}</p>
+              <p style="font-family:${f.b};font-size:.82rem;line-height:1.7;color:${p.text};opacity:${o};">${d}</p>
+            </div>`).join('')}
+        </div>
+        <div class="sr" style="background:${p.surface};border:1px solid ${p.rule};border-radius:16px;padding:2rem;">
+          <p style="font-family:${f.b};font-size:.95rem;font-weight:700;color:${p.text};margin-bottom:.5rem;">Sin permanencia</p>
+          <p style="font-family:${f.b};font-size:.82rem;line-height:1.7;color:${p.text};opacity:${o};">Cancela en 1 clic. Si no funciona, no tienes por qué quedarte. Así de simple.</p>
+        </div>
+        <div class="sr" style="background:${p.bg};border:1px solid ${p.rule};border-radius:16px;padding:2rem;display:flex;align-items:center;justify-content:center;">
+          <button style="background:${p.accent};color:${p.bg};border:none;padding:1rem 2rem;font-family:${f.b};font-size:.85rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:8px;white-space:nowrap;">Empezar Ahora →</button>
+        </div>
+      </div>
+    </section>`;
+
+  } else if (cl === 'scroll-horizontal') {
+    features = `<section style="padding:7rem 0;background:${p.bg};overflow:hidden;">
+      <div style="padding:0 7vw;margin-bottom:3rem;">
+        <p style="font-family:${f.b};font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;color:${p.accent};margin-bottom:.8rem;">Lo Que Incluye</p>
+        <h2 class="sr" style="font-family:${f.d};font-size:clamp(1.8rem,3vw,2.6rem);font-weight:${f.w};color:${p.text};letter-spacing:-.02em;">Todo incluido. Sin sorpresas.</h2>
+      </div>
+      <div style="display:flex;gap:1.2rem;padding:0 7vw;overflow-x:auto;scroll-snap-type:x mandatory;cursor:grab;">
+        ${[
+          ['⚡','Implementación Express','En vivo el mismo día. Sin instalación. Sin equipo técnico.'],
+          ['📊','Analytics en Tiempo Real','Datos que se actualizan cada 5 minutos. Sin esperar el reporte del lunes.'],
+          ['🔗','120+ Integraciones','Conecta con lo que ya usas. CRM, email, ERP, Shopify, todo.'],
+          ['🛡️','Seguridad Empresarial','SOC2, GDPR, ISO 27001. Tu data nunca sale de tu jurisdicción.'],
+          ['🤝','Account Manager Dedicado','No un bot. Una persona que conoce tu negocio y lleva tu cuenta.'],
+        ].map(([icon,t,d])=>`
+          <div class="sr" style="flex:0 0 300px;background:${p.surface};border:1px solid ${p.rule};border-radius:16px;padding:2rem;scroll-snap-align:start;">
+            <div style="font-size:2rem;margin-bottom:1.2rem;">${icon}</div>
+            <p style="font-family:${f.b};font-size:.95rem;font-weight:700;color:${p.text};margin-bottom:.6rem;">${t}</p>
+            <p style="font-family:${f.b};font-size:.82rem;line-height:1.7;color:${p.text};opacity:${o};">${d}</p>
+          </div>`).join('')}
+      </div>
+    </section>`;
+
+  } else {
+    // grid-standard (default)
+    features = `<section style="padding:7rem 7vw;background:${p.bg};">
+      <div class="sr" style="text-align:center;margin-bottom:4rem;">
+        <p style="font-family:${f.b};font-size:.64rem;letter-spacing:.24em;text-transform:uppercase;color:${p.accent};margin-bottom:.8rem;">Lo Que Incluye</p>
+        <h2 style="font-family:${f.d};font-size:clamp(1.8rem,3vw,2.6rem);font-weight:${f.w};color:${p.text};letter-spacing:-.02em;">Un Sistema. No Un Servicio Más.</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;">
+        ${[
+          ['Diagnóstico Profundo','Análisis de brechas en 48h. Específico para tu realidad, no genérico.'],
+          ['Implementación Guiada','Cada paso tiene un protocolo. No te dejamos solo ante la hoja en blanco.'],
+          ['Resultados Medibles','KPIs definidos desde el día 1. Sin datos, no hay progreso.'],
+          ['Soporte con SLA','Urgente, Prioritario, Regular. Sin ambigüedad, sin bots.'],
+          ['Escalabilidad Incluida','Lo que funciona en 10 clientes funciona en 10,000. Mismo sistema.'],
+          ['Reportes Mensuales','Rendición de cuentas real. Transparencia es un documento, no un discurso.'],
+        ].map(([title,desc])=>`
+          <div class="sr" style="padding:2rem;background:${p.surface};border:1px solid ${p.rule};border-radius:12px;">
+            <div style="width:40px;height:40px;background:${p.accent}20;border-radius:10px;margin-bottom:1.2rem;"></div>
+            <p style="font-family:${f.b};font-size:.9rem;font-weight:700;color:${p.text};margin-bottom:.6rem;">${title}</p>
+            <p style="font-family:${f.b};font-size:.82rem;line-height:1.7;color:${p.text};opacity:${o};">${desc}</p>
+          </div>`).join('')}
+      </div>
+    </section>`;
+  }
+
+  // ─── TESTIMONIALS ───────────────────────────────────────────────────────────
   const testimonials = `<section style="padding:7rem 7vw;background:${p.surface};">
     <div class="sr" style="text-align:center;margin-bottom:4rem;">
-      <p style="font-family:${f.b};font-size:.64rem;letter-spacing:.24em;text-transform:uppercase;color:${p.accent};margin-bottom:.8rem;">Lo Que Dicen Las Juntas Directivas</p>
+      <p style="font-family:${f.b};font-size:.64rem;letter-spacing:.24em;text-transform:uppercase;color:${p.accent};margin-bottom:.8rem;">Lo Que Dicen</p>
       <h2 style="font-family:${f.d};font-size:clamp(1.6rem,3vw,2.4rem);font-weight:${f.w};color:${p.text};letter-spacing:-.02em;">No lo decimos nosotros.</h2>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;">
       ${[
-        ['Ricardo O.','Propietario · Torre Residencial, Marbella','La transparencia no es un discurso — es un documento. Eso es exactamente lo que entregaron.'],
-        ['Patricia M.','Presidenta JD · Edificio Ámbar, Panamá','Nunca creí que la administración de mi edificio podría ser tan predecible. Ahora lo es.'],
-        ['Carlos V.','Inversionista · 3 Propiedades','El ROI es claro: menos conflictos, más tiempo, más dinero. Simple.'],
+        ['Ricardo O.','CEO · Fintech Scale-up','Implementamos en un viernes por la tarde. El lunes ya teníamos datos. Nada de lo que habíamos probado antes fue tan rápido.'],
+        ['Patricia M.','VP Marketing · Retail Chain','El equipo tardó 2 horas en adoptarlo. Sin capacitación extra. Sin preguntas raras al soporte. Así de intuitivo.'],
+        ['Carlos V.','Fundador · SaaS B2B','El ROI fue claro en 3 semanas: menos tiempo en reuniones de seguimiento, más tiempo cerrando. No hay vuelta atrás.'],
       ].map(([name,role,quote])=>`
         <div class="sr" style="background:${p.bg};border:1px solid ${p.rule};border-radius:12px;padding:2rem;">
           <div style="display:flex;gap:.3rem;margin-bottom:1rem;">${[0,1,2,3,4].map(()=>`<span style="color:${p.accent};">★</span>`).join('')}</div>
@@ -713,11 +935,12 @@ function fullLanding(theme: ThemeIdentity): string {
     </div>
   </section>`;
 
+  // ─── CTA FINAL ──────────────────────────────────────────────────────────────
   const cta = `<section style="padding:9rem 7vw;background:${p.bg};text-align:center;">
-    <p class="sr" style="font-family:${f.b};font-size:.64rem;letter-spacing:.24em;text-transform:uppercase;color:${p.accent};margin-bottom:1rem;">Sin costo. Sin compromiso. Sin excusas.</p>
-    <h2 class="sr" style="font-family:${f.d};font-size:clamp(2rem,4vw,3.5rem);font-weight:${f.w};color:${p.text};margin-bottom:1.5rem;letter-spacing:-.03em;">Cada día que esperas,<br/>alguien en tu comunidad<br/><em style="color:${p.accent};font-style:normal;">está pagando el costo.</em></h2>
-    <p class="sr" style="font-family:${f.b};font-size:1rem;line-height:1.8;color:${p.text};opacity:${o};max-width:480px;margin:0 auto 3rem;">Diagnóstico gratuito. 30 minutos. Sin compromiso de contratación.</p>
-    <button class="sr" style="background:${p.accent};color:${p.bg};border:none;padding:1.2rem 3.2rem;font-family:${f.b};font-size:.95rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;border-radius:4px;box-shadow:0 8px 40px ${p.accent}50;">Solicitar Diagnóstico Gratuito →</button>
+    <p class="sr" style="font-family:${f.b};font-size:.64rem;letter-spacing:.24em;text-transform:uppercase;color:${p.accent};margin-bottom:1rem;">14 días gratis. Sin tarjeta. Sin trampa.</p>
+    <h2 class="sr" style="font-family:${f.d};font-size:clamp(2rem,4vw,3.5rem);font-weight:${f.w};color:${p.text};margin-bottom:1.5rem;letter-spacing:-.03em;">Cada semana que esperas,<br/>tu competencia no<br/><em style="color:${p.accent};font-style:normal;">está esperando.</em></h2>
+    <p class="sr" style="font-family:${f.b};font-size:1rem;line-height:1.8;color:${p.text};opacity:${o};max-width:440px;margin:0 auto 3rem;">Sin permanencia. Cancela cuando quieras. Pero los que empiezan, no se van.</p>
+    <button class="sr" style="background:${p.accent};color:${p.bg};border:none;padding:1.2rem 3.2rem;font-family:${f.b};font-size:.95rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;border-radius:4px;box-shadow:0 8px 40px ${p.accent}50;">Empezar Ahora — Es Gratis →</button>
   </section>`;
 
   const footer = `<footer style="background:${p.surface};border-top:1px solid ${p.rule};padding:2.5rem 7vw;display:flex;justify-content:space-between;align-items:center;">
@@ -957,6 +1180,32 @@ function fullWeb(theme: ThemeIdentity): string {
         </div>
       </div>
     </section>`;
+  } else if (cl === 'grid-masonry') {
+    servicesSection = `<section style="padding:7rem 7vw;background:${p.surface};">
+      <div class="sr" style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3.5rem;">
+        <h2 style="font-family:${f.d};font-size:clamp(1.8rem,3vw,2.6rem);font-weight:${f.w};color:${p.text};letter-spacing:-.02em;">Proyectos<br/>Seleccionados</h2>
+        <a href="#" style="font-family:${f.b};font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;color:${p.accent};">Portfolio completo →</a>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;">
+        <div class="sr" style="border-radius:12px;overflow:hidden;background:${p.bg};border:1px solid ${p.rule};grid-row:span 2;">
+          <div style="overflow:hidden;height:400px;"><img src="${IMG(S.scene[0],500,400)}" style="width:100%;height:100%;object-fit:cover;transition:transform .5s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" alt=""/></div>
+          <div style="padding:2rem;">
+            <p style="font-family:${f.b};font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:${p.accent};margin-bottom:.5rem;">Identidad · Branding</p>
+            <h3 style="font-family:${f.d};font-size:1.4rem;font-weight:${f.w};color:${p.text};margin-bottom:.7rem;">Proyecto Insignia</h3>
+            <p style="font-family:${f.b};font-size:.85rem;line-height:1.7;color:${p.text};opacity:${o};">Sistema visual completo. Identidad, web, campañas y todos los puntos de contacto.</p>
+          </div>
+        </div>
+        ${S.scene.slice(1,4).map((id,i)=>`
+          <div class="sr" style="border-radius:12px;overflow:hidden;background:${p.bg};border:1px solid ${p.rule};${i===2?'grid-column:span 1;':''}" >
+            <div style="overflow:hidden;height:180px;"><img src="${IMG(id,500,180)}" style="width:100%;height:100%;object-fit:cover;transition:transform .5s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" alt=""/></div>
+            <div style="padding:1.4rem;">
+              <p style="font-family:${f.b};font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:${p.accent};margin-bottom:.4rem;">Proyecto 0${i+2}</p>
+              <h3 style="font-family:${f.d};font-size:1.05rem;font-weight:${f.w};color:${p.text};">Identidad Visual 0${i+2}</h3>
+            </div>
+          </div>`).join('')}
+      </div>
+    </section>`;
+
   } else if (cl === 'scroll-horizontal') {
     servicesSection = `<section style="padding:6rem 0;background:${p.surface};overflow:hidden;">
       <h2 class="sr" style="font-family:${f.d};font-size:2rem;font-weight:${f.w};color:${p.text};margin:0 7vw 3rem;letter-spacing:-.02em;">Proyectos Recientes</h2>
