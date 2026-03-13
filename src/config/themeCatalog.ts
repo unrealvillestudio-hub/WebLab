@@ -5,7 +5,7 @@
 // AGGRO variant available on all themes — breaks rules with client-accepted risk.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type ThemeType = 'ecommerce' | 'landing' | 'web';
+export type ThemeType = 'ecommerce' | 'landing' | 'web' | 'blog';
 export type ThemeMood = 'luxury' | 'edge' | 'organic' | 'technical' | 'editorial' | 'brutalist' | 'maximalist' | 'minimal' | 'dark' | 'vibrant';
 
 export interface ThemeIdentity {
@@ -35,7 +35,7 @@ export interface ThemeIdentity {
   structure: {
     colorMode: 'dark' | 'light';
     headerStyle: 'hero-cinematic' | 'hero-editorial' | 'hero-split' | 'hero-fullbleed' | 'hero-minimal' | 'hero-text-only';
-    cardLayout: 'grid-standard' | 'grid-masonry' | 'scroll-horizontal' | 'list-editorial' | 'cards-overlap';
+    cardLayout: 'grid-standard' | 'grid-masonry' | 'scroll-horizontal' | 'list-editorial' | 'cards-overlap' | 'magazine' | 'single-column';
     enhancers: string[];
   };
   aggro: {
@@ -1198,6 +1198,131 @@ export const THEME_CATALOG: ThemeIdentity[] = [
       cardLayout: 'grid-masonry',
       enhancers: ['scroll-reveal', 'hover-reveal', 'floating-cta'],
     },
+  },
+
+  // ════════════════════════════════════════════════════════
+  // BLOG THEMES (10)
+  // ════════════════════════════════════════════════════════
+
+  {
+    id: 'chronicle', name: 'CHRONICLE', tagline: 'El blog como publicación. La marca como medio.',
+    type: 'blog' as const, mood: ['editorial', 'luxury', 'minimal'] as const,
+    palette: { bg: '#FAFAF6', surface: '#F0EDE4', text: '#1C1814', accent: '#C0282A', accent2: '#1C1814', muted: '#7A7060', rule: 'rgba(28,24,20,0.12)' },
+    typography: { display: 'Playfair Display', body: 'Source Serif 4', displayWeight: '700', style: 'serif' as const, googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300&display=swap' },
+    motion: 'Deliberado y editorial: hover en artículos revela categoría con slide. Zoom muy sutil en imágenes al hover.',
+    layoutDNA: 'Magazine grid: artículo featured 2/3 + sidebar editorial 1/3 arriba. Bajo: 3 columnas. Las imágenes lideran. Arquitectura periodística auténtica.',
+    aggro: { unlocked: true, description: 'AGGRO CHRONICLE: el rojo editorial se convierte en rojo ruptura. Tipografía que rompe la columna. La portada como declaración sin matices.' },
+    previewColors: ['#FAFAF6', '#C0282A', '#1C1814', '#F0EDE4'],
+    designerNote: 'CHRONICLE trata el blog como lo que debería ser: un medio con autoridad propia.',
+    structure: { colorMode: 'light' as const, headerStyle: 'hero-editorial' as const, cardLayout: 'magazine' as const, enhancers: ['reading-progress', 'category-pills', 'newsletter-cta', 'sticky-header'] },
+  },
+  {
+    id: 'dispatch', name: 'DISPATCH', tagline: 'Un solo hilo. Una sola voz. Sin ruido.',
+    type: 'blog' as const, mood: ['minimal', 'editorial', 'luxury'] as const,
+    palette: { bg: '#FFFEF8', surface: '#F5F2E8', text: '#181614', accent: '#1A52A8', accent2: '#8A3A18', muted: '#6A6860', rule: 'rgba(24,22,20,0.1)' },
+    typography: { display: 'EB Garamond', body: 'Lato', displayWeight: '500', style: 'serif' as const, googleFontsUrl: 'https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Lato:ital,wght@0,300;0,400;1,300&display=swap' },
+    motion: 'Anti-digital: sin animaciones de entrada. El contenido simplemente está, como una carta recibida.',
+    layoutDNA: 'Una columna central de 680px. Numeración de entregas tipo newsletter. Artículos como capítulos numerados. CTA de suscripción como párrafo final.',
+    aggro: { unlocked: true, description: 'AGGRO DISPATCH: el tono íntimo se convierte en declaración. Un punto de vista sin concesiones. La columna de opinión sin filtro.' },
+    previewColors: ['#FFFEF8', '#1A52A8', '#181614', '#F5F2E8'],
+    designerNote: 'DISPATCH es para creadores que entienden que una audiencia comprometida vale más que alcance masivo.',
+    structure: { colorMode: 'light' as const, headerStyle: 'hero-text-only' as const, cardLayout: 'single-column' as const, enhancers: ['newsletter-cta', 'author-bio', 'reading-progress'] },
+  },
+  {
+    id: 'mural', name: 'MURAL', tagline: 'La imagen primero. El texto la contextualiza. Siempre.',
+    type: 'blog' as const, mood: ['maximalist', 'editorial', 'dark'] as const,
+    palette: { bg: '#0A0A0A', surface: '#141414', text: '#F5F5F0', accent: '#FF5500', accent2: '#FFD700', muted: '#555555', rule: 'rgba(255,85,0,0.2)' },
+    typography: { display: 'Syne', body: 'DM Sans', displayWeight: '800', style: 'sans' as const, googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap' },
+    motion: 'Hover: la imagen escala al 105% con overlay de título + categoría desde abajo. Masonry que respira.',
+    layoutDNA: 'Foto full-bleed como hero. Masonry grid irregular de imágenes grandes. El texto contextualiza. Categorías como etiquetas flotantes sobre la foto.',
+    aggro: { unlocked: true, description: 'AGGRO MURAL: imágenes que sangran fuera del viewport. Texto sobre imagen sin overlay. La fotografía como statement.' },
+    previewColors: ['#0A0A0A', '#FF5500', '#F5F5F0', '#FFD700'],
+    designerNote: 'MURAL es para fotógrafos, viajeros, chefs y cualquier creador cuya historia vive en la imagen.',
+    structure: { colorMode: 'dark' as const, headerStyle: 'hero-fullbleed' as const, cardLayout: 'grid-masonry' as const, enhancers: ['hover-reveal', 'scroll-reveal', 'parallax'] },
+  },
+  {
+    id: 'codex', name: 'CODEX', tagline: 'El pensamiento largo. La lectura profunda. El argumento completo.',
+    type: 'blog' as const, mood: ['editorial', 'luxury', 'technical'] as const,
+    palette: { bg: '#F8F4EC', surface: '#EDE8DC', text: '#1E1A12', accent: '#2A5C2A', accent2: '#8B3A1A', muted: '#7A7060', rule: 'rgba(30,26,18,0.12)' },
+    typography: { display: 'Libre Baskerville', body: 'Crimson Text', displayWeight: '700', style: 'serif' as const, googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap' },
+    motion: 'Prácticamente estático. Reading progress bar arriba. TOC lateral hace highlight de sección activa. Footnotes en hover.',
+    layoutDNA: 'Dos columnas: contenido principal 70% + TOC sidebar fija 30%. Abstract y tiempo de lectura visibles. Drop caps. Blockquotes formales. Footnotes numeradas.',
+    aggro: { unlocked: true, description: 'AGGRO CODEX: el argumento académico como manifiesto. La evidencia como arma. Sin concesiones al lector casual.' },
+    previewColors: ['#F8F4EC', '#2A5C2A', '#1E1A12', '#EDE8DC'],
+    designerNote: 'CODEX respeta la inteligencia de su audiencia lo suficiente como para no simplificarla.',
+    structure: { colorMode: 'light' as const, headerStyle: 'hero-text-only' as const, cardLayout: 'list-editorial' as const, enhancers: ['toc-sidebar', 'reading-progress', 'scroll-reveal'] },
+  },
+  {
+    id: 'datastream', name: 'DATASTREAM', tagline: 'Contenido técnico con el diseño que merece.',
+    type: 'blog' as const, mood: ['technical', 'dark', 'edge'] as const,
+    palette: { bg: '#020B14', surface: '#061828', text: '#C8E8FF', accent: '#00E5B4', accent2: '#FF6B6B', muted: '#2A4A6A', rule: 'rgba(0,229,180,0.15)' },
+    typography: { display: 'Outfit', body: 'IBM Plex Mono', displayWeight: '600', style: 'mono' as const, googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap' },
+    motion: 'Terminal estético: reading time como progress bar. Tags filtrables con fade instantáneo. Hover en cards: borde acento que crece desde abajo.',
+    layoutDNA: 'Search prominente. Tag pills filtrables. Card grid oscuro con nivel (Básico/Intermedio/Avanzado) + tiempo de lectura + tags + avatar autor.',
+    aggro: { unlocked: true, description: 'AGGRO DATASTREAM: terminal mode completo — monospace puro, negro absoluto, acento verde neón. La complejidad técnica como señal de calidad.' },
+    previewColors: ['#020B14', '#00E5B4', '#C8E8FF', '#FF6B6B'],
+    designerNote: 'DATASTREAM trata el contenido técnico con el rigor visual que sus lectores esperan y merecen.',
+    structure: { colorMode: 'dark' as const, headerStyle: 'hero-split' as const, cardLayout: 'grid-standard' as const, enhancers: ['reading-progress', 'category-pills', 'newsletter-cta'] },
+  },
+  {
+    id: 'memoir', name: 'MEMOIR', tagline: 'La voz de una persona. La historia de muchos.',
+    type: 'blog' as const, mood: ['editorial', 'luxury', 'organic'] as const,
+    palette: { bg: '#FAF7F2', surface: '#F0EAE0', text: '#2A1E18', accent: '#8B4A6A', accent2: '#C09040', muted: '#8A7A6A', rule: 'rgba(42,30,24,0.12)' },
+    typography: { display: 'Cormorant Garamond', body: 'Lora', displayWeight: '300', style: 'serif' as const, googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Lora:ital,wght@0,400;0,500;1,400;1,500&display=swap' },
+    motion: 'Como pasar páginas de un diario: fade suave. Las fotos con leve grano de película simulado. Todo tiene textura.',
+    layoutDNA: 'Intro personal del autor con foto grande. Artículos como entradas de diario: fecha prominente, título en cursiva, foto personal a ancho completo. Alternando imagen-texto.',
+    aggro: { unlocked: false, description: 'MEMOIR no tiene AGGRO — la intimidad no escala con agresividad. Tiene un modo HONESTO: el copy más directo posible.' },
+    previewColors: ['#FAF7F2', '#8B4A6A', '#2A1E18', '#C09040'],
+    designerNote: 'MEMOIR entiende que la vulnerabilidad calculada es la forma más alta de autoridad personal.',
+    structure: { colorMode: 'light' as const, headerStyle: 'hero-editorial' as const, cardLayout: 'list-editorial' as const, enhancers: ['author-bio', 'related-articles', 'scroll-reveal'] },
+  },
+  {
+    id: 'broadcast', name: 'BROADCAST', tagline: 'Noticias de tu industria. Tu voz como medio de referencia.',
+    type: 'blog' as const, mood: ['edge', 'technical', 'brutalist'] as const,
+    palette: { bg: '#FFFFFF', surface: '#F4F4F4', text: '#0A0A0A', accent: '#CC1100', accent2: '#0A0A0A', muted: '#666666', rule: 'rgba(10,10,10,0.15)' },
+    typography: { display: 'Barlow Condensed', body: 'Barlow', displayWeight: '700', style: 'sans' as const, googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,700&family=Barlow:wght@300;400;500;600&display=swap' },
+    motion: 'Periódico vivo: breaking news banner se desliza horizontalmente. Cards en stagger rápido. La noticia no espera.',
+    layoutDNA: 'Masthead de periódico con fecha + número de edición. Grid asimétrico: 1 lead (2/3 ancho) + 2 secundarios + 4 breves. Divisores tipográficos. Información densa, jerarquizada.',
+    aggro: { unlocked: true, description: 'AGGRO BROADCAST: breaking news total. Todo el viewport para el titular en tipo enorme. El resto: texto pequeño y denso. La urgencia como diseño.' },
+    previewColors: ['#FFFFFF', '#CC1100', '#0A0A0A', '#F4F4F4'],
+    designerNote: 'BROADCAST convierte el blog corporativo en el medio de referencia de su categoría.',
+    structure: { colorMode: 'light' as const, headerStyle: 'hero-fullbleed' as const, cardLayout: 'magazine' as const, enhancers: ['scroll-reveal', 'category-pills', 'sticky-header'] },
+  },
+  {
+    id: 'field-notes', name: 'FIELD NOTES', tagline: 'Guías que se usan. Contenido que se guarda.',
+    type: 'blog' as const, mood: ['technical', 'organic', 'minimal'] as const,
+    palette: { bg: '#FBF8F0', surface: '#F0EBE0', text: '#2A2218', accent: '#D4820A', accent2: '#4A7A3A', muted: '#8A7A60', rule: 'rgba(42,34,24,0.12)' },
+    typography: { display: 'IBM Plex Serif', body: 'IBM Plex Sans', displayWeight: '600', style: 'mixed' as const, googleFontsUrl: 'https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap' },
+    motion: 'Funcional: progress bar siempre visible. Steps marcables como completados. Hover en imágenes las expande. La UX al servicio del aprendizaje.',
+    layoutDNA: 'Header con breadcrumb + progress bar. Guide featured con step preview. Card grid con nivel de dificultad + tiempo de lectura + categoría. TOC inline con anclas.',
+    aggro: { unlocked: false, description: 'FIELD NOTES no tiene AGGRO — la utilidad no necesita agresividad. Solo claridad absoluta.' },
+    previewColors: ['#FBF8F0', '#D4820A', '#2A2218', '#4A7A3A'],
+    designerNote: 'FIELD NOTES entiende que enseñar es la mejor estrategia de ventas que existe.',
+    structure: { colorMode: 'light' as const, headerStyle: 'hero-minimal' as const, cardLayout: 'grid-standard' as const, enhancers: ['reading-progress', 'toc-sidebar', 'related-articles'] },
+  },
+  {
+    id: 'roundtable', name: 'ROUNDTABLE', tagline: 'La comunidad como contenido. La conversación como SEO.',
+    type: 'blog' as const, mood: ['vibrant', 'technical', 'editorial'] as const,
+    palette: { bg: '#F8FAFF', surface: '#EEF2FC', text: '#0E1828', accent: '#3A6AE0', accent2: '#E05A20', muted: '#6A7A9A', rule: 'rgba(14,24,40,0.1)' },
+    typography: { display: 'Mulish', body: 'Mulish', displayWeight: '800', style: 'sans' as const, googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;600;700;800;900&display=swap' },
+    motion: 'Social: likes y comentarios con micro-animación al hover. Avatar clusters con stagger. La energía de la comunidad como diseño.',
+    layoutDNA: 'Artículos con métricas de engagement (likes, comentarios, guardados). Author card con foto. Trending topics sidebar. El lector como participante activo.',
+    aggro: { unlocked: true, description: 'AGGRO ROUNDTABLE: el debate como espectáculo. Dos puntos de vista opuestos. Métricas de engagement en prominencia máxima. La polémica como estrategia.' },
+    previewColors: ['#F8FAFF', '#3A6AE0', '#0E1828', '#E05A20'],
+    designerNote: 'ROUNDTABLE convierte la audiencia en la fuente de autoridad más creíble que la marca puede tener.',
+    structure: { colorMode: 'light' as const, headerStyle: 'hero-split' as const, cardLayout: 'list-editorial' as const, enhancers: ['scroll-reveal', 'newsletter-cta', 'category-pills'] },
+  },
+  {
+    id: 'manifesto', name: 'MANIFESTO', tagline: 'Un punto de vista. Sin ambigüedad. Sin disculpa.',
+    type: 'blog' as const, mood: ['brutalist', 'minimal', 'edge'] as const,
+    palette: { bg: '#F5F5F0', surface: '#E8E8E0', text: '#080808', accent: '#080808', accent2: '#FF1A1A', muted: '#5A5A50', rule: 'rgba(8,8,8,0.12)' },
+    typography: { display: 'Oswald', body: 'Work Sans', displayWeight: '700', style: 'sans' as const, googleFontsUrl: 'https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap' },
+    motion: 'Una sola afirmación por scroll. Texto que aparece de golpe. Las imágenes son pocas y enérgicas. El espacio vacío es el diseño.',
+    layoutDNA: 'Single column con una declaración por sección. Numeración de argumentos en grande. Pull quotes que ocupan ancho completo en tipografía enorme. Sin sidebar. Sin distracciones.',
+    aggro: { unlocked: true, description: 'AGGRO MANIFESTO: rojo sangre. Una frase. Un botón. El argumento reducido a su forma más pura y provocadora. La controversia como elección de diseño.' },
+    previewColors: ['#F5F5F0', '#080808', '#FF1A1A', '#E8E8E0'],
+    designerNote: 'MANIFESTO entiende que el silencio también es una posición, y tomar una posición es la única forma de construir audiencia real.',
+    structure: { colorMode: 'light' as const, headerStyle: 'hero-text-only' as const, cardLayout: 'single-column' as const, enhancers: ['reading-progress', 'scroll-reveal'] },
   },
 ];
 
