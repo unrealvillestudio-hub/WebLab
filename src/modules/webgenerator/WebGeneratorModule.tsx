@@ -438,6 +438,9 @@ export default function WebGeneratorModule() {
   const [blogWordCount, setBlogWordCount]   = useState(800);
   const [blogOutputMode, setBlogOutputMode] = useState<WebOutputMode>("html");
   const [blogContext, setBlogContext]       = useState('');
+  const [blogAutoFilled, setBlogAutoFilled]   = useState(false);
+  const [blogDbPromptMode, setBlogDbPromptMode] = useState(false);
+  const [blogDbPromptText, setBlogDbPromptText] = useState('');
   const [blogGenerating, setBlogGenerating] = useState(false);
   const [blogResult, setBlogResult]         = useState<string | null>(null);
   const [blogError, setBlogError]           = useState('');
@@ -465,6 +468,17 @@ export default function WebGeneratorModule() {
     setProductName('');
     setProductBenefits('');
   }, [brandId]);
+
+  // ── DB_VARIABLES auto-fill on blog brand change ──────────────────────────
+  useEffect(() => {
+    const ctx = BRAND_CONTEXTS[blogBrandId as BrandId];
+    if (ctx) {
+      setBlogContext(ctx.extraContext);
+      setBlogAutoFilled(true);
+    } else {
+      setBlogAutoFilled(false);
+    }
+  }, [blogBrandId]);
 
   // ── Handlers: Generator ──────────────────────────────────────────────────
   const handleModuleChange = (mod: WebModuleId) => {
@@ -651,7 +665,7 @@ export default function WebGeneratorModule() {
         language: blogLanguage,
         platform: "wordpress",
         outputMode: blogOutputMode,
-        extraContext: blogContext || undefined,
+        extraContext: (blogDbPromptMode && blogDbPromptText.trim()) ? blogDbPromptText : (blogContext || undefined),
         signal: abortRef.current.signal,
       });
       setBlogResult(res.content);
@@ -1427,11 +1441,68 @@ export default function WebGeneratorModule() {
                 placeholder="Keywords SEO separadas por coma (opcional)"
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50"
               />
-              <textarea value={blogContext} onChange={e => setBlogContext(e.target.value)}
+              {/* DB auto-fill label + DB Prompt toggle */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <p className="text-[10px] uppercase font-bold text-zinc-600 tracking-widest">Contexto de marca</p>
+                  {blogAutoFilled && (
+                    <span className="flex items-center gap-1 text-[9px] text-accent/60 font-mono">
+                      <Database size={9} /> DB auto-fill
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => setBlogDbPromptMode(v => !v)}
+                  className={cn(
+                    "flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-md font-medium transition-colors border",
+                    blogDbPromptMode
+                      ? "bg-accent/15 border-accent/40 text-accent"
+                      : "bg-zinc-800 border-zinc-700 text-zinc-500 hover:text-zinc-300"
+                  )}
+                >
+                  <Database size={10} />
+                  {blogDbPromptMode ? 'DB Prompt activo' : 'DB Prompt'}
+                </button>
+              </div>
+
+              <AnimatePresence>
+                {blogDbPromptMode && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-accent/60 font-mono px-0.5">
+                        Pega el bloque de prompt/contexto de DB_VARIABLES — reemplaza el contexto estándar
+                      </p>
+                      <textarea
+                        value={blogDbPromptText}
+                        onChange={e => setBlogDbPromptText(e.target.value)}
+                        placeholder="Contexto completo desde DB_VARIABLES (CONTEXTOS sheet, PersonBlueprint, o prompt personalizado)..."
+                        rows={6}
+                        className="w-full bg-zinc-800 border border-accent/30 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/60 resize-y font-mono text-xs"
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <textarea
+                value={blogContext}
+                onChange={e => setBlogContext(e.target.value)}
                 placeholder="Contexto adicional de marca o producto (opcional)"
-                rows={2}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50 resize-none"
+                rows={4}
+                className={cn(
+                  "w-full bg-zinc-800 border rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 outline-none focus:border-accent/50 resize-y transition-colors",
+                  blogDbPromptMode ? "border-zinc-700 opacity-50" : "border-zinc-700"
+                )}
+                disabled={blogDbPromptMode && !!blogDbPromptText.trim()}
               />
+              {blogDbPromptMode && blogDbPromptText.trim() && (
+                <p className="text-[10px] text-zinc-600 -mt-1 px-0.5">
+                  ↑ Contexto estándar ignorado — DB Prompt activo
+                </p>
+              )}
             </div>
 
             {/* Blog controls */}

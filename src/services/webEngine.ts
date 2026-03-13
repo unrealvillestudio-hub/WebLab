@@ -431,6 +431,8 @@ export function buildBlogPrompt(params: {
   };
 
   const humanizeBlock = getHumanizeBlock('copy', brand.id);
+  const brandBlueprintBlock = getBrandBlueprintBlock(brand.id as any);
+  const brandCtx = BRAND_CONTEXTS[brand.id as keyof typeof BRAND_CONTEXTS];
   const modeLabel = outputMode === 'liquid' ? 'Shopify Liquid (blog post template)' : outputMode === 'html' ? 'HTML semántico' : 'Markdown';
   const targetWords = blog.wordCount ?? 800;
 
@@ -453,7 +455,7 @@ TEMA DEL POST: ${blog.topic}
 ${blog.keywords?.length ? `KEYWORDS: ${blog.keywords.join(', ')}` : ''}
 EXTENSIÓN OBJETIVO: ~${targetWords} palabras
 
-${extraContext ? `CONTEXTO DE MARCA:\n${extraContext}` : ''}
+${brandBlueprintBlock ? `${brandBlueprintBlock}\n\n` : ''}${brandCtx?.complianceBlock ? `${brandCtx.complianceBlock}\n\n` : ''}${extraContext ? `CONTEXTO ADICIONAL:\n${extraContext}` : ''}
 
 ${BLOG_TYPE_INSTRUCTIONS[blog.postType]}
 
