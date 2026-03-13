@@ -649,11 +649,14 @@ OUTPUT: Solo el HTML. Empieza con <!-- Sales Layer: ${preset.label} --> y termin
                           </div>
                         </div>
 
-                        {/* Preview */}
+                        {/* Preview — iframe aislado para ejecutar scripts y estilos */}
                         <div className="border border-zinc-800 rounded-b-xl overflow-hidden">
-                          <div className="bg-white overflow-auto" style={{ maxHeight: '420px' }}>
-                            <div dangerouslySetInnerHTML={{ __html: output }} />
-                          </div>
+                          <iframe
+                            srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;padding:0;background:#0E1018}</style></head><body>${output}</body></html>`}
+                            style={{ width: '100%', height: '480px', border: 'none', display: 'block' }}
+                            sandbox="allow-scripts allow-same-origin"
+                            title="Sales Layer Preview"
+                          />
                         </div>
 
                         {/* Regenerar */}
