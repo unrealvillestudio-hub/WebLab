@@ -25,6 +25,8 @@ import { useBlueprintStore } from '../../store/useBlueprintStore';
 import { EcomProductSelector, BlueprintImageTogglesPanel, buildEcomPromptContext } from './EcomProductSelector';
 import { ThemePicker } from './ThemePicker';
 import { getThemeById, buildThemePromptBlock } from '../../config/themeCatalog';
+import { SalesLayerPanel } from './SalesLayerPanel';
+import type { SalesPreset } from './SalesLayerPanel';
 
 // ── TABS ───────────────────────────────────────────────────────────────────────
 type MainTab = 'generator' | 'blog';
@@ -1305,6 +1307,15 @@ export default function WebGeneratorModule() {
                     </span>
                   </motion.div>
                 )}
+
+                {/* ── F7 SALES LAYER ── */}
+                {result && (activeModule === 'ecommerce' || activeModule === 'landing') && (
+                  <SalesLayerPanel
+                    context={activeModule}
+                    brandId={brandId}
+                    onGenerate={(_preset: SalesPreset, _params, _html) => {}}
+                  />
+                )}
               </div>
             )}
 
@@ -1490,6 +1501,16 @@ export default function WebGeneratorModule() {
                   )}
                 </div>
               </div>
+            )}
+
+            {/* ── F7 SALES LAYER — BLOG ── */}
+            {blogResult && !blogGenerating && (
+              <SalesLayerPanel
+                context="blog"
+                blogPostType={blogType}
+                brandId={blogBrandId}
+                onGenerate={(_preset: SalesPreset, _params, _html) => {}}
+              />
             )}
 
             {!blogGenerating && !blogResult && !blogError && (
