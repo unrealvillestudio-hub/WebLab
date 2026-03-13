@@ -420,6 +420,8 @@ export default function WebGeneratorModule() {
   // ── Blueprint image toggles ──
   const [bpToggles, setBpToggles]                 = useState<BlueprintImageToggles>({ usePersonBP: true, useLocationBP: true });
   const [isGenerating, setIsGenerating]           = useState(false);
+  const [salesLayerReady, setSalesLayerReady]     = useState(false);
+  const [blogSalesLayerReady, setBlogSalesLayerReady] = useState(false);
   const [draftSaving, setDraftSaving]             = useState(false);
   const [draftResult, setDraftResult]             = useState<SaveDraftResult | null>(null);
   const [draftError, setDraftError]               = useState("");
@@ -487,6 +489,7 @@ export default function WebGeneratorModule() {
     setLiveSections([]);
     setResult(null);
     setError('');
+    setSalesLayerReady(false);
     // Web e-institutional/personal siempre en WordPress — Shopify no aplica
     if (mod === 'web') setPlatform('wordpress');
     // Web: solo HTML — Liquid no aplica en WordPress
@@ -565,6 +568,7 @@ export default function WebGeneratorModule() {
       });
       setResult(output);
       addOutput(output);
+      if (activeModule === 'ecommerce' || activeModule === 'landing') setSalesLayerReady(true);
     } catch (e: any) {
       if (e.name !== 'AbortError') setError(e.message ?? 'Error desconocido');
     } finally {
@@ -649,6 +653,7 @@ export default function WebGeneratorModule() {
     setBlogGenerating(true);
     setBlogResult(null);
     setBlogError('');
+    setBlogSalesLayerReady(false);
     abortRef.current = new AbortController();
 
     const blogSpec: BlogSpec = {
@@ -669,6 +674,7 @@ export default function WebGeneratorModule() {
         signal: abortRef.current.signal,
       });
       setBlogResult(res.content);
+      setBlogSalesLayerReady(true);
     } catch (e: any) {
       if (e.name !== 'AbortError') setBlogError(e.message ?? 'Error desconocido');
     } finally {
@@ -1327,7 +1333,8 @@ export default function WebGeneratorModule() {
                   <SalesLayerPanel
                     context={activeModule}
                     brandId={brandId}
-                    onGenerate={(_preset: SalesPreset, _params, _html) => {}}
+                    pulse={salesLayerReady}
+                    onGenerate={(_preset: SalesPreset, _params, _html) => { setSalesLayerReady(false); }}
                   />
                 )}
               </div>
@@ -1580,7 +1587,8 @@ export default function WebGeneratorModule() {
                 context="blog"
                 blogPostType={blogType}
                 brandId={blogBrandId}
-                onGenerate={(_preset: SalesPreset, _params, _html) => {}}
+                pulse={blogSalesLayerReady}
+                onGenerate={(_preset: SalesPreset, _params, _html) => { setBlogSalesLayerReady(false); }}
               />
             )}
 

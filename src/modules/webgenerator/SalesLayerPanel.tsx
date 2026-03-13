@@ -310,10 +310,11 @@ interface SalesLayerPanelProps {
   context: SalesContext;
   blogPostType?: BlogPostType;
   brandId: string;
+  pulse?: boolean;
   onGenerate: (preset: SalesPreset, params: Record<string, string>, outputHtml: string) => void;
 }
 
-export function SalesLayerPanel({ context, blogPostType, brandId, onGenerate }: SalesLayerPanelProps) {
+export function SalesLayerPanel({ context, blogPostType, brandId, pulse = false, onGenerate }: SalesLayerPanelProps) {
   const [open, setOpen]               = useState(false);
   const [selectedId, setSelectedId]   = useState<SalesPresetId | null>(null);
   const [params, setParams]           = useState<Record<string, string>>({});
@@ -396,18 +397,26 @@ OUTPUT: Solo el HTML. Empieza con <!-- Sales Layer: ${preset.label} --> y termin
     setOutput(null);
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          prompt: buildSalesPrompt(selectedPreset, params),
           max_tokens: 4000,
-          messages: [{ role: 'user', content: buildSalesPrompt(selectedPreset, params) }],
+          temperature: 0.7,
         }),
       });
 
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(`Error ${response.status}: ${(err as any)?.error ?? response.statusText}`);
+      }
+
       const data = await response.json();
-      const html = data.content?.find((b: any) => b.type === 'text')?.text ?? '';
+      const rawHtml = (data.text ?? '').trim();
+      // Strip markdown fences si Claude las añade
+      const lines = rawHtml.split('\n');
+      const html = lines.filter((l: string) => !l.startsWith('```')).join('\n').trim();
 
       if (!html) throw new Error('Sin output del modelo');
 
@@ -447,27 +456,39 @@ OUTPUT: Solo el HTML. Empieza con <!-- Sales Layer: ${preset.label} --> y termin
       className="mt-4"
     >
       {/* ── HEADER / TOGGLE ── */}
-      <button
-        onClick={() => setOpen(o => !o)}
+      <motion.button
+        onClick={() => { setOpen(o => !o); }}
+        animate={pulse && !open ? {
+          boxShadow: ['0 0 0px #22c55e00', '0 0 12px #22c55e60', '0 0 0px #22c55e00'],
+        } : {}}
+        transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
         className={cn(
           'w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all',
           open
             ? 'bg-violet-500/10 border-violet-500/30 text-violet-300'
-            : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-zinc-300'
+            : pulse
+              ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
+              : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-zinc-300'
         )}
       >
         <div className="flex items-center gap-2.5">
           <div className={cn(
             'w-6 h-6 rounded-lg flex items-center justify-center transition-colors',
-            open ? 'bg-violet-500/20' : 'bg-zinc-800'
+            open ? 'bg-violet-500/20' : pulse ? 'bg-emerald-500/20' : 'bg-zinc-800'
           )}>
-            <Zap size={12} className={open ? 'text-violet-400' : 'text-zinc-500'} />
+            <Zap size={12} className={open ? 'text-violet-400' : pulse ? 'text-emerald-400' : 'text-zinc-500'} />
           </div>
           <div className="text-left">
             <span className="text-sm font-bold">Sales Layer</span>
-            <span className="text-[10px] ml-2 opacity-60">
-              {availablePresets.length} presets disponibles
-            </span>
+            {pulse && !open ? (
+              <span className="text-[10px] ml-2 text-emerald-400/80 font-medium animate-pulse">
+                ¡Potencia este output!
+              </span>
+            ) : (
+              <span className="text-[10px] ml-2 opacity-60">
+                {availablePresets.length} presets disponibles
+              </span>
+            )}
           </div>
           {selectedPreset && !open && (
             <span
@@ -479,7 +500,7 @@ OUTPUT: Solo el HTML. Empieza con <!-- Sales Layer: ${preset.label} --> y termin
           )}
         </div>
         {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-      </button>
+      </motion.button>
 
       {/* ── BODY ── */}
       <AnimatePresence>
