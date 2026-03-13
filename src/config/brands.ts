@@ -11,7 +11,6 @@ export type BrandId =
   | 'd7Herbal'
   | 'vivoseMask'
   | 'vizosCosmetics'
-  | 'phas'
   | 'neuroneCosmetics'
   | 'forumPhs'
 
@@ -116,17 +115,6 @@ export const BRANDS: Record<BrandId, Brand> = {
     description: 'Cosméticos y maquillaje',
     market: 'Miami, FL',
     channels: ['instagram', 'tiktok', 'shopify'],
-  },
-  phas: {
-    id: 'phas',
-    name: 'PHAS',
-    shortName: 'PHAS',
-    owner: 'Sam',
-    color: '#14B8A6',
-    emoji: '🔬',
-    description: 'Productos de salud y bienestar',
-    market: 'Miami, FL',
-    channels: ['web', 'amazon', 'shopify'],
   },
   neuroneCosmetics: {
     id: 'neuroneCosmetics',

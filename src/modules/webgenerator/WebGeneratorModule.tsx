@@ -252,7 +252,7 @@ const PREVIEW_BASE_CSS = `
   a[class*="cta"], button[class*="cta"], .cta-button { display: inline-block; }
 `;
 
-const FIRMA_HTML = `<footer style="background:#1C2233;text-align:center;font-family:'Inter',system-ui,sans-serif;font-size:11px;letter-spacing:0.04em;color:#71717a;padding:18px 24px 20px;margin-top:0;line-height:1.6;">Designed &amp; Developed by <a href="#" style="color:#a8a8b3;font-weight:600;text-decoration:none;">Unreal&gt;ille Studio</a><br><span style="font-size:10px;color:#52525b;">1303 N 46th Ave, Hollywood, FL 33021</span></footer>`;
+const FIRMA_HTML = `<footer style="background:#0E1018;text-align:center;font-family:'DM Sans','Inter',system-ui,sans-serif;font-size:11px;letter-spacing:0.04em;color:#6B6460;padding:18px 24px 20px;margin-top:0;line-height:1.6;border-top:1px solid #1e1e2a;">Designed &amp; Developed by <a href="#" style="color:#C4622D;font-weight:600;text-decoration:none;">Unreal&gt;ille Studio</a><br><span style="font-size:10px;color:#6B6460;">1303 N 46th Ave, Hollywood, FL 33021</span></footer>`;
 
 // ── FULL PAGE PREVIEW MODAL ────────────────────────────────────────────────────
 function FullPagePreviewModal({

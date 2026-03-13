@@ -229,35 +229,6 @@ export const BRAND_CONTEXTS: Partial<Record<BrandId, BrandAutoContext>> = {
       'Mujeres latinas 18–45 años Miami. Amantes del maquillaje, el color y la expresión a través de la belleza.',
   },
 
-  phas: {
-    defaultPlatform: 'shopify',
-    extraContext:
-      'PHAS — productos de salud y bienestar para el mercado latinoamericano. ' +
-      'Distribución: Amazon + e-commerce propio Shopify. Miami, FL. ' +
-      'Foco en suplementación y salud integral.',
-    productAudience:
-      'Adultos 25–55 años interesados en salud, bienestar y suplementación. Comunidad latina Miami y Florida.',
-    productCompliance:
-      'Productos de salud/wellness. SIN claims médicos sin respaldo científico. ' +
-      'Cumplimiento FDA para suplementos dietéticos (DSHEA). ' +
-      'INCLUIR disclaimer cuando aplique.',
-    complianceBlock:
-      '── COMPLIANCE PHAS — GUARDARRAÍL OBLIGATORIO FDA/FTC ───────────────────────────\n' +
-      'CLASIFICACIÓN: Suplementos dietéticos / Productos wellness (DSHEA, 21 CFR 101).\n' +
-      'CANALES: Amazon (políticas adicionales) + Shopify propio. Florida / US.\n\n' +
-      'VERBOS APROBADOS:\n' +
-      '  apoya • contribuye a • ayuda a mantener • favorece • potencia • promueve\n\n' +
-      'PROHIBIDO ABSOLUTO:\n' +
-      '  ✗ Disease claims: cualquier referencia a diagnóstico, tratamiento o cura de enfermedades\n' +
-      '  ✗ "Clínicamente probado" o "aprobado por la FDA" sin documentación válida\n' +
-      '  ✗ Cifras de resultados (pérdida de peso, ganancia muscular) sin estudio clínico registrado\n' +
-      '  ✗ En Amazon: estructura/función claims sin notificación FTC previa\n\n' +
-      'DISCLAIMER FDA — OBLIGATORIO en toda landing page, product page y listing Amazon:\n' +
-      '  "Este producto no ha sido evaluado por la FDA. No está destinado a diagnosticar,\n' +
-      '  tratar, curar o prevenir ninguna enfermedad o condición médica."\n' +
-      '────────────────────────────────────────────────────────────────────────────────',
-  },
-
   forumPhs: {
     defaultPlatform: 'wordpress',
     extraContext:

@@ -138,6 +138,8 @@ REGLAS ESTRICTAS:
 - PALETA: Si el contexto incluye "color dominante: #XXXXXX" de un producto, usa ese hex como color de acento (botones, bordes, highlights). Si no, usa paleta neutra: fondo blanco o #f9f9f9, texto #1a1a1a, acento #000.
 - Responsive: usa max-width, padding proporcionales.
 - Botones con cursor:pointer y padding generoso.
+- CTAs tipo enlace de texto (no botón): NO uses white-space:nowrap. El sistema aplicará wrapping automático en mobile.
+- CTAs tipo botón: usa display:block con width:100% en mobile (max-width:400px en desktop) para evitar overflow.
 - NO incluyas <script>, NO incluyas frameworks externos.
 - La sección debe ser copy-paste directo en un bloque "Custom HTML" de ${platform === 'shopify' ? 'Shopify' : 'WordPress'}.
 - ⛔ PROHIBIDO incluir después del HTML: notas de producción, tablas markdown, comentarios sobre decisiones de diseño, explicaciones, resúmenes ni ningún texto fuera del bloque HTML. El output termina con la etiqueta de cierre de la sección (</section> o </div>). NADA más.
@@ -163,7 +165,7 @@ IMÁGENES DE BLUEPRINT:
 - Para BP_PERSON: coloca el <img> en secciones hero/about con class="person-bp-img".
 - Para BP_LOCATION: coloca el <img> en secciones gallery/hero como background o decorativo.
 - Para BP_PRODUCT: coloca el <img> inmediatamente junto al nombre/descripción del producto.
-- Si el precio del contexto es "0.00" o "[PRECIO]": escribe <span class="product-price">[PRECIO]</span> — NO pongas $0.00.
+- Si el precio del contexto es "0.00": escribe <span class="product-price">$10.00</span> — los precios con "0.00" son placeholders, muéstralos como $10.00 hasta confirmar precio real.
 EJEMPLO DE ESTRUCTURA:
 <section class="hero-section" style="padding:80px 20px;text-align:center;background:#fff;">
   <h1 class="hero-title" style="font-size:2.5rem;font-weight:700;color:#1a1a1a;margin-bottom:16px;">...</h1>
@@ -686,13 +688,22 @@ export function buildExportFile(
     }
     /* CTA base — evita desplazamiento por herencia de margin/text-align */
     a[class*="cta"], button[class*="cta"], .cta-button { display: inline-block; }
+    /* CTA mobile — wrapping obligatorio, sin overflow lateral */
+    @media (max-width: 860px) {
+      a[class*="cta"], button[class*="cta"], .cta-button {
+        white-space: normal !important;
+        word-break: break-word !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+    }
   </style>
 </head>
 <body>
 ${aggroWarningHtml}
 ${body}
-<footer style="font-family:'DM Sans','Helvetica Neue',Arial,sans-serif;font-size:0.75rem;color:#888;text-align:center;padding:28px 24px;border-top:1px solid #e0e0e0;margin-top:0;background:#fafafa;line-height:1.7;">
-  Designed &amp; Developed by <strong style="color:#555;">Unreal&gt;ille Studio</strong><br>
+<footer style="font-family:'DM Sans','Helvetica Neue',Arial,sans-serif;font-size:0.75rem;color:#6B6460;text-align:center;padding:28px 24px;border-top:1px solid #1e1e2a;margin-top:0;background:#0E1018;line-height:1.7;">
+  Designed &amp; Developed by <strong style="color:#C4622D;">Unreal&gt;ille Studio</strong><br>
   1303 N 46th Ave, Hollywood, FL 33021
 </footer>
 </body>
