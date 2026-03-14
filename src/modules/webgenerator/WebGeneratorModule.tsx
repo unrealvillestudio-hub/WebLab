@@ -444,6 +444,8 @@ export default function WebGeneratorModule() {
   const [bpToggles, setBpToggles]                 = useState<BlueprintImageToggles>({ usePersonBP: true, useLocationBP: true });
   const [isGenerating, setIsGenerating]           = useState(false);
   const [salesLayerReady, setSalesLayerReady]     = useState(false);
+  const [salesLayerHtml, setSalesLayerHtml]       = useState<string | null>(null);
+  const [salesLayerInserted, setSalesLayerInserted] = useState(false);
   const [blogSalesLayerReady, setBlogSalesLayerReady] = useState(false);
   const [draftSaving, setDraftSaving]             = useState(false);
   const [draftResult, setDraftResult]             = useState<SaveDraftResult | null>(null);
@@ -512,7 +514,10 @@ export default function WebGeneratorModule() {
     setShopifyPushResult(null);
     try {
       const resolvedMode = ((result as any).outputMode as WebOutputMode) ?? outputMode;
-      const html = buildExportFile(result.sections, resolvedMode, result.superAggro ?? false);
+      const baseHtml = buildExportFile(result.sections, resolvedMode, result.superAggro ?? false);
+      const html = salesLayerHtml && salesLayerInserted
+        ? baseHtml + '\n\n<!-- Sales Layer -->\n' + salesLayerHtml
+        : baseHtml;
       const pageTitle = `${brand?.name ?? 'Neurone'} — ${pack?.label ?? 'Página'} ${new Date().toLocaleDateString('es-ES')}`;
 
       const res = await fetch('/api/shopify', {
@@ -554,6 +559,8 @@ export default function WebGeneratorModule() {
     setResult(null);
     setError('');
     setSalesLayerReady(false);
+    setSalesLayerHtml(null);
+    setSalesLayerInserted(false);
     // Web e-institutional/personal siempre en WordPress — Shopify no aplica
     if (mod === 'web') setPlatform('wordpress');
     // Web: solo HTML — Liquid no aplica en WordPress
@@ -1319,6 +1326,20 @@ export default function WebGeneratorModule() {
                     }
                   </button>
                 )}
+                {/* Insertar Sales Layer en output */}
+                {salesLayerHtml && !salesLayerInserted && (
+                  <button
+                    onClick={() => setSalesLayerInserted(true)}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-violet-500/15 border border-violet-500/30 text-violet-300 text-xs font-bold hover:bg-violet-500/25 transition-colors animate-pulse"
+                  >
+                    <Zap size={11} />+ Sales Layer
+                  </button>
+                )}
+                {salesLayerInserted && (
+                  <span className="flex items-center gap-1.5 text-[10px] text-violet-400 font-mono">
+                    <Check size={10} />Sales Layer incluido
+                  </span>
+                )}
                 {/* Push to Shopify — siempre visible, activo con result + connected */}
                 <>
                   <div className="w-px h-5 bg-zinc-700 mx-0.5" />
@@ -1429,7 +1450,11 @@ export default function WebGeneratorModule() {
                     context={activeModule}
                     brandId={brandId}
                     pulse={salesLayerReady}
-                    onGenerate={(_preset: SalesPreset, _params, _html) => { setSalesLayerReady(false); }}
+                    onGenerate={(_preset: SalesPreset, _params, _html) => {
+                      setSalesLayerReady(false);
+                      setSalesLayerHtml(_html);
+                      setSalesLayerInserted(false);
+                    }}
                   />
                 )}
               </div>

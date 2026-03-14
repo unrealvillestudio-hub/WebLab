@@ -317,8 +317,42 @@ ${productSpec.complianceNotes ? `RESTRICCIONES DE COMPLIANCE: ${productSpec.comp
       ? `${brandCtx.productCatalogContext}\n\n`
       : '';
 
-  // Instrucciones visuales específicas para Product Page
-  const isProductPage = pack.id === 'ecom_product_page';
+  // Instrucciones visuales específicas para Product Page y Collection Page
+  const isProductPage   = pack.id === 'ecom_product_page';
+  const isCollectionPage = pack.id === 'ecom_collection';
+  const collectionPageOverride = isCollectionPage ? `
+── INSTRUCCIONES CRÍTICAS PARA COLLECTION PAGE ───────────────────────────────
+Esta sección es una PÁGINA DE COLECCIÓN de e-commerce. NO es una página corporativa.
+Visual, impactante, que muestra productos reales con imágenes.
+
+${section.id === 'hero' ? `
+HERO DE COLECCIÓN:
+- HEADLINE: 2-4 palabras máximo en H1. Tamaño gigante (clamp 3rem-6rem). Bold extremo. Que ocupe toda la línea.
+  Ejemplos correctos: "HIDRATACIÓN SIN COMPROMISO" / "TU CUERO CABELLUDO PRIMERO" / "REPARA. RESTAURA. DOMINA."
+  Ejemplos incorretos: "Descubre nuestra línea de productos Moisture" (demasiado largo, sin punch)
+- SUBHEADLINE: 1 frase de 10-15 palabras máximo. Específica, con datos o diferenciador.
+- DOS CTAs en flex-wrap: [Ver colección] (botón sólido color marca) + [Soy profesional → Portal Pro] (outline)
+- Eyebrow label encima del H1: nombre de colección + "Distribución exclusiva South & Central Miami"
+- Fondo: #0E1018 oscuro. Acento: #0076A8 navy Neurone.` 
+: section.id === 'features' ? `
+GRID DE PRODUCTOS — obligatorio mostrar imágenes:
+- Título sección: corto y con punch (ej: "Los productos que lo hacen posible")
+- Grid de product cards: mínimo 3 columnas desktop, 1 móvil
+- Cada card DEBE incluir:
+  · <img> del producto — usa el image_filename del contexto: <img src="[IMAGE:FILENAME]" alt="NOMBRE">
+  · Nombre del producto en bold
+  · 1 benefit claim en 6 palabras máximo
+  · Precio: <span class="product-price">$10.00</span>
+  · Botón "Ver producto" o "Agregar"
+- Si hay subcollections diferentes: agrúpalos con un label pequeño de subcollection
+- Fondo alterno: #161923 para contrastar con el hero oscuro`
+: `
+CTA FINAL DE COLECCIÓN:
+- Fondo de acento #0076A8 o gradiente oscuro
+- 1 frase de cierre con urgencia o exclusividad
+- Botón CTA grande full-width en mobile`}
+` : '';
+
   const productPageOverride = isProductPage ? `
 ── INSTRUCCIONES CRÍTICAS PARA PRODUCT PAGE ─────────────────────────────────
 Esta sección es una PÁGINA DE PRODUCTO de e-commerce. NO es una web corporativa.
@@ -376,7 +410,7 @@ OUTPUT MODE: ${modeLabel}
 
 ${productBlock}
 
-${productPageOverride}${brandBlueprintBlock ? `${brandBlueprintBlock}\n\n` : ""}${brandCtx?.complianceBlock ? `${brandCtx.complianceBlock}\n\n` : ""}${catalogContextBlock}${extraContext ? `CONTEXTO DE MARCA / DB_VARIABLES:\n${extraContext}` : ""}
+${collectionPageOverride}${productPageOverride}${brandBlueprintBlock ? `${brandBlueprintBlock}\n\n` : ""}${brandCtx?.complianceBlock ? `${brandCtx.complianceBlock}\n\n` : ""}${catalogContextBlock}${extraContext ? `CONTEXTO DE MARCA / DB_VARIABLES:\n${extraContext}` : ""}
 
 ── ESTÁNDAR DE COPY BASE (SIEMPRE APLICA) ──────────────────────────────────────
 ADN UNRLVL: Todo copy producido aquí sigue estas reglas por defecto. No son opcionales.
