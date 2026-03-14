@@ -54,12 +54,18 @@ export default function App() {
             >
               <ShoppingBag size={12} />
               Shopify Push
-              {/* Indicador de estado */}
+              {/* Indicador de estado — estilo pill como CLAUDE CONNECTED */}
               {!shopifyStore.connected && activeTab !== 'shopify' && (
-                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 animate-pulse" title="Conecta Shopify para publicar" />
+                <span className="flex items-center gap-1 text-[9px] font-mono text-amber-400/80 bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded-full ml-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse inline-block" />
+                  CONECTAR
+                </span>
               )}
-              {shopifyStore.connected && (
-                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-400" title="Shopify conectado" />
+              {shopifyStore.connected && activeTab !== 'shopify' && (
+                <span className="flex items-center gap-1 text-[9px] font-mono text-emerald-400/70 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full ml-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+                  SYNC
+                </span>
               )}
             </button>
           </div>
