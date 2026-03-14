@@ -761,7 +761,7 @@ export default function ShopifyPushModule() {
             <div className="flex items-center gap-2 flex-wrap">
               {/* Sync */}
               <button
-                onClick={handleSync}
+                onClick={() => handleSync()}
                 disabled={syncing}
                 className={cn(
                   'flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold border transition-all',
