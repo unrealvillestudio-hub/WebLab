@@ -14,7 +14,7 @@ import { hasBrandBlueprint } from '../../config/brandBlueprints';
 import { WEB_PACKS, PACKS_BY_MODULE, PAGE_SECTIONS } from '../../config/packs';
 import {
   runWebPack, runBlogPost, estimateTotalWords,
-  getFileExtension, getMimeType, buildExportFile,
+  getFileExtension, getMimeType, buildExportFile, resolveImagePlaceholders,
   WebOutputMode, BlogSpec, BlogPostType,
 } from '../../services/webEngine';
 import { useWebOutputStore } from '../../store/useWebOutputStore';
@@ -158,7 +158,7 @@ function SectionCard({ section, live, aggro, outputMode }: {
                 <div
                   className="rounded-lg overflow-auto bg-white p-2"
                   style={{ maxHeight: '400px' }}
-                  dangerouslySetInnerHTML={{ __html: section.content }}
+                  dangerouslySetInnerHTML={{ __html: resolveImagePlaceholders(section.content) }}
                 />
               ) : mode === 'liquid' && preview ? (
                 <div
@@ -1474,6 +1474,27 @@ export default function WebGeneratorModule() {
                     <span className="ml-auto text-[10px] font-mono opacity-50">
                       {new Date(result.generatedAt).toLocaleTimeString('es-ES')}
                     </span>
+                  </motion.div>
+                )}
+
+                {/* ── SALES LAYER PREVIEW (cuando está insertado) ── */}
+                {salesLayerInserted && salesLayerHtml && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                    className="bg-zinc-900 border border-violet-500/30 rounded-xl overflow-hidden"
+                  >
+                    <div className="flex items-center gap-2 px-4 py-2.5 border-b border-violet-500/20">
+                      <Zap size={12} className="text-violet-400" />
+                      <span className="text-xs font-bold text-violet-300">Sales Layer — incluido en output</span>
+                    </div>
+                    <div className="overflow-auto" style={{ maxHeight: '300px' }}>
+                      <iframe
+                        srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;padding:0;background:#0E1018}</style></head><body>${salesLayerHtml}</body></html>`}
+                        style={{ width: '100%', height: '300px', border: 'none', display: 'block' }}
+                        sandbox="allow-scripts allow-same-origin"
+                        title="Sales Layer Preview"
+                      />
+                    </div>
                   </motion.div>
                 )}
 
