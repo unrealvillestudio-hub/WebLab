@@ -9,6 +9,7 @@ import { cn, Badge, Spinner } from '../../ui/components';
 import { getCatalog } from '../../config/productCatalog';
 import { useShopifyStore } from '../../store/useShopifyStore';
 import type { CatalogProduct } from '../../config/productCatalog';
+import ThemeDeployModule from './ThemeDeployModule';
 
 // ── TIPOS ──────────────────────────────────────────────────────────────────────
 
@@ -288,6 +289,7 @@ export default function ShopifyPushModule() {
   const [shop, setShopLocal]   = useState(shopifyStore.shop);
   const [token, setTokenLocal] = useState(shopifyStore.token);
   const [showToken, setShowToken] = useState(false);
+  const [activeTab, setActiveTab] = useState<'catalog' | 'theme'>('catalog');
 
   function setShop(v: string)  { setShopLocal(v);  shopifyStore.setShop(v); shopifyStore.setConnected(false); }
   function setToken(v: string) { setTokenLocal(v); shopifyStore.setToken(v); shopifyStore.setConnected(false); }
@@ -747,8 +749,30 @@ export default function ShopifyPushModule() {
         </div>
       </div>
 
+      {/* ── TAB SELECTOR ── */}
+      <div className="flex gap-1 p-1 bg-zinc-900 border border-zinc-800 rounded-xl">
+        {([
+          { id: 'catalog', label: 'Catálogo', icon: <ShoppingBag size={13} /> },
+          { id: 'theme',   label: 'Theme Deploy', icon: <Layers size={13} /> },
+        ] as const).map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={cn(
+              'flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all',
+              activeTab === tab.id
+                ? 'bg-zinc-700 text-white shadow-sm'
+                : 'text-zinc-500 hover:text-zinc-300'
+            )}
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* ── SYNC OPERATIONS ── */}
-      {connected && (
+      {activeTab === 'catalog' && connected && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
@@ -781,7 +805,7 @@ export default function ShopifyPushModule() {
       )}
 
       {/* ── STATS ── */}
-      <div className="grid grid-cols-4 gap-3">
+      {activeTab === 'catalog' && <div className="grid grid-cols-4 gap-3">
         {[
           { label: 'Total', value: stats.total, color: '#6366F1' },
           { label: 'Seleccionados', value: stats.selected, color: '#3B82F6' },
@@ -793,10 +817,10 @@ export default function ShopifyPushModule() {
             <p className="text-[10px] text-zinc-600 uppercase tracking-wider mt-0.5">{s.label}</p>
           </div>
         ))}
-      </div>
+      </div>}
 
       {/* ── PRODUCT LIST ── */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+      {activeTab === 'catalog' && <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
 
         {/* Toolbar */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
@@ -867,7 +891,7 @@ export default function ShopifyPushModule() {
             );
           })}
         </div>
-      </div>
+      </div>}
 
       {/* ── PUSH CONTROLS ── */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
@@ -947,7 +971,7 @@ export default function ShopifyPushModule() {
       </div>
 
       {/* ── LOG ── */}
-      <AnimatePresence>
+      {activeTab === 'catalog' && <AnimatePresence>
         {log.length > 0 && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
@@ -975,10 +999,10 @@ export default function ShopifyPushModule() {
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>}
 
       {/* ── IMAGE UPLOAD ── */}
-      {connected && (syncDone || pushDone) && (
+      {activeTab === 'catalog' && connected && (syncDone || pushDone) && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center">
@@ -1039,6 +1063,13 @@ export default function ShopifyPushModule() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── THEME DEPLOY ── */}
+      {activeTab === 'theme' && (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+          <ThemeDeployModule />
         </div>
       )}
     </div>

@@ -1,0 +1,38 @@
+{
+  "sections": {
+    "nc-hero": {
+      "type": "nc-hero",
+      "settings": {}
+    },
+    "nc-trust": {
+      "type": "nc-trust-strip",
+      "settings": {}
+    },
+    "nc-collections": {
+      "type": "nc-collection-grid",
+      "settings": {
+        "eyebrow": "Líneas de Tratamiento",
+        "title": "Encuentra Tu Solución"
+      }
+    },
+    "nc-science": {
+      "type": "nc-science-strip",
+      "settings": {}
+    },
+    "nc-featured": {
+      "type": "nc-featured-products",
+      "settings": {
+        "eyebrow": "Más Vendidos",
+        "title": "Productos Destacados",
+        "view_all_url": "/collections/all"
+      }
+    }
+  },
+  "order": [
+    "nc-hero",
+    "nc-trust",
+    "nc-collections",
+    "nc-science",
+    "nc-featured"
+  ]
+}
