@@ -753,20 +753,21 @@ export function buildExportFile(
     // Override CSS de Dawn/Shopify — rompe el contenedor page-width y rte
     const dawnOverride = `<style>
 /* ── Shopify Dawn override — ancho completo ── */
-.shopify-block.rte,
-.shopify-block.rte > *,
-#shopify-block-Ad0NjSFplcnZvcmdoa__page-content,
-[id*="page-content"],
-[class*="text-block"],
-[class*="page-width-content"],
-.section-content-wrapper {
+:root { --max-width--body-normal: 100% !important; --page-width: 2000px !important; }
+.shopify-block, .shopify-block.rte, .shopify-block > *,
+[class*="text-block"], [class*="page-width"],
+[class*="section-content"], .rte, .rte > *,
+[id*="page-content"], [id*="shopify-block"] {
   max-width: 100% !important;
   width: 100% !important;
   padding-inline-start: 0 !important;
   padding-inline-end: 0 !important;
-  --max-width--body-normal: 100% !important;
+  margin-inline-start: 0 !important;
+  margin-inline-end: 0 !important;
 }
-.page-width-content { padding: 0 !important; }
+/* Romper el grid de Dawn */
+.page-width { max-width: 100% !important; padding: 0 !important; }
+main > .shopify-section { padding: 0 !important; }
 </style>`;
 
     const body = dawnOverride + '\n' + sections

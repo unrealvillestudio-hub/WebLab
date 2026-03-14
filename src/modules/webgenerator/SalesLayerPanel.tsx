@@ -397,6 +397,8 @@ INSTRUCCIONES:
 4. Responsive mobile-first — mínimo 100 líneas con contenido real
 5. NUNCA divs vacíos — todo el contenido visible y funcional
 6. Sin explicaciones — solo el HTML
+7. CRÍTICO si tienes HTML base: NO repitas header, nav, ni footer del HTML base — solo integra las tácticas en el body
+8. Headlines sin punto final — el punto debilita el impacto
 
 OUTPUT: ${outputLabel}`;
   }

@@ -1002,20 +1002,21 @@ ${c.content}`).join(`
 
 `);if(t==="html"){const c=h=>h.replace(/\{\{\s*section\.settings\.background_color\s*\}\}/g,"#0d0d0d").replace(/\{\{\s*section\.settings\.text_color\s*\}\}/g,"#ffffff").replace(/\{\{\s*section\.settings\.heading\s*\}\}/g,"").replace(/\{\{\s*section\.settings\.subheading\s*\}\}/g,"").replace(/\{\{\s*section\.settings\.eyebrow\s*\}\}/g,"").replace(/\{\{[^}]+\}\}/g,"").replace(/\{%-?\s*.*?-?%\}/g,""),u=`<style>
 /* ── Shopify Dawn override — ancho completo ── */
-.shopify-block.rte,
-.shopify-block.rte > *,
-#shopify-block-Ad0NjSFplcnZvcmdoa__page-content,
-[id*="page-content"],
-[class*="text-block"],
-[class*="page-width-content"],
-.section-content-wrapper {
+:root { --max-width--body-normal: 100% !important; --page-width: 2000px !important; }
+.shopify-block, .shopify-block.rte, .shopify-block > *,
+[class*="text-block"], [class*="page-width"],
+[class*="section-content"], .rte, .rte > *,
+[id*="page-content"], [id*="shopify-block"] {
   max-width: 100% !important;
   width: 100% !important;
   padding-inline-start: 0 !important;
   padding-inline-end: 0 !important;
-  --max-width--body-normal: 100% !important;
+  margin-inline-start: 0 !important;
+  margin-inline-end: 0 !important;
 }
-.page-width-content { padding: 0 !important; }
+/* Romper el grid de Dawn */
+.page-width { max-width: 100% !important; padding: 0 !important; }
+main > .shopify-section { padding: 0 !important; }
 </style>`+`
 `+n.map(h=>`<!-- === ${h.label.toUpperCase()} === -->
 ${c(bu(h.content))}`).join(`
@@ -2097,6 +2098,8 @@ INSTRUCCIONES:
 4. Responsive mobile-first — mínimo 100 líneas con contenido real
 5. NUNCA divs vacíos — todo el contenido visible y funcional
 6. Sin explicaciones — solo el HTML
+7. CRÍTICO si tienes HTML base: NO repitas header, nav, ni footer del HTML base — solo integra las tácticas en el body
+8. Headlines sin punto final — el punto debilita el impacto
 
 OUTPUT: ${J}`}async function ve(){if(!F)return;const G=F.params.filter(pe=>{var Ae;return pe.required&&!((Ae=y[pe.id])!=null&&Ae.trim())});if(G.length>0){S(`Campos requeridos: ${G.map(pe=>pe.label).join(", ")}`);return}_(!0),S(""),A(null);try{const pe=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:Y(F,y),max_tokens:4e3,temperature:.7})});if(!pe.ok){const B=await pe.json().catch(()=>({}));throw new Error(`Error ${pe.status}: ${(B==null?void 0:B.error)??pe.statusText}`)}const ae=((await pe.json()).text??"").trim().split(`
 `).filter(B=>!B.startsWith("```")).join(`
