@@ -615,12 +615,34 @@ OUTPUT: Solo el HTML. Empieza con <!-- Sales Layer: ${preset.label} --> y termin
                         animate={{ opacity: 1, y: 0 }}
                         className="space-y-2"
                       >
-                        {/* Output toolbar */}
-                        <div className="flex items-center justify-between px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-t-xl border-b-0">
+                        {/* Output toolbar — celebratorio */}
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.97 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.35, ease: 'easeOut' }}
+                          className="relative overflow-hidden rounded-t-xl border-b-0"
+                          style={{ background: 'linear-gradient(135deg, #052e16 0%, #14532d 50%, #052e16 100%)', border: '1px solid #16a34a60' }}
+                        >
+                          {/* Shimmer sweep */}
+                          <motion.div
+                            initial={{ x: '-100%' }}
+                            animate={{ x: '200%' }}
+                            transition={{ duration: 0.8, delay: 0.1, ease: 'easeOut' }}
+                            style={{ position: 'absolute', top: 0, left: 0, width: '50%', height: '100%', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)', pointerEvents: 'none' }}
+                          />
+                        <div className="flex items-center justify-between px-3 py-2.5">
                           <div className="flex items-center gap-2">
-                            <Check size={12} className="text-emerald-400" />
-                            <span className="text-xs font-bold text-zinc-300">
-                              Sales Layer generado · {selectedPreset.label}
+                            <motion.div
+                              initial={{ scale: 0 }} animate={{ scale: 1 }}
+                              transition={{ type: 'spring', stiffness: 300, damping: 15, delay: 0.15 }}
+                            >
+                              <Check size={15} className="text-emerald-400" strokeWidth={3} />
+                            </motion.div>
+                            <span className="text-sm font-bold text-emerald-300">
+                              ✦ Sales Layer listo
+                            </span>
+                            <span className="text-xs text-emerald-400/70 font-medium">
+                              · {selectedPreset.label}
                             </span>
                             <FunnelBadge stage={selectedPreset.funnel} label={selectedPreset.funnelLabel} />
                           </div>
@@ -648,6 +670,7 @@ OUTPUT: Solo el HTML. Empieza con <!-- Sales Layer: ${preset.label} --> y termin
                             </button>
                           </div>
                         </div>
+                        </motion.div>
 
                         {/* Preview — iframe aislado para ejecutar scripts y estilos */}
                         <div className="border border-zinc-800 rounded-b-xl overflow-hidden">

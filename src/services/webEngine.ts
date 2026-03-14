@@ -316,6 +316,48 @@ ${productSpec.complianceNotes ? `RESTRICCIONES DE COMPLIANCE: ${productSpec.comp
       ? `${brandCtx.productCatalogContext}\n\n`
       : '';
 
+  // Instrucciones visuales específicas para Product Page
+  const isProductPage = pack.id === 'ecom_product_page';
+  const productPageOverride = isProductPage ? `
+── INSTRUCCIONES CRÍTICAS PARA PRODUCT PAGE ─────────────────────────────────
+Esta sección es una PÁGINA DE PRODUCTO de e-commerce. NO es una web corporativa.
+El formato debe ser visual, orientado a conversión, con muy poco texto y mucho peso visual.
+
+ESTRUCTURA OBLIGATORIA para la sección "${section.label}":
+${section.id === 'hero' ? `
+HERO DE PRODUCTO (layout split 50/50):
+- COLUMNA IZQUIERDA: imagen de producto grande.
+  · Si hay image_filename en el contexto: <img src="[IMAGE:FILENAME]" ...>
+  · Si NO hay imagen: genera un placeholder visual elegante con fondo de color de marca, nombre del producto centrado y badge de categoría. NUNCA uses un <img> roto o con src vacío.
+  · Mínimo 400px de altura en desktop. Ocupa todo el ancho de la columna.
+- COLUMNA DERECHA: ficha de compra.
+  · Brand label pequeño (NEURONE COSMÉTICA)
+  · Nombre del producto en H1 grande y bold
+  · Rating visual (★★★★★ con número de reviews)
+  · Precio destacado ($XX.XX) — si el precio es 0.00 usa $10.00 como placeholder
+  · 3-4 bullets de beneficio clave (máx 8 palabras cada uno) con ícono ✓ o ●
+  · Botón CTA primario full-width "Agregar al carrito" o "Comprar ahora"
+  · Botón secundario opcional "Ver descripción completa"
+  · Trust badges pequeños debajo: 🔒 Pago seguro · 🚚 Envío gratis +$50 · ↩ 30 días devolución
+PROHIBIDO en el hero: párrafos de texto largos, múltiples CTAs de texto, fondos blancos sin imagen.` 
+: section.id === 'features' ? `
+FEATURES DEL PRODUCTO:
+- Sección oscura de contraste (fondo #0E1018 o similar)
+- Título corto: "Por qué [Nombre Producto]" o "Lo que lo hace diferente"
+- Grid de 3 cards visuales: ícono grande + título corto + 1 frase de beneficio (máx 15 palabras)
+- NO uses listas de texto corrido. Solo cards visuales.
+- Incluye 1 bloque "Modo de uso" con pasos numerados simples (máx 4 pasos)`
+: section.id === 'faq' ? `
+FAQ COMPACTO:
+- Máximo 4 preguntas. Solo las más frecuentes de compra.
+- Acordeón CSS puro (no JS) con + / − toggle
+- Respuestas de máx 2 líneas.`
+: `
+SECCIÓN CTA FINAL:
+- Fondo de color de marca
+- 1 frase de cierre + botón CTA principal`}
+` : '';
+
   return `Eres un redactor web senior, front-end developer y estratega de conversión especializado en negocios hispanos en Miami.
 Generas contenido en formato ${modeLabel} listo para producción.
 Tu estándar no es copy "correcto" — es copy que convierte. Directo, específico, que incomoda al lector lo suficiente para que actúe.
@@ -333,7 +375,7 @@ OUTPUT MODE: ${modeLabel}
 
 ${productBlock}
 
-${brandBlueprintBlock ? `${brandBlueprintBlock}\n\n` : ""}${brandCtx?.complianceBlock ? `${brandCtx.complianceBlock}\n\n` : ""}${catalogContextBlock}${extraContext ? `CONTEXTO DE MARCA / DB_VARIABLES:\n${extraContext}` : ""}
+${productPageOverride}${brandBlueprintBlock ? `${brandBlueprintBlock}\n\n` : ""}${brandCtx?.complianceBlock ? `${brandCtx.complianceBlock}\n\n` : ""}${catalogContextBlock}${extraContext ? `CONTEXTO DE MARCA / DB_VARIABLES:\n${extraContext}` : ""}
 
 ── ESTÁNDAR DE COPY BASE (SIEMPRE APLICA) ──────────────────────────────────────
 ADN UNRLVL: Todo copy producido aquí sigue estas reglas por defecto. No son opcionales.

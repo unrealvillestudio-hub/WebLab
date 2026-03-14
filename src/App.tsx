@@ -1,6 +1,10 @@
-import { Bell } from 'lucide-react';
+import { useState } from 'react';
+import { Bell, Globe, ShoppingBag } from 'lucide-react';
 import WebGeneratorModule from './modules/webgenerator/WebGeneratorModule';
+import ShopifyPushModule from './modules/shopify/ShopifyPushModule';
 import { BUILD_TAG } from './config/buildTag';
+
+type AppTab = 'weblab' | 'shopify';
 
 const Logo = () => (
   <div className="flex items-center gap-2 font-bold tracking-tighter text-xl">
@@ -10,6 +14,8 @@ const Logo = () => (
 );
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState<AppTab>('weblab');
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-zinc-200 selection:bg-[#FFAB00]/30">
 
@@ -20,6 +26,31 @@ export default function App() {
           <div className="flex items-center gap-2">
             <span className="text-sm font-bold text-[#FFAB00]">UNRLVL — WebLab</span>
             <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-[10px] font-mono text-zinc-500">{BUILD_TAG}</span>
+          </div>
+          {/* Nav tabs */}
+          <div className="flex items-center gap-1 ml-2">
+            <button
+              onClick={() => setActiveTab('weblab')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                activeTab === 'weblab'
+                  ? 'bg-zinc-800 text-zinc-200'
+                  : 'text-zinc-600 hover:text-zinc-400'
+              }`}
+            >
+              <Globe size={12} />
+              WebLab
+            </button>
+            <button
+              onClick={() => setActiveTab('shopify')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                activeTab === 'shopify'
+                  ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                  : 'text-zinc-600 hover:text-zinc-400'
+              }`}
+            >
+              <ShoppingBag size={12} />
+              Shopify Push
+            </button>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -34,7 +65,8 @@ export default function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-6 pb-20">
-        <WebGeneratorModule />
+        {activeTab === 'weblab'  && <WebGeneratorModule />}
+        {activeTab === 'shopify' && <ShopifyPushModule />}
       </main>
 
       <footer className="h-8 border-t border-zinc-800/50 px-6 flex items-center justify-between text-[10px] font-mono text-zinc-700 uppercase tracking-widest fixed bottom-0 left-0 right-0 bg-[#0A0A0A]/80 backdrop-blur-sm z-50">

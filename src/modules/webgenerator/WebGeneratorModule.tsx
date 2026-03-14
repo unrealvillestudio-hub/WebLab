@@ -378,7 +378,8 @@ function PlatformToggle({ value, onChange, wordpressOnly }: {
         >
           {p === 'wordpress' ? '⚙️ WordPress' : '🛍️ Shopify'}
         </button>
-      ))}\n    </div>
+      ))}
+    </div>
   );
 }
 
