@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn, Badge, Spinner } from '../../ui/components';
 import { getCatalog } from '../../config/productCatalog';
+import { useShopifyStore } from '../../store/useShopifyStore';
 import type { CatalogProduct } from '../../config/productCatalog';
 
 // ── TIPOS ──────────────────────────────────────────────────────────────────────
@@ -282,10 +283,14 @@ function ProductRow({
 // ── MAIN COMPONENT ─────────────────────────────────────────────────────────────
 
 export default function ShopifyPushModule() {
-  // Config
-  const [shop, setShop]       = useState('neurone-south-central-florida.myshopify.com');
-  const [token, setToken]     = useState('');
+  // Config — sincronizado con store compartido
+  const shopifyStore = useShopifyStore();
+  const [shop, setShopLocal]   = useState(shopifyStore.shop);
+  const [token, setTokenLocal] = useState(shopifyStore.token);
   const [showToken, setShowToken] = useState(false);
+
+  function setShop(v: string)  { setShopLocal(v);  shopifyStore.setShop(v); }
+  function setToken(v: string) { setTokenLocal(v); shopifyStore.setToken(v); }
 
   // Leer token del fragment URL tras OAuth callback (#shopify_token=xxx&shop=xxx)
   useEffect(() => {
@@ -351,6 +356,9 @@ export default function ShopifyPushModule() {
       const info = await testConnection(config);
       setShopInfo(info);
       setConnected(true);
+      shopifyStore.setConnected(true);
+      shopifyStore.setToken(token);
+      shopifyStore.setShop(shop);
     } catch (e: any) {
       setConnError(e.message ?? 'Error de conexión');
     } finally {

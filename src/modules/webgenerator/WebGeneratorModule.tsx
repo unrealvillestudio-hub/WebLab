@@ -5,7 +5,7 @@ import {
   ChevronRight, Copy, Check, Download, Trash2, BookOpen,
   AlertCircle, CheckCircle2, FileText, RotateCcw, Zap,
   Database, RefreshCw, Code2, FileCode, PenLine, Rss, Layers, X,
-  CloudUpload, Clock, Monitor, Smartphone, Eye,
+  CloudUpload, Clock, Monitor, Smartphone, Eye, ShoppingBag,
 } from 'lucide-react';
 import { saveDraft, SaveDraftResult } from '../../services/draftService';
 import { BRAND_LIST, getBrandById, BrandId } from '../../config/brands';
@@ -18,6 +18,7 @@ import {
   WebOutputMode, BlogSpec, BlogPostType,
 } from '../../services/webEngine';
 import { useWebOutputStore } from '../../store/useWebOutputStore';
+import { useShopifyStore } from '../../store/useShopifyStore';
 import { WebModuleId, WebLanguage, WebTone, WebPlatform, WebOutput, EcomProductContext, BlueprintImageToggles } from '../../core/types';
 import { cn, Badge, Spinner } from '../../ui/components';
 import { BlueprintPanel } from '../../ui/BlueprintPanel';
@@ -388,6 +389,9 @@ function PlatformToggle({ value, onChange, wordpressOnly }: {
 // ══════════════════════════════════════════════════════════════════════════════
 export default function WebGeneratorModule() {
   const { outputs, addOutput, removeOutput } = useWebOutputStore();
+  const shopifyStore = useShopifyStore();
+  const [shopifyPushing, setShopifyPushing] = useState(false);
+  const [shopifyPushResult, setShopifyPushResult] = useState<{url: string; title: string} | null>(null);
   const { getSlotContext, slots } = useBlueprintStore();
 
   // ── Main tab ──
@@ -482,6 +486,47 @@ export default function WebGeneratorModule() {
       setBlogAutoFilled(false);
     }
   }, [blogBrandId]);
+
+  // ── Handler: Shopify Push ────────────────────────────────────────────────
+  async function handleShopifyPush() {
+    if (!result || !shopifyStore.connected || shopifyPushing) return;
+    setShopifyPushing(true);
+    setShopifyPushResult(null);
+    try {
+      const resolvedMode = ((result as any).outputMode as WebOutputMode) ?? outputMode;
+      const html = buildExportFile(result.sections, resolvedMode, result.superAggro ?? false);
+      const pageTitle = `${brand?.name ?? 'Neurone'} — ${pack?.label ?? 'Página'} ${new Date().toLocaleDateString('es-ES')}`;
+
+      const res = await fetch('/api/shopify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shop: shopifyStore.shop,
+          token: shopifyStore.token,
+          endpoint: '/admin/api/2024-01/pages.json',
+          method: 'POST',
+          body: {
+            page: {
+              title: pageTitle,
+              body_html: html,
+              published: true,
+            },
+          },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.errors ? JSON.stringify(data.errors) : `HTTP ${res.status}`);
+      const shopDomain = shopifyStore.shop.replace('.myshopify.com', '');
+      setShopifyPushResult({
+        url: `https://admin.shopify.com/store/${shopDomain}/pages/${data.page?.id}`,
+        title: data.page?.title ?? pageTitle,
+      });
+    } catch (e: any) {
+      alert(`Error push Shopify: ${e.message}`);
+    } finally {
+      setShopifyPushing(false);
+    }
+  }
 
   // ── Handlers: Generator ──────────────────────────────────────────────────
   const handleModuleChange = (mod: WebModuleId) => {
@@ -1255,6 +1300,32 @@ export default function WebGeneratorModule() {
                         : <><CloudUpload size={11} />Borrador</>
                     }
                   </button>
+                )}
+                {/* Push to Shopify */}
+                {result && shopifyStore.connected && (
+                  <>
+                    <div className="w-px h-5 bg-zinc-700 mx-0.5" />
+                    {shopifyPushResult ? (
+                      <a
+                        href={shopifyPushResult.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold transition-colors hover:bg-emerald-500/20"
+                      >
+                        <CheckCircle2 size={11} /> En Shopify ↗
+                      </a>
+                    ) : (
+                      <button
+                        onClick={handleShopifyPush}
+                        disabled={shopifyPushing}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
+                        title="Push página a Shopify"
+                      >
+                        {shopifyPushing ? <RefreshCw size={11} className="animate-spin" /> : <ShoppingBag size={11} />}
+                        {shopifyPushing ? 'Pushing...' : 'Push to Shopify'}
+                      </button>
+                    )}
+                  </>
                 )}
                 {draftError && (
                   <span className="text-[10px] text-red-400 max-w-40 truncate" title={draftError}>
