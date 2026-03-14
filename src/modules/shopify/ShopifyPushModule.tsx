@@ -379,6 +379,8 @@ export default function ShopifyPushModule() {
       shopifyStore.setConnected(true);
       shopifyStore.setToken(token);
       shopifyStore.setShop(shop);
+      // Auto-sync tras conectar
+      setTimeout(() => handleSync(), 300);
     } catch (e: any) {
       setConnError(e.message ?? 'Error de conexión');
     } finally {
