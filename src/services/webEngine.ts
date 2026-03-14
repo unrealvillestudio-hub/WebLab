@@ -697,6 +697,36 @@ export function resolveImagePlaceholders(html: string): string {
   );
 }
 
+/**
+ * Post-processor: rellena <img src=""> vacíos buscando coincidencia por alt text
+ * contra el catálogo de productos. Último recurso cuando el modelo no inyecta la URL.
+ */
+export function injectProductImages(
+  html: string,
+  imageMap: Record<string, string>,  // { "Nombre Producto": "URL" }
+): string {
+  // Caso 1: src vacío con alt de producto — <img alt="Nombre" src="">
+  let result = html.replace(
+    /<img([^>]*?)src=""([^>]*?)>/gi,
+    (match, before, after) => {
+      const altMatch = (before + after).match(/alt="([^"]+)"/i);
+      if (!altMatch) return match;
+      const altText = altMatch[1];
+      // Buscar por nombre exacto o parcial en el mapa
+      const url = imageMap[altText]
+        ?? Object.entries(imageMap).find(([k]) =>
+            altText.toLowerCase().includes(k.toLowerCase()) ||
+            k.toLowerCase().includes(altText.toLowerCase())
+          )?.[1];
+      if (!url) return match;
+      return `<img${before}src="${url}"${after}>`;
+    }
+  );
+  // Caso 2: [IMAGE:FILENAME] no resuelto
+  result = resolveImagePlaceholders(result);
+  return result;
+}
+
 export function buildExportFile(
   sections: { sectionId: string; label: string; content: string }[],
   mode: WebOutputMode,

@@ -14,7 +14,7 @@ import { hasBrandBlueprint } from '../../config/brandBlueprints';
 import { WEB_PACKS, PACKS_BY_MODULE, PAGE_SECTIONS } from '../../config/packs';
 import {
   runWebPack, runBlogPost, estimateTotalWords,
-  getFileExtension, getMimeType, buildExportFile, resolveImagePlaceholders,
+  getFileExtension, getMimeType, buildExportFile, resolveImagePlaceholders, injectProductImages,
   WebOutputMode, BlogSpec, BlogPostType,
 } from '../../services/webEngine';
 import { useWebOutputStore } from '../../store/useWebOutputStore';
@@ -24,6 +24,8 @@ import { cn, Badge, Spinner } from '../../ui/components';
 import { BlueprintPanel } from '../../ui/BlueprintPanel';
 import { useBlueprintStore } from '../../store/useBlueprintStore';
 import { EcomProductSelector, BlueprintImageTogglesPanel, buildEcomPromptContext } from './EcomProductSelector';
+import { getCatalog } from '../../config/productCatalog';
+import { BLUEPRINTS_RAW_BASE } from '../../config/brandAssets';
 import { ThemePicker } from './ThemePicker';
 import { getThemeById, buildThemePromptBlock } from '../../config/themeCatalog';
 import { SalesLayerPanel } from './SalesLayerPanel';
@@ -514,7 +516,13 @@ export default function WebGeneratorModule() {
     setShopifyPushResult(null);
     try {
       const resolvedMode = ((result as any).outputMode as WebOutputMode) ?? outputMode;
-      const baseHtml = buildExportFile(result.sections, resolvedMode, result.superAggro ?? false);
+      // Construir mapa imagen para post-processor
+      const _catalog = getCatalog(brandId);
+      const _imgMap: Record<string, string> = {};
+      _catalog.flatMap(c => c.products).forEach(p => {
+        if (p.image_filename) _imgMap[p.display_name] = `${BLUEPRINTS_RAW_BASE}/assets/images/products/${p.image_filename}`;
+      });
+      const baseHtml = injectProductImages(buildExportFile(result.sections, resolvedMode, result.superAggro ?? false), _imgMap);
       // Sales Layer: insertar ANTES del último </div> o </section> del output
       const html = salesLayerHtml && salesLayerInserted
         ? baseHtml + '\n\n<!-- ═══ SALES LAYER ═══ -->\n' + salesLayerHtml + '\n<!-- ═══ /SALES LAYER ═══ -->'
@@ -727,7 +735,12 @@ export default function WebGeneratorModule() {
     setDraftResult(null);
     try {
       const resolvedMode = ((result as any).outputMode as WebOutputMode) ?? outputMode;
-      const content = buildExportFile(result.sections, resolvedMode, result.superAggro ?? false);
+      const _cat2 = getCatalog(brandId);
+      const _imap2: Record<string, string> = {};
+      _cat2.flatMap(c => c.products).forEach(p => {
+        if (p.image_filename) _imap2[p.display_name] = `${BLUEPRINTS_RAW_BASE}/assets/images/products/${p.image_filename}`;
+      });
+      const content = injectProductImages(buildExportFile(result.sections, resolvedMode, result.superAggro ?? false), _imap2);
       const saved = await saveDraft({
         token:      githubToken,
         brandId:    brand.id,
