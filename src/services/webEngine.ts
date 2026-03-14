@@ -136,7 +136,7 @@ REGLAS ESTRICTAS:
 - Usa clases descriptivas (hero-section, hero-title, hero-subtitle, cta-button, etc.)
 - CSS inline en style="" para colores, tipografía y espaciado base.
 - PALETA: Si el contexto incluye "color dominante: #XXXXXX" de un producto, usa ese hex como color de acento (botones, bordes, highlights). Si no, usa paleta neutra: fondo blanco o #f9f9f9, texto #1a1a1a, acento #000.
-- Responsive: el contenedor principal NO debe tener max-width menor a 1200px — Shopify ya gestiona el ancho del layout. Usa max-width en elementos internos (texto, cards) pero nunca en la sección raíz.
+- Responsive: las secciones raíz (<section>) deben tener width:100% sin ningún max-width. Shopify ya gestiona el ancho del layout. Solo los contenedores INTERNOS de texto (divs de copy, no la sección) pueden tener max-width para legibilidad.
 - Botones con cursor:pointer y padding generoso.
 - CTAs tipo enlace de texto (no botón): NO uses white-space:nowrap. El sistema aplicará wrapping automático en mobile.
 - CTAs tipo botón: usa display:block con width:100% en mobile (max-width:400px en desktop) para evitar overflow.
@@ -334,7 +334,9 @@ HERO DE COLECCIÓN:
   Ejemplos incorretos: "Descubre nuestra línea de productos Moisture" (demasiado largo, sin punch)
 - SUBHEADLINE: 1 frase de 10-15 palabras máximo. Específica, con datos o diferenciador.
 - DOS CTAs en flex-wrap: [Ver colección] (botón sólido color marca) + [Soy profesional → Portal Pro] (outline)
-- Eyebrow label encima del H1: nombre de colección + "Distribución exclusiva South & Central Miami"
+- Eyebrow: DOS elementos separados, en una sola línea horizontal (display:inline-flex, gap:12px, NO flex-wrap):
+  · Primero: badge azul (#0076A8) con "Línea [NOMBRE COLECCIÓN]" — una sola línea, sin salto
+  · Segundo: texto plain "Distribuidor Exclusivo · South & Central Florida" — SIEMPRE "Florida" NO "Miami"
 - Fondo: #0E1018 oscuro. Acento: #0076A8 navy Neurone.` 
 : section.id === 'features' ? `
 GRID DE PRODUCTOS — obligatorio mostrar imágenes:

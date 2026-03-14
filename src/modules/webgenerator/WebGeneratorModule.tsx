@@ -530,7 +530,15 @@ export default function WebGeneratorModule() {
       const html = salesLayerHtml && salesLayerInserted
         ? baseHtml + '\n\n<!-- ═══ SALES LAYER ═══ -->\n' + salesLayerHtml + '\n<!-- ═══ /SALES LAYER ═══ -->'
         : baseHtml;
-      const pageTitle = `${brand?.name ?? 'Neurone'} — ${pack?.label ?? 'Página'}`;
+      // Título: si es collection page usar "Línea X" con nombre de colección
+      const collectionName = ecomCtx?.collectionId
+        ? getCatalog(brandId).find(c => c.id === ecomCtx.collectionId)?.label ?? pack?.label
+        : pack?.label;
+      const pageTitle = pack?.id === 'ecom_collection'
+        ? `Línea ${collectionName ?? 'Colección'}`
+        : pack?.id === 'ecom_homepage'
+        ? `${brand?.name ?? 'Neurone'} — Tienda`
+        : `${brand?.name ?? 'Neurone'} — ${pack?.label ?? 'Página'}`;
 
       // ── Upsert: buscar página existente por título ──────────────────────
       const searchRes = await fetch('/api/shopify', {
@@ -1523,8 +1531,10 @@ export default function WebGeneratorModule() {
                     pulse={salesLayerReady}
                     onGenerate={(_preset: SalesPreset, _params, _html) => {
                       setSalesLayerReady(false);
-                      setSalesLayerHtml(_html);
-                      setSalesLayerInserted(true); // auto-insert
+                      if (_html && _html.trim().length > 100) {
+                        setSalesLayerHtml(_html);
+                        setSalesLayerInserted(true); // auto-insert solo si hay contenido real
+                      }
                     }}
                   />
                 )}
