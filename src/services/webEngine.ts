@@ -140,6 +140,7 @@ REGLAS ESTRICTAS:
 - Botones con cursor:pointer y padding generoso.
 - CTAs tipo enlace de texto (no botón): NO uses white-space:nowrap. El sistema aplicará wrapping automático en mobile.
 - CTAs tipo botón: usa display:block con width:100% en mobile (max-width:400px en desktop) para evitar overflow.
+- Cuando haya DOS botones en fila (ej: "Ver catálogo" + "Soy profesional"): envuélvelos en un div con display:flex; flex-wrap:wrap; gap:12px. Cada botón con flex:1; min-width:140px. NUNCA uses width fijo ni white-space:nowrap en estos casos.
 - NO incluyas <script>, NO incluyas frameworks externos.
 - La sección debe ser copy-paste directo en un bloque "Custom HTML" de ${platform === 'shopify' ? 'Shopify' : 'WordPress'}.
 - ⛔ PROHIBIDO incluir después del HTML: notas de producción, tablas markdown, comentarios sobre decisiones de diseño, explicaciones, resúmenes ni ningún texto fuera del bloque HTML. El output termina con la etiqueta de cierre de la sección (</section> o </div>). NADA más.
