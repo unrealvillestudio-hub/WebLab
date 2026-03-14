@@ -346,6 +346,7 @@ export default function ShopifyPushModule() {
   const [syncing, setSyncing]           = useState(false);
   const [syncDone, setSyncDone]         = useState(false);
   const [syncCount, setSyncCount]       = useState(0);
+  const [syncStatus, setSyncStatus]     = useState('');
 
   // Image upload
   const [imgUploading, setImgUploading]   = useState(false);
@@ -516,6 +517,7 @@ export default function ShopifyPushModule() {
     if (!connected || syncing) return;
     setSyncing(true);
     setSyncDone(false);
+    setSyncStatus('Leyendo catálogo...');
     try {
       // Cursor-based pagination — Shopify 2024-01+
       const idMap: Record<string, number> = {};
@@ -537,6 +539,7 @@ export default function ShopifyPushModule() {
         }
       }
 
+      setSyncStatus('Sincronizando imágenes CDN...');
       // Traer imágenes CDN de Shopify para cada producto
       const cdnMap: Record<string, string> = {};
       for (const [title, pid] of Object.entries(idMap)) {
@@ -559,6 +562,7 @@ export default function ShopifyPushModule() {
       }));
       setShopifyIdMap(idMap);
       setSyncCount(Object.keys(idMap).length);
+      setSyncStatus('');
       setSyncDone(true);
     } catch (e: any) {
       setConnError(`Error sync: ${e.message}`);
@@ -768,7 +772,7 @@ export default function ShopifyPushModule() {
                 )}
               >
                 {syncing ? <Spinner size={12} /> : syncDone ? <CheckCircle2 size={12} /> : <RefreshCw size={12} />}
-                {syncing ? 'Sincronizando...' : syncDone ? `Sincronizado (${syncCount})` : 'Sincronizar tienda'}
+                {syncing ? (syncStatus || 'Sincronizando...') : syncDone ? `Sincronizado (${syncCount})` : 'Sincronizar tienda'}
               </button>
             </div>
           </div>

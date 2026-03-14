@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useShopifyStore } from './store/useShopifyStore';
 import { Bell, Globe, ShoppingBag } from 'lucide-react';
 import WebGeneratorModule from './modules/webgenerator/WebGeneratorModule';
 import ShopifyPushModule from './modules/shopify/ShopifyPushModule';
@@ -15,6 +16,7 @@ const Logo = () => (
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<AppTab>('weblab');
+  const shopifyStore = useShopifyStore();
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-zinc-200 selection:bg-[#FFAB00]/30">
@@ -42,14 +44,23 @@ export default function App() {
             </button>
             <button
               onClick={() => setActiveTab('shopify')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 activeTab === 'shopify'
                   ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                  : shopifyStore.connected
+                  ? 'text-emerald-400/70 hover:text-emerald-300'
                   : 'text-zinc-600 hover:text-zinc-400'
               }`}
             >
               <ShoppingBag size={12} />
               Shopify Push
+              {/* Indicador de estado */}
+              {!shopifyStore.connected && activeTab !== 'shopify' && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 animate-pulse" title="Conecta Shopify para publicar" />
+              )}
+              {shopifyStore.connected && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-400" title="Shopify conectado" />
+              )}
             </button>
           </div>
         </div>
