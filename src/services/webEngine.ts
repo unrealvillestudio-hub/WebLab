@@ -750,7 +750,26 @@ export function buildExportFile(
       .replace(/\{\{[^}]+\}\}/g, '')
       .replace(/\{%-?\s*.*?-?%\}/g, '');
 
-    const body = sections
+    // Override CSS de Dawn/Shopify — rompe el contenedor page-width y rte
+    const dawnOverride = `<style>
+/* ── Shopify Dawn override — ancho completo ── */
+.shopify-block.rte,
+.shopify-block.rte > *,
+#shopify-block-Ad0NjSFplcnZvcmdoa__page-content,
+[id*="page-content"],
+[class*="text-block"],
+[class*="page-width-content"],
+.section-content-wrapper {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding-inline-start: 0 !important;
+  padding-inline-end: 0 !important;
+  --max-width--body-normal: 100% !important;
+}
+.page-width-content { padding: 0 !important; }
+</style>`;
+
+    const body = dawnOverride + '\n' + sections
       .map(s => `<!-- === ${s.label.toUpperCase()} === -->\n${resolveForPreview(resolveImagePlaceholders(s.content))}`)
       .join('\n\n');
 
