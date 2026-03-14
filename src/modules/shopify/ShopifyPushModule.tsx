@@ -317,6 +317,11 @@ export default function ShopifyPushModule() {
     new Set(allProducts.filter(p => p.shopify_visibility === 'public' && !p.b2b_only).map(p => p.id))
   );
 
+  // Sync
+  const [syncing, setSyncing]           = useState(false);
+  const [syncDone, setSyncDone]         = useState(false);
+  const [syncCount, setSyncCount]       = useState(0);
+
   // Image upload
   const [imgUploading, setImgUploading]   = useState(false);
   const [imgLog, setImgLog]               = useState<string[]>([]);
@@ -476,6 +481,46 @@ export default function ShopifyPushModule() {
     pending: productStates.filter(s => s.product.shopify_visibility === 'pending' && !s.product.b2b_only).length,
     b2b: productStates.filter(s => s.product.b2b_only).length,
   };
+
+  async function handleSync() {
+    if (!connected || syncing) return;
+    setSyncing(true);
+    setSyncDone(false);
+    try {
+      // Cursor-based pagination — Shopify 2024-01+
+      const idMap: Record<string, number> = {};
+      let url = `/admin/api/2024-01/products.json?limit=250&fields=id,title,status`;
+      let hasNext = true;
+
+      while (hasNext) {
+        const data = await shopifyCall(config, url);
+        const products = data.products ?? [];
+        for (const p of products) idMap[p.title] = p.id;
+
+        // Shopify devuelve Link header para paginación — el proxy lo reenvía
+        // Si products < 250 no hay más páginas
+        hasNext = products.length === 250;
+        if (hasNext) {
+          // Obtener cursor del último producto
+          const lastId = products[products.length - 1]?.id;
+          url = `/admin/api/2024-01/products.json?limit=250&fields=id,title,status&since_id=${lastId}`;
+        }
+      }
+
+      // Sincronizar con productStates
+      setProductStates(prev => prev.map(s => {
+        const shopifyId = idMap[s.product.display_name];
+        return shopifyId ? { ...s, status: 'success' as PushStatus, shopifyId } : s;
+      }));
+      setShopifyIdMap(idMap);
+      setSyncCount(Object.keys(idMap).length);
+      setSyncDone(true);
+    } catch (e: any) {
+      setConnError(`Error sync: ${e.message}`);
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   function addImgLog(msg: string) {
     setImgLog(prev => [...prev, `${new Date().toLocaleTimeString('es-ES')} — ${msg}`]);
@@ -651,6 +696,39 @@ export default function ShopifyPushModule() {
           )}
         </div>
       </div>
+
+      {/* ── SYNC OPERATIONS ── */}
+      {connected && (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p className="text-[10px] uppercase font-bold text-zinc-600 tracking-widest mb-1">Operaciones</p>
+              <p className="text-[11px] text-zinc-500">
+                {syncDone
+                  ? `Sincronizado — ${syncCount} productos en tienda`
+                  : 'Sincroniza el estado actual de la tienda antes de operar'}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Sync */}
+              <button
+                onClick={handleSync}
+                disabled={syncing}
+                className={cn(
+                  'flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold border transition-all',
+                  syncDone
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                    : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-zinc-600',
+                  syncing && 'opacity-50 cursor-not-allowed',
+                )}
+              >
+                {syncing ? <Spinner size={12} /> : syncDone ? <CheckCircle2 size={12} /> : <RefreshCw size={12} />}
+                {syncing ? 'Sincronizando...' : syncDone ? `Sincronizado (${syncCount})` : 'Sincronizar tienda'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── STATS ── */}
       <div className="grid grid-cols-4 gap-3">
@@ -850,7 +928,7 @@ export default function ShopifyPushModule() {
       </AnimatePresence>
 
       {/* ── IMAGE UPLOAD ── */}
-      {(pushDone || Object.keys(shopifyIdMap).length > 0) && (
+      {connected && (syncDone || pushDone) && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center">
