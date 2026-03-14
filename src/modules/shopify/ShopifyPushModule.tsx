@@ -535,6 +535,21 @@ export default function ShopifyPushModule() {
         }
       }
 
+      // Traer imágenes CDN de Shopify para cada producto
+      const cdnMap: Record<string, string> = {};
+      for (const [title, pid] of Object.entries(idMap)) {
+        try {
+          const imgData = await shopifyCall(
+            config,
+            `/admin/api/2024-01/products/${pid}/images.json?limit=1&fields=src,alt`
+          );
+          const firstImg = imgData.images?.[0];
+          if (firstImg?.src) cdnMap[title] = firstImg.src;
+        } catch {}
+        await delay(200);
+      }
+      shopifyStore.setCdnImageMap(cdnMap);
+
       // Sincronizar con productStates
       setProductStates(prev => prev.map(s => {
         const shopifyId = idMap[s.product.display_name];

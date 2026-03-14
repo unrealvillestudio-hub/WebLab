@@ -516,12 +516,15 @@ export default function WebGeneratorModule() {
     setShopifyPushResult(null);
     try {
       const resolvedMode = ((result as any).outputMode as WebOutputMode) ?? outputMode;
-      // Construir mapa imagen para post-processor
+      // Mapa imagen: CDN Shopify (si sincronizado) → fallback BluePrints
+      const _cdnMap = shopifyStore.cdnImageMap;
       const _catalog = getCatalog(brandId);
       const _imgMap: Record<string, string> = {};
       _catalog.flatMap(c => c.products).forEach(p => {
         if (p.image_filename) _imgMap[p.display_name] = `${BLUEPRINTS_RAW_BASE}/assets/images/products/${p.image_filename}`;
       });
+      // CDN sobreescribe fallback cuando disponible
+      Object.assign(_imgMap, _cdnMap);
       const baseHtml = injectProductImages(buildExportFile(result.sections, resolvedMode, result.superAggro ?? false), _imgMap);
       // Sales Layer: insertar ANTES del último </div> o </section> del output
       const html = salesLayerHtml && salesLayerInserted
@@ -736,9 +739,10 @@ export default function WebGeneratorModule() {
     try {
       const resolvedMode = ((result as any).outputMode as WebOutputMode) ?? outputMode;
       const _cat2 = getCatalog(brandId);
-      const _imap2: Record<string, string> = {};
+      const _imap2: Record<string, string> = { ...shopifyStore.cdnImageMap };
       _cat2.flatMap(c => c.products).forEach(p => {
-        if (p.image_filename) _imap2[p.display_name] = `${BLUEPRINTS_RAW_BASE}/assets/images/products/${p.image_filename}`;
+        if (p.image_filename && !_imap2[p.display_name])
+          _imap2[p.display_name] = `${BLUEPRINTS_RAW_BASE}/assets/images/products/${p.image_filename}`;
       });
       const content = injectProductImages(buildExportFile(result.sections, resolvedMode, result.superAggro ?? false), _imap2);
       const saved = await saveDraft({
@@ -1520,7 +1524,7 @@ export default function WebGeneratorModule() {
                     onGenerate={(_preset: SalesPreset, _params, _html) => {
                       setSalesLayerReady(false);
                       setSalesLayerHtml(_html);
-                      setSalesLayerInserted(false);
+                      setSalesLayerInserted(true); // auto-insert
                     }}
                   />
                 )}
