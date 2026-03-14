@@ -515,8 +515,9 @@ export default function WebGeneratorModule() {
     try {
       const resolvedMode = ((result as any).outputMode as WebOutputMode) ?? outputMode;
       const baseHtml = buildExportFile(result.sections, resolvedMode, result.superAggro ?? false);
+      // Sales Layer: insertar ANTES del último </div> o </section> del output
       const html = salesLayerHtml && salesLayerInserted
-        ? baseHtml + '\n\n<!-- Sales Layer -->\n' + salesLayerHtml
+        ? baseHtml + '\n\n<!-- ═══ SALES LAYER ═══ -->\n' + salesLayerHtml + '\n<!-- ═══ /SALES LAYER ═══ -->'
         : baseHtml;
       const pageTitle = `${brand?.name ?? 'Neurone'} — ${pack?.label ?? 'Página'}`;
 
