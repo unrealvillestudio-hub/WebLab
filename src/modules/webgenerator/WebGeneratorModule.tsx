@@ -392,6 +392,24 @@ export default function WebGeneratorModule() {
   const shopifyStore = useShopifyStore();
   const [shopifyPushing, setShopifyPushing] = useState(false);
   const [shopifyPushResult, setShopifyPushResult] = useState<{url: string; title: string} | null>(null);
+
+  // Auto-verificar conexión Shopify si hay token en store pero no está marcado connected
+  useEffect(() => {
+    if (shopifyStore.token && !shopifyStore.connected) {
+      fetch('/api/shopify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shop: shopifyStore.shop,
+          token: shopifyStore.token,
+          endpoint: '/admin/api/2024-01/shop.json',
+        }),
+      })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => { if (data?.shop) shopifyStore.setConnected(true); })
+        .catch(() => {});
+    }
+  }, [shopifyStore.token]);
   const { getSlotContext, slots } = useBlueprintStore();
 
   // ── Main tab ──
@@ -1301,32 +1319,37 @@ export default function WebGeneratorModule() {
                     }
                   </button>
                 )}
-                {/* Push to Shopify */}
-                {result && shopifyStore.connected && (
-                  <>
-                    <div className="w-px h-5 bg-zinc-700 mx-0.5" />
-                    {shopifyPushResult ? (
-                      <a
-                        href={shopifyPushResult.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold transition-colors hover:bg-emerald-500/20"
-                      >
-                        <CheckCircle2 size={11} /> En Shopify ↗
-                      </a>
-                    ) : (
-                      <button
-                        onClick={handleShopifyPush}
-                        disabled={shopifyPushing}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold hover:bg-emerald-500/20 transition-colors disabled:opacity-50"
-                        title="Push página a Shopify"
-                      >
-                        {shopifyPushing ? <RefreshCw size={11} className="animate-spin" /> : <ShoppingBag size={11} />}
-                        {shopifyPushing ? 'Pushing...' : 'Push to Shopify'}
-                      </button>
-                    )}
-                  </>
-                )}
+                {/* Push to Shopify — siempre visible, activo con result + connected */}
+                <>
+                  <div className="w-px h-5 bg-zinc-700 mx-0.5" />
+                  {shopifyPushResult ? (
+                    <a
+                      href={shopifyPushResult.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold transition-colors hover:bg-emerald-500/20"
+                    >
+                      <CheckCircle2 size={11} /> En Shopify ↗
+                    </a>
+                  ) : (
+                    <button
+                      onClick={handleShopifyPush}
+                      disabled={shopifyPushing || !result || !shopifyStore.connected}
+                      className={cn(
+                        'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border',
+                        result && shopifyStore.connected
+                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20'
+                          : 'bg-zinc-800 border-zinc-700 text-zinc-600 cursor-not-allowed opacity-50',
+                      )}
+                      title={!shopifyStore.connected ? 'Conecta Shopify en el tab Shopify Push' : 'Push página a Shopify'}
+                    >
+                      {shopifyPushing
+                        ? <RefreshCw size={11} className="animate-spin" />
+                        : <ShoppingBag size={11} />}
+                      {shopifyPushing ? 'Pushing...' : 'Shopify'}
+                    </button>
+                  )}
+                </>
                 {draftError && (
                   <span className="text-[10px] text-red-400 max-w-40 truncate" title={draftError}>
                     ⚠ {draftError}

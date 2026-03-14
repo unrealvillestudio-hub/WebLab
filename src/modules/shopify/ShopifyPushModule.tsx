@@ -302,11 +302,31 @@ export default function ShopifyPushModule() {
     if (t) setToken(t);
     if (s) setShop(s);
     window.history.replaceState(null, '', window.location.pathname);
+    // Auto-verificar conexión tras OAuth
+    if (t) setTimeout(() => autoVerify(t, s ?? shop), 300);
   }, []);
+
+  async function autoVerify(t: string, s: string) {
+    try {
+      const res = await fetch('/api/shopify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shop: s, token: t, endpoint: '/admin/api/2024-01/shop.json' }),
+      });
+      const data = await res.json();
+      if (res.ok && data.shop) {
+        setShopInfo(data.shop);
+        setConnected(true);
+        shopifyStore.setConnected(true);
+        shopifyStore.setToken(t);
+        shopifyStore.setShop(s);
+      }
+    } catch {}
+  }
 
   // Connection
   const [testing, setTesting]     = useState(false);
-  const [connected, setConnected] = useState(false);
+  const [connected, setConnected] = useState(shopifyStore.connected);
   const [shopInfo, setShopInfo]   = useState<{ name: string; email: string; domain: string } | null>(null);
   const [connError, setConnError] = useState('');
 
