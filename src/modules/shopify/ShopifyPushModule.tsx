@@ -289,8 +289,8 @@ export default function ShopifyPushModule() {
   const [token, setTokenLocal] = useState(shopifyStore.token);
   const [showToken, setShowToken] = useState(false);
 
-  function setShop(v: string)  { setShopLocal(v);  shopifyStore.setShop(v); }
-  function setToken(v: string) { setTokenLocal(v); shopifyStore.setToken(v); }
+  function setShop(v: string)  { setShopLocal(v);  shopifyStore.setShop(v); shopifyStore.setConnected(false); }
+  function setToken(v: string) { setTokenLocal(v); shopifyStore.setToken(v); shopifyStore.setConnected(false); }
 
   // Leer token del fragment URL tras OAuth callback (#shopify_token=xxx&shop=xxx)
   useEffect(() => {
@@ -316,8 +316,8 @@ export default function ShopifyPushModule() {
       const data = await res.json();
       if (res.ok && data.shop) {
         setShopInfo(data.shop);
-        setConnected(true);
         shopifyStore.setConnected(true);
+        
         shopifyStore.setToken(t);
         shopifyStore.setShop(s);
       }
@@ -326,7 +326,8 @@ export default function ShopifyPushModule() {
 
   // Connection
   const [testing, setTesting]     = useState(false);
-  const [connected, setConnected] = useState(shopifyStore.connected);
+  // connected viene directo del store Zustand — reactivo, sin duplicar estado
+  const connected = shopifyStore.connected;
   const [shopInfo, setShopInfo]   = useState<{ name: string; email: string; domain: string } | null>(null);
   const [connError, setConnError] = useState('');
 
@@ -372,12 +373,12 @@ export default function ShopifyPushModule() {
   async function handleTest() {
     setTesting(true);
     setConnError('');
-    setConnected(false);
+    shopifyStore.setConnected(false);
     try {
       const info = await testConnection(config);
       setShopInfo(info);
-      setConnected(true);
       shopifyStore.setConnected(true);
+      
       shopifyStore.setToken(token);
       shopifyStore.setShop(shop);
       // Auto-sync tras conectar
@@ -673,7 +674,7 @@ export default function ShopifyPushModule() {
             <label className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Shop URL</label>
             <input
               value={shop}
-              onChange={e => { setShop(e.target.value); setConnected(false); }}
+              onChange={e => { setShop(e.target.value); shopifyStore.setConnected(false); }}
               placeholder="mi-tienda.myshopify.com"
               className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 outline-none focus:border-emerald-500/50 font-mono text-xs"
             />
@@ -683,7 +684,7 @@ export default function ShopifyPushModule() {
             <div className="relative">
               <input
                 value={token}
-                onChange={e => { setToken(e.target.value); setConnected(false); }}
+                onChange={e => { setToken(e.target.value); shopifyStore.setConnected(false); }}
                 type={showToken ? 'text' : 'password'}
                 placeholder="shpss_..."
                 className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 pr-9 text-sm text-zinc-200 outline-none focus:border-emerald-500/50 font-mono text-xs"
