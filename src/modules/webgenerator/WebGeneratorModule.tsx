@@ -518,31 +518,63 @@ export default function WebGeneratorModule() {
       const html = salesLayerHtml && salesLayerInserted
         ? baseHtml + '\n\n<!-- Sales Layer -->\n' + salesLayerHtml
         : baseHtml;
-      const pageTitle = `${brand?.name ?? 'Neurone'} — ${pack?.label ?? 'Página'} ${new Date().toLocaleDateString('es-ES')}`;
+      const pageTitle = `${brand?.name ?? 'Neurone'} — ${pack?.label ?? 'Página'}`;
 
-      const res = await fetch('/api/shopify', {
+      // ── Upsert: buscar página existente por título ──────────────────────
+      const searchRes = await fetch('/api/shopify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           shop: shopifyStore.shop,
           token: shopifyStore.token,
-          endpoint: '/admin/api/2024-01/pages.json',
-          method: 'POST',
-          body: {
-            page: {
-              title: pageTitle,
-              body_html: html,
-              published: true,
-            },
-          },
+          endpoint: `/admin/api/2024-01/pages.json?title=${encodeURIComponent(pageTitle)}&fields=id,title`,
+          method: 'GET',
         }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.errors ? JSON.stringify(data.errors) : `HTTP ${res.status}`);
+      const searchData = await searchRes.json();
+      const existingPage = searchData.pages?.[0];
+
+      let pageId: number;
+      let pageData: any;
+
+      if (existingPage?.id) {
+        // UPDATE — página existe
+        const putRes = await fetch('/api/shopify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            shop: shopifyStore.shop,
+            token: shopifyStore.token,
+            endpoint: `/admin/api/2024-01/pages/${existingPage.id}.json`,
+            method: 'PUT',
+            body: { page: { id: existingPage.id, title: pageTitle, body_html: html, published: true } },
+          }),
+        });
+        pageData = await putRes.json();
+        if (!putRes.ok) throw new Error(pageData?.errors ? JSON.stringify(pageData.errors) : `HTTP ${putRes.status}`);
+        pageId = pageData.page?.id;
+      } else {
+        // CREATE — página nueva
+        const postRes = await fetch('/api/shopify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            shop: shopifyStore.shop,
+            token: shopifyStore.token,
+            endpoint: '/admin/api/2024-01/pages.json',
+            method: 'POST',
+            body: { page: { title: pageTitle, body_html: html, published: true } },
+          }),
+        });
+        pageData = await postRes.json();
+        if (!postRes.ok) throw new Error(pageData?.errors ? JSON.stringify(pageData.errors) : `HTTP ${postRes.status}`);
+        pageId = pageData.page?.id;
+      }
+
       const shopDomain = shopifyStore.shop.replace('.myshopify.com', '');
       setShopifyPushResult({
-        url: `https://admin.shopify.com/store/${shopDomain}/pages/${data.page?.id}`,
-        title: data.page?.title ?? pageTitle,
+        url: `https://admin.shopify.com/store/${shopDomain}/pages/${pageId}`,
+        title: pageData.page?.title ?? pageTitle,
       });
     } catch (e: any) {
       alert(`Error push Shopify: ${e.message}`);
