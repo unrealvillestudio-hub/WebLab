@@ -381,7 +381,7 @@ export default function ShopifyPushModule() {
       shopifyStore.setToken(token);
       shopifyStore.setShop(shop);
       // Auto-sync tras conectar
-      setTimeout(() => handleSync(), 300);
+      setTimeout(() => handleSync(true), 300);
     } catch (e: any) {
       setConnError(e.message ?? 'Error de conexión');
     } finally {
@@ -513,8 +513,8 @@ export default function ShopifyPushModule() {
     b2b: productStates.filter(s => s.product.b2b_only).length,
   };
 
-  async function handleSync() {
-    if (!connected || syncing) return;
+  async function handleSync(forceRun = false) {
+    if ((!connected && !forceRun) || syncing) return;
     setSyncing(true);
     setSyncDone(false);
     setSyncStatus('Leyendo catálogo...');
