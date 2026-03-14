@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ShoppingBag, CheckCircle2, XCircle, AlertCircle, Upload,
@@ -288,18 +288,16 @@ export default function ShopifyPushModule() {
   const [showToken, setShowToken] = useState(false);
 
   // Leer token del fragment URL tras OAuth callback (#shopify_token=xxx&shop=xxx)
-  useState(() => {
-    if (typeof window === 'undefined') return;
+  useEffect(() => {
     const hash = window.location.hash;
     if (!hash.includes('shopify_token=')) return;
     const params = new URLSearchParams(hash.replace('#', ''));
     const t = params.get('shopify_token');
     const s = params.get('shop');
-    if (t) { setToken(t); setConnected(false); }
+    if (t) setToken(t);
     if (s) setShop(s);
-    // Limpiar el fragment de la URL
     window.history.replaceState(null, '', window.location.pathname);
-  });
+  }, []);
 
   // Connection
   const [testing, setTesting]     = useState(false);
