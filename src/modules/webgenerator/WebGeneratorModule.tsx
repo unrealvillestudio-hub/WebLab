@@ -1483,57 +1483,129 @@ export default function WebGeneratorModule() {
                     outputMode={activeOutputMode}
                   />
                 ))}
+                {/* ── POST-OUTPUT ACTIONS ── */}
                 {result && (
                   <motion.div
                     initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                    className={cn(
+                    className="space-y-3"
+                  >
+                    {/* Banner generación completa */}
+                    <div className={cn(
                       "flex items-center gap-2 px-4 py-2.5 border rounded-xl text-sm",
                       result.superAggro
                         ? "bg-orange-500/10 border-orange-500/20 text-orange-400"
                         : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                    )}>
+                      <CheckCircle2 size={14} />
+                      Generación completa · {result.wordCount} palabras · {result.sections.length} secciones · {result.platform}
+                      {result.superAggro && ' · ⚡ SUPER AGGRO'}
+                      <span className="ml-auto text-[10px] font-mono opacity-50">
+                        {new Date(result.generatedAt).toLocaleTimeString('es-ES')}
+                      </span>
+                    </div>
+
+                    {/* ── FLUJO GUIADO POST-OUTPUT ── */}
+                    {(activeModule === 'ecommerce' || activeModule === 'landing') && !salesLayerInserted && (
+                      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
+                        <p className="text-[10px] uppercase font-bold text-zinc-600 tracking-widest">¿Qué quieres hacer?</p>
+                        <div className="flex gap-3 flex-wrap">
+                          {/* Opción A: Push directo */}
+                          <button
+                            onClick={handleShopifyPush}
+                            disabled={shopifyPushing || !shopifyStore.connected}
+                            className={cn(
+                              'flex-1 min-w-[180px] flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold border transition-all',
+                              shopifyStore.connected
+                                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20'
+                                : 'bg-zinc-800 border-zinc-700 text-zinc-600 cursor-not-allowed'
+                            )}
+                          >
+                            {shopifyPushing ? <RefreshCw size={14} className="animate-spin" /> : <ShoppingBag size={14} />}
+                            {shopifyPushing ? 'Pushing...' : shopifyStore.connected ? 'Push to Shopify' : 'Conecta Shopify primero'}
+                          </button>
+                          {/* Opción B: Sales Layer */}
+                          <button
+                            onClick={() => setSalesLayerReady(true)}
+                            className="flex-1 min-w-[180px] flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold border bg-violet-500/10 border-violet-500/40 text-violet-300 hover:bg-violet-500/20 transition-all"
+                          >
+                            <Zap size={14} />
+                            Aplicar Sales Layer
+                          </button>
+                        </div>
+                        {!shopifyStore.connected && (
+                          <p className="text-[10px] text-zinc-600">
+                            Para hacer push conecta Shopify en el tab correspondiente.
+                          </p>
+                        )}
+                      </div>
                     )}
-                  >
-                    <CheckCircle2 size={14} />
-                    Generación completa · {result.wordCount} palabras · {result.sections.length} secciones · {result.platform}
-                    {result.superAggro && ' · ⚡ SUPER AGGRO'}
-                    <span className="ml-auto text-[10px] font-mono opacity-50">
-                      {new Date(result.generatedAt).toLocaleTimeString('es-ES')}
-                    </span>
+
+                    {/* Sales Layer enhanced — resultado final */}
+                    {salesLayerInserted && salesLayerHtml && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                        className="bg-zinc-900 border border-violet-500/30 rounded-xl overflow-hidden"
+                      >
+                        <div className="flex items-center justify-between px-4 py-2.5 border-b border-violet-500/20">
+                          <div className="flex items-center gap-2">
+                            <Zap size={12} className="text-violet-400" />
+                            <span className="text-xs font-bold text-violet-300">Sales Layer aplicado — output enhanced</span>
+                          </div>
+                          <button
+                            onClick={() => { setSalesLayerHtml(null); setSalesLayerInserted(false); setSalesLayerReady(false); }}
+                            className="text-zinc-600 hover:text-zinc-400 transition-colors"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                        <iframe
+                          srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;padding:0;background:#0E1018}</style></head><body>${salesLayerHtml}</body></html>`}
+                          style={{ width: '100%', height: '400px', border: 'none', display: 'block' }}
+                          sandbox="allow-scripts allow-same-origin"
+                          title="Enhanced Output Preview"
+                        />
+                        {/* Push del enhanced output */}
+                        <div className="px-4 py-3 border-t border-violet-500/20">
+                          <button
+                            onClick={handleShopifyPush}
+                            disabled={shopifyPushing || !shopifyStore.connected}
+                            className={cn(
+                              'w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all',
+                              shopifyStore.connected
+                                ? 'bg-emerald-500 hover:bg-emerald-400 text-white'
+                                : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
+                            )}
+                          >
+                            {shopifyPushing ? <RefreshCw size={13} className="animate-spin" /> : <ShoppingBag size={13} />}
+                            {shopifyPushing ? 'Pushing...' : 'Push Enhanced to Shopify'}
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
                   </motion.div>
                 )}
 
-                {/* ── SALES LAYER PREVIEW (cuando está insertado) ── */}
-                {salesLayerInserted && salesLayerHtml && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                    className="bg-zinc-900 border border-violet-500/30 rounded-xl overflow-hidden"
-                  >
-                    <div className="flex items-center gap-2 px-4 py-2.5 border-b border-violet-500/20">
-                      <Zap size={12} className="text-violet-400" />
-                      <span className="text-xs font-bold text-violet-300">Sales Layer — incluido en output</span>
-                    </div>
-                    <div className="overflow-auto" style={{ maxHeight: '300px' }}>
-                      <iframe
-                        srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;padding:0;background:#0E1018}</style></head><body>${salesLayerHtml}</body></html>`}
-                        style={{ width: '100%', height: '300px', border: 'none', display: 'block' }}
-                        sandbox="allow-scripts allow-same-origin"
-                        title="Sales Layer Preview"
-                      />
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* ── F7 SALES LAYER ── */}
-                {result && (activeModule === 'ecommerce' || activeModule === 'landing') && (
+                {/* ── SALES LAYER PANEL (se activa al elegir la opción) ── */}
+                {result && (activeModule === 'ecommerce' || activeModule === 'landing') && salesLayerReady && !salesLayerInserted && (
                   <SalesLayerPanel
                     context={activeModule}
                     brandId={brandId}
-                    pulse={salesLayerReady}
+                    pulse={true}
+                    baseHtml={(() => {
+                      const resolvedMode = ((result as any).outputMode as WebOutputMode) ?? outputMode;
+                      const _cat = getCatalog(brandId);
+                      const _map: Record<string, string> = { ...shopifyStore.cdnImageMap };
+                      _cat.flatMap(c => c.products).forEach(p => {
+                        if (p.image_filename && !_map[p.display_name])
+                          _map[p.display_name] = `${BLUEPRINTS_RAW_BASE}/assets/images/products/${p.image_filename}`;
+                      });
+                      return injectProductImages(buildExportFile(result.sections, resolvedMode, result.superAggro ?? false), _map);
+                    })()}
                     onGenerate={(_preset: SalesPreset, _params, _html) => {
-                      setSalesLayerReady(false);
                       if (_html && _html.trim().length > 100) {
                         setSalesLayerHtml(_html);
-                        setSalesLayerInserted(true); // auto-insert solo si hay contenido real
+                        setSalesLayerInserted(true);
+                        setSalesLayerReady(false);
                       }
                     }}
                   />

@@ -311,10 +311,11 @@ interface SalesLayerPanelProps {
   blogPostType?: BlogPostType;
   brandId: string;
   pulse?: boolean;
+  baseHtml?: string; // HTML completo del output generado — el modelo trabaja sobre él
   onGenerate: (preset: SalesPreset, params: Record<string, string>, outputHtml: string) => void;
 }
 
-export function SalesLayerPanel({ context, blogPostType, brandId, pulse = false, onGenerate }: SalesLayerPanelProps) {
+export function SalesLayerPanel({ context, blogPostType, brandId, pulse = false, baseHtml, onGenerate }: SalesLayerPanelProps) {
   const [open, setOpen]               = useState(false);
   const [selectedId, setSelectedId]   = useState<SalesPresetId | null>(null);
   const [params, setParams]           = useState<Record<string, string>>({});
@@ -352,34 +353,52 @@ export function SalesLayerPanel({ context, blogPostType, brandId, pulse = false,
       .map(p => `- ${p.label}: ${paramValues[p.id]}`)
       .join('\n');
 
+    const hasBase = !!(baseHtml && baseHtml.trim().length > 200);
+    const truncated = hasBase ? baseHtml!.slice(0, 9000) + (baseHtml!.length > 9000 ? '\n[continúa...]' : '') : '';
+
+    const tarea = hasBase
+      ? 'Toma el HTML base y devuelve la versión MEJORADA con las tácticas de Sales Layer integradas quirúrgicamente en los puntos óptimos de la página.'
+      : 'Genera un bloque HTML de Sales Layer completo listo para insertar.';
+
+    const outputLabel = hasBase
+      ? `<!-- Enhanced by Sales Layer: ${preset.label} -->`
+      : `<!-- Sales Layer: ${preset.label} -->`;
+
+    const baseSection = hasBase ? `
+HTML BASE (integra las tácticas EN este HTML):
+- Inyecta form/gate/CTA después del hero o antes del CTA final
+- Respeta paleta y tipografía existente
+- Devuelve el HTML COMPLETO mejorado
+
+${truncated}` : '';
+
     return `Eres un experto en conversión web y copywriting de alto rendimiento.
 
-TAREA: Genera un bloque HTML de Sales Layer listo para insertar en una página web.
+TAREA: ${tarea}
 
 OBJETIVO ESTRATÉGICO: ${preset.label} — ${preset.tagline}
 ETAPA DEL FUNNEL: ${preset.funnelLabel}
 ESTRATEGIA: ${preset.rationale}
 
-TÁCTICAS A IMPLEMENTAR:
+TÁCTICAS:
 ${tacticsList}
 
-PARÁMETROS DE MARCA / CAMPAÑA:
+PARÁMETROS:
 ${paramsList || '(usar placeholders profesionales)'}
 
-CONTEXTO: ${context === 'blog' ? `Blog post tipo "${blogPostType}"` : context === 'ecommerce' ? 'Tienda E-Commerce' : 'Landing Page'}
+CONTEXTO: ${context === 'blog' ? 'Blog post' : context === 'ecommerce' ? 'Tienda E-Commerce' : 'Landing Page'}
 MARCA ID: ${brandId}
+${baseSection}
 
-INSTRUCCIONES DE OUTPUT:
-1. Genera HTML semántico completo con CSS inline y/o <style> embebido
-2. El bloque debe ser funcional y visualmente profesional — dark theme (#0E1018 base)
-3. Incluye cada táctica como sección o componente separado y bien estructurado
-4. Usa JavaScript vanilla solo si es necesario (countdown, exit intent, animaciones simples)
-5. El output debe poder insertarse directamente en cualquier página sin dependencias externas
-6. Usa variables CSS para colores principales para que sea fácil de personalizar
-7. Responsive: mobile-first
-8. NO incluyas explicaciones, solo el bloque HTML
+INSTRUCCIONES:
+1. ${hasBase ? 'HTML COMPLETO de la página con tácticas integradas' : 'Bloque HTML standalone completo'}
+2. Dark theme (#0E1018) — respeta paleta existente si hay base
+3. JavaScript vanilla si necesario — sin dependencias externas
+4. Responsive mobile-first — mínimo 100 líneas con contenido real
+5. NUNCA divs vacíos — todo el contenido visible y funcional
+6. Sin explicaciones — solo el HTML
 
-OUTPUT: Solo el HTML. Empieza con <!-- Sales Layer: ${preset.label} --> y termina con <!-- /Sales Layer -->`;
+OUTPUT: ${outputLabel}`;
   }
 
   async function handleGenerate() {
