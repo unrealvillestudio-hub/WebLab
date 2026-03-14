@@ -287,6 +287,20 @@ export default function ShopifyPushModule() {
   const [token, setToken]     = useState('');
   const [showToken, setShowToken] = useState(false);
 
+  // Leer token del fragment URL tras OAuth callback (#shopify_token=xxx&shop=xxx)
+  useState(() => {
+    if (typeof window === 'undefined') return;
+    const hash = window.location.hash;
+    if (!hash.includes('shopify_token=')) return;
+    const params = new URLSearchParams(hash.replace('#', ''));
+    const t = params.get('shopify_token');
+    const s = params.get('shop');
+    if (t) { setToken(t); setConnected(false); }
+    if (s) setShop(s);
+    // Limpiar el fragment de la URL
+    window.history.replaceState(null, '', window.location.pathname);
+  });
+
   // Connection
   const [testing, setTesting]     = useState(false);
   const [connected, setConnected] = useState(false);
@@ -510,7 +524,18 @@ export default function ShopifyPushModule() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Botón OAuth — conectar via Shopify */}
+          <a
+            href={`/api/shopify-auth?shop=${encodeURIComponent(shop)}`}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all border bg-zinc-800 border-zinc-700 text-zinc-300 hover:border-emerald-500/50 hover:text-emerald-300"
+          >
+            <ShoppingBag size={13} />
+            Conectar con Shopify
+          </a>
+
+          <span className="text-zinc-700 text-xs">o pega el token manualmente →</span>
+
           <button
             onClick={handleTest}
             disabled={testing || !shop || !token}
