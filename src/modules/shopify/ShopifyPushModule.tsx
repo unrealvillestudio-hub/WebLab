@@ -317,6 +317,13 @@ export default function ShopifyPushModule() {
     new Set(allProducts.filter(p => p.shopify_visibility === 'public' && !p.b2b_only).map(p => p.id))
   );
 
+  // Image upload
+  const [imgUploading, setImgUploading]   = useState(false);
+  const [imgLog, setImgLog]               = useState<string[]>([]);
+  const [imgDone, setImgDone]             = useState(false);
+  const [imgStats, setImgStats]           = useState({ ok: 0, err: 0 });
+  const [shopifyIdMap, setShopifyIdMap]   = useState<Record<string, number>>({});
+
   // Push
   const [pushing, setPushing]   = useState(false);
   const [pushDone, setPushDone] = useState(false);
@@ -435,6 +442,10 @@ export default function ShopifyPushModule() {
     }
 
     addLog(`─── Completado: ${ok} exitosos · ${errors} errores · ${skipped} omitidos`);
+    // Guardar mapa nombre → Shopify ID para upload de imágenes
+    const idMap: Record<string, number> = {};
+    productStates.forEach(s => { if (s.shopifyId) idMap[s.product.display_name] = s.shopifyId; });
+    setShopifyIdMap(idMap);
     setPushing(false);
     setPushDone(true);
   }
@@ -465,6 +476,77 @@ export default function ShopifyPushModule() {
     pending: productStates.filter(s => s.product.shopify_visibility === 'pending' && !s.product.b2b_only).length,
     b2b: productStates.filter(s => s.product.b2b_only).length,
   };
+
+  function addImgLog(msg: string) {
+    setImgLog(prev => [...prev, `${new Date().toLocaleTimeString('es-ES')} — ${msg}`]);
+  }
+
+  async function handleImageUpload() {
+    if (!connected || imgUploading) return;
+    setImgUploading(true);
+    setImgDone(false);
+    setImgLog([]);
+    setImgStats({ ok: 0, err: 0 });
+
+    const toUpload = productStates.filter(s =>
+      s.shopifyId && s.product.image_filename
+    );
+
+    addImgLog(`Iniciando upload de imágenes — ${toUpload.length} productos`);
+
+    let ok = 0, errors = 0;
+
+    for (const state of toUpload) {
+      const p = state.product;
+      const shopifyId = state.shopifyId ?? shopifyIdMap[p.display_name];
+      if (!shopifyId) {
+        addImgLog(`⚠️ ${p.display_name} — sin Shopify ID, omitido`);
+        continue;
+      }
+
+      addImgLog(`Subiendo imagen: ${p.display_name} (${p.image_filename})...`);
+
+      try {
+        // Leer imagen como base64 desde BluePrints via GitHub raw
+        const imageUrl = `https://raw.githubusercontent.com/unrealvillestudio-hub/BluePrints/main/assets/images/products/${p.image_filename}`;
+        const imgRes = await fetch(imageUrl);
+        if (!imgRes.ok) throw new Error(`No se pudo obtener imagen: ${imgRes.status}`);
+
+        const buffer = await imgRes.arrayBuffer();
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+
+        // Upload via proxy
+        const uploadRes = await fetch('/api/shopify-images', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            shop,
+            token,
+            productId: shopifyId,
+            filename: p.image_filename,
+            base64,
+            alt: p.display_name,
+          }),
+        });
+
+        const data = await uploadRes.json();
+        if (!uploadRes.ok) throw new Error(data?.errors ? JSON.stringify(data.errors) : `HTTP ${uploadRes.status}`);
+
+        addImgLog(`✓ ${p.display_name} — imagen subida`);
+        ok++;
+      } catch (e: any) {
+        addImgLog(`✗ ${p.display_name} — ${e.message}`);
+        errors++;
+      }
+
+      await new Promise(r => setTimeout(r, 600));
+    }
+
+    addImgLog(`─── Imágenes: ${ok} subidas · ${errors} errores`);
+    setImgStats({ ok, err: errors });
+    setImgUploading(false);
+    setImgDone(true);
+  }
 
   return (
     <div className="space-y-4 pb-12">
@@ -766,6 +848,71 @@ export default function ShopifyPushModule() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── IMAGE UPLOAD ── */}
+      {(pushDone || Object.keys(shopifyIdMap).length > 0) && (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <Upload size={12} className="text-blue-400" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-zinc-200">Upload de imágenes</p>
+              <p className="text-[11px] text-zinc-500">39 imágenes disponibles en BluePrints → Shopify CDN</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleImageUpload}
+              disabled={!connected || imgUploading}
+              className={cn(
+                'flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all',
+                connected && !imgUploading
+                  ? 'bg-blue-500 hover:bg-blue-400 text-white'
+                  : 'bg-zinc-800 text-zinc-600 cursor-not-allowed',
+              )}
+            >
+              {imgUploading ? (
+                <><Spinner size={13} /> Subiendo imágenes {imgStats.ok}/{productStates.filter(s => s.product.image_filename).length}...</>
+              ) : (
+                <><Upload size={13} /> Subir imágenes a Shopify</>
+              )}
+            </button>
+
+            {imgDone && !imgUploading && (
+              <motion.span
+                initial={{ opacity: 0, x: 8 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="text-sm text-blue-300 flex items-center gap-2"
+              >
+                <Check size={13} />
+                {imgStats.ok} imágenes subidas · {imgStats.err} errores
+              </motion.span>
+            )}
+          </div>
+
+          {/* Image log */}
+          {imgLog.length > 0 && (
+            <div className="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
+              <div className="p-3 max-h-48 overflow-y-auto space-y-0.5">
+                {imgLog.map((line, i) => (
+                  <p key={i} className={cn(
+                    'text-[11px] font-mono leading-relaxed',
+                    line.includes('✓') ? 'text-blue-400' :
+                    line.includes('✗') ? 'text-red-400' :
+                    line.includes('⚠️') ? 'text-amber-400' :
+                    line.includes('───') ? 'text-zinc-300 font-bold' :
+                    'text-zinc-500'
+                  )}>
+                    {line}
+                  </p>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
