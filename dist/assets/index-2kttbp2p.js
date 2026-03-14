@@ -820,9 +820,10 @@ HERO DE COLECCIÓN:
   Ejemplos incorretos: "Descubre nuestra línea de productos Moisture" (demasiado largo, sin punch)
 - SUBHEADLINE: 1 frase de 10-15 palabras máximo. Específica, con datos o diferenciador.
 - DOS CTAs en flex-wrap: [Ver colección] (botón sólido color marca) + [Soy profesional → Portal Pro] (outline)
-- Eyebrow: DOS elementos separados, en una sola línea horizontal (display:inline-flex, gap:12px, NO flex-wrap):
-  · Primero: badge azul (#0076A8) con "Línea [NOMBRE COLECCIÓN]" — una sola línea, sin salto
-  · Segundo: texto plain "Distribuidor Exclusivo · South & Central Florida" — SIEMPRE "Florida" NO "Miami"
+- Eyebrow: DOS elementos en una línea horizontal en desktop, wrap permitido en mobile:
+  · Wrapper: display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:24px
+  · Primero: badge azul (#0076A8) con "Línea [NOMBRE COLECCIÓN]" — texto en una sola línea, white-space:nowrap
+  · Segundo: texto plain "Distribuidor Exclusivo · South & Central Florida" — white-space:nowrap — SIEMPRE "Florida" NO "Miami"
 - Fondo: #0E1018 oscuro. Acento: #0076A8 navy Neurone.`:a.id==="features"?`
 GRID DE PRODUCTOS — obligatorio mostrar imágenes:
 - Título sección: corto y con punch (ej: "Los productos que lo hacen posible")
