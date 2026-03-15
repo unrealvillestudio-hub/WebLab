@@ -6,7 +6,8 @@ import {
 } from 'lucide-react';
 import { cn, Badge, Spinner } from '../../ui/components';
 import { useShopifyStore } from '../../store/useShopifyStore';
-import { NEURONE_THEME_FILES, NEURONE_THEME_LIGHT_FILES, THEME_NAME, THEME_LIGHT_NAME, THEME_LIGHT_FILE_COUNT, type ThemeFile } from './themeFiles';
+import { buildThemeFiles, type ThemeFile } from './themeFiles';
+import { BRAND_THEME_CONFIGS, type BrandThemeTokens } from './brandThemeConfigs';
 
 // ── TIPOS ─────────────────────────────────────────────────────────────────────
 
@@ -66,14 +67,22 @@ export default function ThemeDeployModule() {
   const [themes, setThemes] = useState<ShopifyTheme[]>([]);
   const [selectedThemeId, setSelectedThemeId] = useState<number | null>(null);
   const [createNew, setCreateNew] = useState(true);
-  const [themeVariant, setThemeVariant] = useState<'dark' | 'light'>('dark');
-  const activeFiles = themeVariant === 'light' ? NEURONE_THEME_LIGHT_FILES : NEURONE_THEME_FILES;
-  const activeThemeName = themeVariant === 'light' ? THEME_LIGHT_NAME : THEME_NAME;
-  const activeFileCount = themeVariant === 'light' ? THEME_LIGHT_FILE_COUNT : NEURONE_THEME_FILES.length;
-  const [themeName, setThemeName] = useState(activeThemeName);
+
+  // ── Brand selector ──────────────────────────────────────────────────────────
+  const [selectedBrand, setSelectedBrand] = useState<BrandThemeTokens>(BRAND_THEME_CONFIGS[0]);
+  const activeFiles = buildThemeFiles(selectedBrand);
+  const activeFileCount = activeFiles.length;
+
+  const [themeName, setThemeName] = useState(selectedBrand.shopName);
   const [fileStates, setFileStates] = useState<FileDeployState[]>(
     activeFiles.map(f => ({ file: f, status: 'idle' }))
   );
+
+  function switchBrand(brand: BrandThemeTokens) {
+    setSelectedBrand(brand);
+    setThemeName(brand.shopName);
+    setFileStates(buildThemeFiles(brand).map(f => ({ file: f, status: 'idle' })));
+  }
   const [deployed, setDeployed] = useState(0);
   const [errors, setErrors] = useState(0);
   const [themeUrl, setThemeUrl] = useState('');
@@ -324,25 +333,30 @@ export default function ThemeDeployModule() {
             </button>
           </div>
 
-          {/* Variante: Dark / Light */}
+          {/* Selector de marca */}
           <div>
-            <label className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1.5">Variante del theme</label>
-            <div className="flex gap-2">
-              <button
-                onClick={() => { setThemeVariant('dark'); setThemeName(THEME_NAME); setFileStates(NEURONE_THEME_FILES.map(f => ({ file: f, status: 'idle' }))); }}
-                className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-widest border transition-colors ${themeVariant === 'dark' ? 'bg-[#0076A8]/20 border-[#0076A8]/60 text-[#5BB8E8]' : 'bg-zinc-800/60 border-white/10 text-zinc-400 hover:border-white/20'}`}
-              >
-                🌑 Dark
-              </button>
-              <button
-                onClick={() => { setThemeVariant('light'); setThemeName(THEME_LIGHT_NAME); setFileStates(NEURONE_THEME_LIGHT_FILES.map(f => ({ file: f, status: 'idle' }))); }}
-                className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-widest border transition-colors ${themeVariant === 'light' ? 'bg-amber-500/20 border-amber-500/60 text-amber-300' : 'bg-zinc-800/60 border-white/10 text-zinc-400 hover:border-white/20'}`}
-              >
-                ☀️ Light
-              </button>
+            <label className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1.5">Marca</label>
+            <div className="grid grid-cols-2 gap-2">
+              {BRAND_THEME_CONFIGS.map(brand => (
+                <button
+                  key={`${brand.brandId}-${brand.mode}`}
+                  onClick={() => switchBrand(brand)}
+                  className={cn(
+                    'py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-widest border transition-colors text-left',
+                    selectedBrand.brandId === brand.brandId && selectedBrand.mode === brand.mode
+                      ? 'bg-[#0076A8]/20 border-[#0076A8]/60 text-[#5BB8E8]'
+                      : 'bg-zinc-800/60 border-white/10 text-zinc-400 hover:border-white/20'
+                  )}
+                >
+                  <span className="block text-[9px] opacity-60">{brand.mode === 'dark' ? '🌑' : '☀️'} {brand.mode.toUpperCase()}</span>
+                  {brand.brandName}
+                </button>
+              ))}
             </div>
-            <p className="text-[10px] text-zinc-600 mt-1">
-              {themeVariant === 'light' ? 'Neurone South & Central Florida — fondo claro, paleta cálida' : 'Neurone Custom — fondo oscuro, paleta carbon'}
+            <p className="text-[10px] text-zinc-600 mt-1.5">
+              {selectedBrand.collections.length > 0
+                ? `${selectedBrand.collections.length} colecciones · ${activeFileCount} archivos`
+                : `${activeFileCount} archivos`}
             </p>
           </div>
 
