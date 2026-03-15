@@ -523,14 +523,66 @@ export default function WebGeneratorModule() {
       _catalog.flatMap(c => c.products).forEach(p => {
         if (p.image_filename) _imgMap[p.display_name] = `${BLUEPRINTS_RAW_BASE}/assets/images/products/${p.image_filename}`;
       });
-      // CDN sobreescribe fallback cuando disponible
       Object.assign(_imgMap, _cdnMap);
-      const baseHtml = injectProductImages(buildExportFile(result.sections, resolvedMode, result.superAggro ?? false), _imgMap);
-      // Sales Layer: insertar ANTES del último </div> o </section> del output
-      const html = salesLayerHtml && salesLayerInserted
-        ? baseHtml + '\n\n<!-- ═══ SALES LAYER ═══ -->\n' + salesLayerHtml + '\n<!-- ═══ /SALES LAYER ═══ -->'
-        : baseHtml;
-      // Título: si es collection page usar "Línea X" con nombre de colección
+      const baseContent = injectProductImages(buildExportFile(result.sections, resolvedMode, result.superAggro ?? false), _imgMap);
+      const content = salesLayerHtml && salesLayerInserted
+        ? baseContent + (resolvedMode === 'liquid'
+            ? '\n\n{% comment %} ═══ SALES LAYER ═══ {% endcomment %}\n'
+            : '\n\n<!-- ═══ SALES LAYER ═══ -->\n')
+          + salesLayerHtml
+        : baseContent;
+
+      // ── Packs que son secciones del theme (Liquid) ──────────────────────
+      // Homepage, Collection, Product → van como theme section assets, NO como Pages
+      const isThemeSection = resolvedMode === 'liquid' &&
+        ['ecom_collection', 'ecom_homepage', 'ecom_product'].includes(pack?.id ?? '');
+
+      if (isThemeSection) {
+        // Derivar nombre de archivo de sección
+        const collectionName = ecomCtx?.collectionId
+          ? getCatalog(brandId).find(c => c.id === ecomCtx.collectionId)?.id ?? 'collection'
+          : 'collection';
+        const sectionFilename = pack?.id === 'ecom_collection'
+          ? `nc-page-${collectionName}.liquid`
+          : pack?.id === 'ecom_homepage'
+          ? 'nc-page-home.liquid'
+          : `nc-page-product-${collectionName}.liquid`;
+
+        // Obtener theme activo
+        const themesRes = await fetch('/api/shopify-theme', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            shop: shopifyStore.shop, token: shopifyStore.token,
+            action: 'list_themes', payload: {},
+          }),
+        });
+        const themesData = await themesRes.json();
+        const activeTheme = themesData.themes?.find((t: any) => t.role === 'main') ?? themesData.themes?.[0];
+        if (!activeTheme) throw new Error('No se encontró theme activo en Shopify');
+
+        // Subir como sección del theme
+        const assetRes = await fetch('/api/shopify-theme', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            shop: shopifyStore.shop, token: shopifyStore.token,
+            action: 'put_asset',
+            payload: { theme_id: activeTheme.id, key: `sections/${sectionFilename}`, value: content },
+          }),
+        });
+        const assetData = await assetRes.json();
+        if (!assetRes.ok) throw new Error(assetData?.errors ? JSON.stringify(assetData.errors) : `HTTP ${assetRes.status}`);
+
+        const shopDomain = shopifyStore.shop.replace('.myshopify.com', '');
+        setShopifyPushResult({
+          url: `https://admin.shopify.com/store/${shopDomain}/themes/${activeTheme.id}/editor`,
+          title: `Theme section: sections/${sectionFilename}`,
+        });
+        return;
+      }
+
+      // ── Resto de packs → Page con body_html (HTML o Liquid estático) ────
       const collectionName = ecomCtx?.collectionId
         ? getCatalog(brandId).find(c => c.id === ecomCtx.collectionId)?.label ?? pack?.label
         : pack?.label;
@@ -558,7 +610,6 @@ export default function WebGeneratorModule() {
       let pageData: any;
 
       if (existingPage?.id) {
-        // UPDATE — página existe
         const putRes = await fetch('/api/shopify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -567,14 +618,13 @@ export default function WebGeneratorModule() {
             token: shopifyStore.token,
             endpoint: `/admin/api/2024-01/pages/${existingPage.id}.json`,
             method: 'PUT',
-            body: { page: { id: existingPage.id, title: pageTitle, body_html: html, published: true } },
+            body: { page: { id: existingPage.id, title: pageTitle, body_html: content, published: true } },
           }),
         });
         pageData = await putRes.json();
         if (!putRes.ok) throw new Error(pageData?.errors ? JSON.stringify(pageData.errors) : `HTTP ${putRes.status}`);
         pageId = pageData.page?.id;
       } else {
-        // CREATE — página nueva
         const postRes = await fetch('/api/shopify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -583,7 +633,7 @@ export default function WebGeneratorModule() {
             token: shopifyStore.token,
             endpoint: '/admin/api/2024-01/pages.json',
             method: 'POST',
-            body: { page: { title: pageTitle, body_html: html, published: true } },
+            body: { page: { title: pageTitle, body_html: content, published: true } },
           }),
         });
         pageData = await postRes.json();
