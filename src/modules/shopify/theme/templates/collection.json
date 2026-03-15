@@ -1,4 +1,5 @@
 {
+  "layout": "theme.liquid",
   "sections": {
     "nc-collection": {
       "type": "nc-collection-page",
@@ -7,5 +8,7 @@
       }
     }
   },
-  "order": ["nc-collection"]
+  "order": [
+    "nc-collection"
+  ]
 }

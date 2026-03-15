@@ -326,3 +326,15 @@
     }
   }
 </script>
+
+{% schema %}
+{
+  "name": "NC Product Detail",
+  "settings": [
+    { "type": "checkbox", "id": "show_vendor",      "label": "Mostrar marca",          "default": false },
+    { "type": "checkbox", "id": "show_sku",         "label": "Mostrar SKU",            "default": false },
+    { "type": "checkbox", "id": "enable_zoom",      "label": "Activar zoom en imagen", "default": true }
+  ],
+  "presets": [{ "name": "NC Product Detail" }]
+}
+{% endschema %}
