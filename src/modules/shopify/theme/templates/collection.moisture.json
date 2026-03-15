@@ -1,0 +1,29 @@
+{
+  "layout": "theme.liquid",
+  "sections": {
+    "nc-collection": {
+      "type": "nc-collection-page",
+      "settings": {
+        "products_per_page": 24
+      }
+    },
+    "nc-page-moisture-hero": {
+      "type": "nc-page-moisture-hero",
+      "settings": {}
+    },
+    "nc-page-moisture-caracteristicas": {
+      "type": "nc-page-moisture-caracteristicas",
+      "settings": {}
+    },
+    "nc-page-moisture-cta-final": {
+      "type": "nc-page-moisture-cta-final",
+      "settings": {}
+    }
+  },
+  "order": [
+    "nc-page-moisture-hero",
+    "nc-collection",
+    "nc-page-moisture-caracteristicas",
+    "nc-page-moisture-cta-final"
+  ]
+}

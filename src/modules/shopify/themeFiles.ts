@@ -31,6 +31,11 @@ import ncProductCard from './theme/snippets/nc-product-card.liquid?raw';
 import tplIndex from './theme/templates/index.json?raw';
 import tplProduct from './theme/templates/product.json?raw';
 import tplCollection from './theme/templates/collection.json?raw';
+import tplCollectionMoisture from './theme/templates/collection.moisture.json?raw';
+import tplCollectionRestore from './theme/templates/collection.restore.json?raw';
+import tplCollectionStyling from './theme/templates/collection.styling.json?raw';
+import tplCollectionColorRescue from './theme/templates/collection.color-rescue.json?raw';
+import tplCollectionScalp from './theme/templates/collection.scalp.json?raw';
 import tplPage from './theme/templates/page.json?raw';
 import tplPageSalesLayer from './theme/templates/page.sales-layer.json?raw';
 import tplCart from './theme/templates/cart.liquid?raw';
@@ -75,6 +80,11 @@ export const NEURONE_THEME_FILES: ThemeFile[] = [
   // Templates
   { key: 'templates/index.json',                value: tplIndex,          description: 'Template: Homepage' },
   { key: 'templates/product.json',              value: tplProduct,        description: 'Template: Producto' },
+  { key: 'templates/collection.moisture.json',     value: tplCollectionMoisture,    description: 'Light — Template: Colección Moisture' },
+  { key: 'templates/collection.restore.json',      value: tplCollectionRestore,     description: 'Light — Template: Colección Restore' },
+  { key: 'templates/collection.styling.json',      value: tplCollectionStyling,     description: 'Light — Template: Colección Styling' },
+  { key: 'templates/collection.color-rescue.json', value: tplCollectionColorRescue, description: 'Light — Template: Colección Color Rescue' },
+  { key: 'templates/collection.scalp.json',        value: tplCollectionScalp,       description: 'Light — Template: Colección Scalp' },
   { key: 'templates/collection.json',           value: tplCollection,     description: 'Template: Colección' },
   { key: 'templates/page.json',                 value: tplPage,           description: 'Template: Página' },
   { key: 'templates/page.sales-layer.json',     value: tplPageSalesLayer, description: 'Template: Sales Layer' },
@@ -112,6 +122,11 @@ export const NEURONE_THEME_LIGHT_FILES: ThemeFile[] = [
   { key: 'snippets/nc-product-card.liquid',     value: ncProductCard,     description: 'Tarjeta de producto' },
   { key: 'templates/index.json',                value: tplIndex,          description: 'Template: Homepage' },
   { key: 'templates/product.json',              value: tplProduct,        description: 'Template: Producto' },
+  { key: 'templates/collection.moisture.json',     value: tplCollectionMoisture,    description: 'Light — Template: Colección Moisture' },
+  { key: 'templates/collection.restore.json',      value: tplCollectionRestore,     description: 'Light — Template: Colección Restore' },
+  { key: 'templates/collection.styling.json',      value: tplCollectionStyling,     description: 'Light — Template: Colección Styling' },
+  { key: 'templates/collection.color-rescue.json', value: tplCollectionColorRescue, description: 'Light — Template: Colección Color Rescue' },
+  { key: 'templates/collection.scalp.json',        value: tplCollectionScalp,       description: 'Light — Template: Colección Scalp' },
   { key: 'templates/collection.json',           value: tplCollection,     description: 'Template: Colección' },
   { key: 'templates/page.json',                 value: tplPage,           description: 'Template: Página' },
   { key: 'templates/page.sales-layer.json',     value: tplPageSalesLayer, description: 'Template: Sales Layer' },

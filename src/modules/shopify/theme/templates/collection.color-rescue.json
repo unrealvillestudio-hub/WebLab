@@ -1,0 +1,29 @@
+{
+  "layout": "theme.liquid",
+  "sections": {
+    "nc-collection": {
+      "type": "nc-collection-page",
+      "settings": {
+        "products_per_page": 24
+      }
+    },
+    "nc-page-color-rescue-hero": {
+      "type": "nc-page-color-rescue-hero",
+      "settings": {}
+    },
+    "nc-page-color-rescue-caracteristicas": {
+      "type": "nc-page-color-rescue-caracteristicas",
+      "settings": {}
+    },
+    "nc-page-color-rescue-cta-final": {
+      "type": "nc-page-color-rescue-cta-final",
+      "settings": {}
+    }
+  },
+  "order": [
+    "nc-page-color-rescue-hero",
+    "nc-collection",
+    "nc-page-color-rescue-caracteristicas",
+    "nc-page-color-rescue-cta-final"
+  ]
+}
