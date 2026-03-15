@@ -24,7 +24,8 @@
       {%- else -%}
         <!-- Fallback: mostrar productos de la colección featured -->
         {%- assign featured = collections['featured'] | default: collections['all'] -%}
-        {%- for product in featured.products limit: section.settings.products_per_row | default: 4 -%}
+        {%- assign per_row = section.settings.products_per_row | default: 4 -%}
+        {%- for product in featured.products limit: per_row -%}
           {%- render 'nc-product-card', product: product -%}
         {%- endfor -%}
       {%- endfor -%}
