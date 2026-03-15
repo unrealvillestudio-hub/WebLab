@@ -7,7 +7,7 @@ import crypto from 'crypto';
  * Intercambia el code por un access token y redirige al frontend con el token.
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const { code, shop, hmac, state } = req.query as Record<string, string>;
+  const { code, shop, hmac } = req.query as Record<string, string>;
   const clientId     = process.env.SHOPIFY_CLIENT_ID;
   const clientSecret = process.env.SHOPIFY_CLIENT_SECRET;
 
