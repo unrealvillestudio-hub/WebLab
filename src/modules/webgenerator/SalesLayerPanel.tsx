@@ -355,23 +355,37 @@ export function SalesLayerPanel({ context, blogPostType, brandId, pulse = false,
       .join('\n');
 
     const hasBase = !!(baseHtml && baseHtml.trim().length > 200);
-    const truncated = hasBase ? baseHtml!.slice(0, 9000) + (baseHtml!.length > 9000 ? '\n[continúa...]' : '') : '';
+    const isLiquid = outputMode === 'liquid';
+    const truncated = hasBase && !isLiquid ? baseHtml!.slice(0, 9000) + (baseHtml!.length > 9000 ? '\n[continúa...]' : '') : '';
 
-    const tarea = hasBase
-      ? 'Toma el HTML base y devuelve la versión MEJORADA con las tácticas de Sales Layer integradas quirúrgicamente en los puntos óptimos de la página.'
-      : 'Genera un bloque HTML de Sales Layer completo listo para insertar.';
+    const tarea = isLiquid
+      ? 'Genera una NUEVA SECCIÓN Shopify Liquid de Sales Layer para añadir a la página. No reescribas las secciones existentes.'
+      : hasBase
+        ? 'Toma el HTML base y devuelve la versión MEJORADA con las tácticas de Sales Layer integradas quirúrgicamente en los puntos óptimos de la página.'
+        : 'Genera un bloque HTML de Sales Layer completo listo para insertar.';
 
     const outputLabel = hasBase
       ? `<!-- Enhanced by Sales Layer: ${preset.label} -->`
       : `<!-- Sales Layer: ${preset.label} -->`;
 
-    const baseSection = hasBase ? `
+    const baseSection = !isLiquid && hasBase ? `
 HTML BASE (integra las tácticas EN este HTML):
 - Inyecta form/gate/CTA después del hero o antes del CTA final
 - Respeta paleta y tipografía existente
 - Devuelve el HTML COMPLETO mejorado
 
 ${truncated}` : '';
+
+    const liquidInstructions = isLiquid ? `
+FORMATO LIQUID — REGLAS ESTRICTAS:
+- Genera UNA sección Shopify Liquid completa y autosuficiente
+- Incluye <style> al inicio con clases prefijadas .sl-
+- Usa variables: {{ section.settings.heading }}, {{ section.settings.cta_label }}, {{ section.settings.cta_url }}, etc.
+- Termina con {% schema %} ... {% endschema %} — nombre: "Sales Layer: ${preset.label}"
+- ⛔ PROHIBIDO: reescribir secciones existentes, añadir header/nav/footer
+- ✅ Solo la sección nueva lista para añadir en Theme Editor
+- Sistema de grids: .sl-rg-2 { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
+  @media(max-width:860px){ .sl-rg-2 { grid-template-columns:1fr !important; } }` : '';
 
     return `Eres un experto en conversión web y copywriting de alto rendimiento.
 
@@ -389,16 +403,16 @@ ${paramsList || '(usar placeholders profesionales)'}
 
 CONTEXTO: ${context === 'blog' ? 'Blog post' : context === 'ecommerce' ? 'Tienda E-Commerce' : 'Landing Page'}
 MARCA ID: ${brandId}
-${baseSection}
+${baseSection}${liquidInstructions}
 
 INSTRUCCIONES:
-1. ${hasBase ? 'HTML COMPLETO de la página con tácticas integradas' : 'Bloque HTML standalone completo'}
+1. ${isLiquid ? 'Sección Liquid completa con {% schema %}...{% endschema %} cerrado' : hasBase ? 'HTML COMPLETO de la página con tácticas integradas' : 'Bloque HTML standalone completo'}
 2. Dark theme (#0E1018) — respeta paleta existente si hay base
 3. JavaScript vanilla si necesario — sin dependencias externas
 4. Responsive mobile-first — mínimo 100 líneas con contenido real
 5. NUNCA divs vacíos — todo el contenido visible y funcional
-6. Sin explicaciones — solo el HTML
-7. CRÍTICO si tienes HTML base: NO repitas header, nav, ni footer del HTML base — solo integra las tácticas en el body
+6. Sin explicaciones — solo el ${isLiquid ? 'Liquid' : 'HTML'}
+7. ${isLiquid ? 'Sección nueva standalone — NO reescribas las secciones existentes' : 'CRÍTICO si tienes HTML base: NO repitas header, nav, ni footer del HTML base — solo integra las tácticas en el body'}
 8. Headlines sin punto final — el punto debilita el impacto
 
 OUTPUT: ${outputLabel}`;
