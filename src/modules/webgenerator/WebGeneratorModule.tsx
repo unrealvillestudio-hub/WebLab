@@ -538,15 +538,15 @@ export default function WebGeneratorModule() {
         ['ecom_collection', 'ecom_homepage', 'ecom_product'].includes(pack?.id ?? '');
 
       if (isThemeSection) {
-        // Derivar nombre de archivo de sección
-        const collectionName = ecomCtx?.collectionId
+        // Derivar prefijo de nombre de archivo
+        const collectionId = ecomCtx?.collectionId
           ? getCatalog(brandId).find(c => c.id === ecomCtx.collectionId)?.id ?? 'collection'
           : 'collection';
-        const sectionFilename = pack?.id === 'ecom_collection'
-          ? `nc-page-${collectionName}.liquid`
+        const filePrefix = pack?.id === 'ecom_collection'
+          ? `nc-page-${collectionId}`
           : pack?.id === 'ecom_homepage'
-          ? 'nc-page-home.liquid'
-          : `nc-page-product-${collectionName}.liquid`;
+          ? 'nc-page-home'
+          : `nc-page-product-${collectionId}`;
 
         // Obtener theme activo
         const themesRes = await fetch('/api/shopify-theme', {
@@ -561,23 +561,55 @@ export default function WebGeneratorModule() {
         const activeTheme = themesData.themes?.find((t: any) => t.role === 'main') ?? themesData.themes?.[0];
         if (!activeTheme) throw new Error('No se encontró theme activo en Shopify');
 
-        // Subir como sección del theme
-        const assetRes = await fetch('/api/shopify-theme', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            shop: shopifyStore.shop, token: shopifyStore.token,
-            action: 'put_asset',
-            payload: { theme_id: activeTheme.id, key: `sections/${sectionFilename}`, value: content },
-          }),
-        });
-        const assetData = await assetRes.json();
-        if (!assetRes.ok) throw new Error(assetData?.errors ? JSON.stringify(assetData.errors) : `HTTP ${assetRes.status}`);
+        // ── Separar en secciones individuales ──────────────────────────────
+        // Shopify: 1 archivo = máximo 1 {% schema %}
+        // Dividimos por los markers de sección y el Sales Layer
+        const sectionBlocks: { name: string; content: string }[] = [];
+
+        // Extraer secciones del output principal usando los comment markers
+        const sectionPattern = /\{%-?\s*comment\s*-?%\}\s*===\s*SECTION:\s*([^=]+?)\s*===\s*\{%-?\s*endcomment\s*-?%\}([\s\S]*?)(?=\{%-?\s*comment\s*-?%\}\s*===|$)/g;
+        let match;
+        let hasNamedSections = false;
+        while ((match = sectionPattern.exec(content)) !== null) {
+          hasNamedSections = true;
+          const sectionName = match[1].trim().toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9-]/g, '');
+          const sectionContent = match[2].trim();
+          if (sectionContent.length > 50) {
+            sectionBlocks.push({ name: sectionName, content: sectionContent });
+          }
+        }
+
+        // Si no hay markers, subir como archivo único (fallback)
+        if (!hasNamedSections) {
+          sectionBlocks.push({ name: 'main', content });
+        }
+
+        // ── Push cada sección como archivo independiente ────────────────────
+        const pushedFiles: string[] = [];
+        for (const block of sectionBlocks) {
+          const filename = `${filePrefix}-${block.name}.liquid`;
+          const assetRes = await fetch('/api/shopify-theme', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              shop: shopifyStore.shop, token: shopifyStore.token,
+              action: 'put_asset',
+              payload: { theme_id: activeTheme.id, key: `sections/${filename}`, value: block.content },
+            }),
+          });
+          const assetData = await assetRes.json();
+          if (!assetRes.ok) throw new Error(`${filename}: ${assetData?.errors ? JSON.stringify(assetData.errors) : `HTTP ${assetRes.status}`}`);
+          pushedFiles.push(filename);
+          // Rate limit
+          await new Promise(r => setTimeout(r, 300));
+        }
 
         const shopDomain = shopifyStore.shop.replace('.myshopify.com', '');
         setShopifyPushResult({
           url: `https://admin.shopify.com/store/${shopDomain}/themes/${activeTheme.id}/editor`,
-          title: `Theme section: sections/${sectionFilename}`,
+          title: `${pushedFiles.length} sección${pushedFiles.length > 1 ? 'es' : ''} subida${pushedFiles.length > 1 ? 's' : ''}: ${pushedFiles.join(', ')}`,
         });
         return;
       }
