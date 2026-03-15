@@ -65,7 +65,7 @@
     "settings": [
       {
         "type": "image_picker",
-        "id": "checkout_logo",
+        "id": "nc_checkout_logo",
         "label": "Logo en checkout"
       },
       {
