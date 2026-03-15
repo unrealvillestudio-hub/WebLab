@@ -731,11 +731,20 @@ export default function WebGeneratorModule() {
     const resolvedMode = ((result as any).outputMode as WebOutputMode) ?? outputMode;
     const ext     = getFileExtension(resolvedMode);
     const mime    = getMimeType(resolvedMode);
-    const content = buildExportFile(result.sections, resolvedMode, result.superAggro ?? false);
+    let content = buildExportFile(result.sections, resolvedMode, result.superAggro ?? false);
+
+    // Si el Sales Layer fue generado e insertado, incluirlo en el export
+    if (salesLayerHtml && salesLayerInserted) {
+      const sep = resolvedMode === 'liquid'
+        ? '\n\n{% comment %} ═══ SALES LAYER ═══ {% endcomment %}\n'
+        : '\n\n<!-- ═══ SALES LAYER ═══ -->\n';
+      content = content + sep + salesLayerHtml;
+    }
+
     const blob = new Blob([content], { type: mime });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `weblab_${brand.id}_${pack.id}_${result.superAggro ? 'AGGRO_' : ''}${Date.now()}.${ext}`;
+    a.download = `weblab_${brand.id}_${pack.id}_${result.superAggro ? 'AGGRO_' : ''}${salesLayerInserted ? 'SL_' : ''}${Date.now()}.${ext}`;
     a.click();
   };
 
