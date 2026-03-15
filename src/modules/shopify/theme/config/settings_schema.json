@@ -36,14 +36,12 @@
       {
         "type": "font_picker",
         "id": "font_heading",
-        "label": "Tipografía de títulos",
-        "default": "sans-serif_n4"
+        "label": "Tipografía de títulos"
       },
       {
         "type": "font_picker",
         "id": "font_body",
-        "label": "Tipografía de cuerpo",
-        "default": "sans-serif_n4"
+        "label": "Tipografía de cuerpo"
       }
     ]
   },
