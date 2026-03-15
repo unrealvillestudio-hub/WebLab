@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { cn, Badge, Spinner } from '../../ui/components';
 import { useShopifyStore } from '../../store/useShopifyStore';
-import { NEURONE_THEME_FILES, THEME_NAME, THEME_FILE_COUNT, type ThemeFile } from './themeFiles';
+import { NEURONE_THEME_FILES, NEURONE_THEME_LIGHT_FILES, THEME_NAME, THEME_LIGHT_NAME, THEME_LIGHT_FILE_COUNT, type ThemeFile } from './themeFiles';
 
 // ── TIPOS ─────────────────────────────────────────────────────────────────────
 
@@ -66,9 +66,13 @@ export default function ThemeDeployModule() {
   const [themes, setThemes] = useState<ShopifyTheme[]>([]);
   const [selectedThemeId, setSelectedThemeId] = useState<number | null>(null);
   const [createNew, setCreateNew] = useState(true);
-  const [themeName, setThemeName] = useState(THEME_NAME);
+  const [themeVariant, setThemeVariant] = useState<'dark' | 'light'>('dark');
+  const activeFiles = themeVariant === 'light' ? NEURONE_THEME_LIGHT_FILES : NEURONE_THEME_FILES;
+  const activeThemeName = themeVariant === 'light' ? THEME_LIGHT_NAME : THEME_NAME;
+  const activeFileCount = themeVariant === 'light' ? THEME_LIGHT_FILE_COUNT : NEURONE_THEME_FILES.length;
+  const [themeName, setThemeName] = useState(activeThemeName);
   const [fileStates, setFileStates] = useState<FileDeployState[]>(
-    NEURONE_THEME_FILES.map(f => ({ file: f, status: 'idle' }))
+    activeFiles.map(f => ({ file: f, status: 'idle' }))
   );
   const [deployed, setDeployed] = useState(0);
   const [errors, setErrors] = useState(0);
@@ -118,7 +122,7 @@ export default function ThemeDeployModule() {
     setDeployed(0);
     setErrors(0);
     setLog([]);
-    setFileStates(NEURONE_THEME_FILES.map(f => ({ file: f, status: 'idle' })));
+    setFileStates(activeFiles.map(f => ({ file: f, status: 'idle' })));
 
     let targetThemeId = selectedThemeId;
 
@@ -144,7 +148,7 @@ export default function ThemeDeployModule() {
 
     // 2. Deploy archivos
     setPhase('deploying');
-    addLog(`Deployando ${THEME_FILE_COUNT} archivos...`);
+    addLog(`Deployando ${activeFileCount} archivos...`);
     let successCount = 0;
     let errorCount = 0;
 
@@ -208,15 +212,15 @@ export default function ThemeDeployModule() {
     return acc;
   }, {} as Record<FileStatus, number>);
 
-  const progress = THEME_FILE_COUNT > 0
-    ? Math.round(((deployed + errors) / THEME_FILE_COUNT) * 100)
+  const progress = activeFileCount > 0
+    ? Math.round(((deployed + errors) / activeFileCount) * 100)
     : 0;
 
   // ── RESET ────────────────────────────────────────────────────────────────────
   const reset = () => {
     abortRef.current = true;
     setPhase('idle');
-    setFileStates(NEURONE_THEME_FILES.map(f => ({ file: f, status: 'idle' })));
+    setFileStates(activeFiles.map(f => ({ file: f, status: 'idle' })));
     setDeployed(0);
     setErrors(0);
     setGlobalError('');
@@ -256,7 +260,7 @@ export default function ThemeDeployModule() {
             <Badge color="#0076A8">F9</Badge>
           </div>
           <p className="text-xs text-zinc-400">
-            {THEME_FILE_COUNT} archivos · Neurone Custom Theme · Full-width, sin Dawn
+            {activeFileCount} archivos · Neurone Custom Theme · Full-width, sin Dawn
           </p>
         </div>
         <div className="flex gap-2">
@@ -318,6 +322,28 @@ export default function ThemeDeployModule() {
             >
               Actualizar existente
             </button>
+          </div>
+
+          {/* Variante: Dark / Light */}
+          <div>
+            <label className="block text-[10px] uppercase tracking-widest text-zinc-500 mb-1.5">Variante del theme</label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setThemeVariant('dark'); setThemeName(THEME_NAME); setFileStates(NEURONE_THEME_FILES.map(f => ({ file: f, status: 'idle' }))); }}
+                className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-widest border transition-colors ${themeVariant === 'dark' ? 'bg-[#0076A8]/20 border-[#0076A8]/60 text-[#5BB8E8]' : 'bg-zinc-800/60 border-white/10 text-zinc-400 hover:border-white/20'}`}
+              >
+                🌑 Dark
+              </button>
+              <button
+                onClick={() => { setThemeVariant('light'); setThemeName(THEME_LIGHT_NAME); setFileStates(NEURONE_THEME_LIGHT_FILES.map(f => ({ file: f, status: 'idle' }))); }}
+                className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-widest border transition-colors ${themeVariant === 'light' ? 'bg-amber-500/20 border-amber-500/60 text-amber-300' : 'bg-zinc-800/60 border-white/10 text-zinc-400 hover:border-white/20'}`}
+              >
+                ☀️ Light
+              </button>
+            </div>
+            <p className="text-[10px] text-zinc-600 mt-1">
+              {themeVariant === 'light' ? 'Neurone South & Central Florida — fondo claro, paleta cálida' : 'Neurone Custom — fondo oscuro, paleta carbon'}
+            </p>
           </div>
 
           {/* Nombre si nuevo */}
@@ -403,14 +429,14 @@ export default function ThemeDeployModule() {
           className="flex items-center gap-2 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
         >
           <FileCode2 size={13} />
-          {THEME_FILE_COUNT} archivos incluidos
+          {activeFileCount} archivos incluidos
           {showFiles ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
         </button>
       )}
 
       {showFiles && phase === 'idle' && (
         <div className="rounded-xl border border-white/5 overflow-hidden">
-          {NEURONE_THEME_FILES.map((f, i) => (
+          {activeFiles.map((f, i) => (
             <div
               key={f.key}
               className={cn(
@@ -453,7 +479,7 @@ export default function ThemeDeployModule() {
             <div className="flex items-center gap-2">
               <Spinner size={16} />
               <span className="text-sm text-white font-medium">
-                {phase === 'creating_theme' ? 'Creando theme...' : `Deployando archivos (${deployed}/${THEME_FILE_COUNT})`}
+                {phase === 'creating_theme' ? 'Creando theme...' : `Deployando archivos (${deployed}/${activeFileCount})`}
               </span>
             </div>
             <button
@@ -535,7 +561,7 @@ export default function ThemeDeployModule() {
               <span className="text-[10px] uppercase tracking-wider text-red-600">Errores</span>
             </div>
             <div className="text-center p-2 rounded-lg bg-[#0076A8]/10 border border-[#0076A8]/20">
-              <span className="block text-lg font-bold text-[#5BB8E8]">{THEME_FILE_COUNT}</span>
+              <span className="block text-lg font-bold text-[#5BB8E8]">{activeFileCount}</span>
               <span className="text-[10px] uppercase tracking-wider text-[#0076A8]">Total</span>
             </div>
           </div>
@@ -622,7 +648,7 @@ export default function ThemeDeployModule() {
         <span>Shop: <span className="text-zinc-500">{shop}</span></span>
         <span className="ml-auto flex items-center gap-1">
           <Package size={11} />
-          {THEME_FILE_COUNT} archivos · Theme Custom v1.0
+          {activeFileCount} archivos · Theme Custom v1.0
         </span>
       </div>
     </div>
