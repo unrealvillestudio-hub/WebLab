@@ -128,7 +128,22 @@ export const VIZOS_DARK: BrandThemeTokens = {
   ],
 };
 
-// ── FORUMPHS ──────────────────────────────────────────────────────────────────
+// ── VIZOS SALÓN — Light ───────────────────────────────────────────────────────
+export const VIZOS_LIGHT: BrandThemeTokens = {
+  ...VIZOS_DARK,
+  shopName: 'Vizos Salón — Light v1.0',
+  mode: 'light',
+  bg: '#FAF7F4',           // Marfil cálido — evoca el salón, no un consultorio
+  bgCard: '#FFFFFF',
+  bgElevated: '#F0EAE2',   // Arena suave
+  white: '#1A0F08',        // Casi negro cálido para contraste
+  text: 'rgba(26, 15, 8, 0.82)',
+  textMuted: 'rgba(26, 15, 8, 0.50)',
+  border: 'rgba(180, 83, 9, 0.10)',   // Cobre muy suave
+  borderMid: 'rgba(180, 83, 9, 0.18)',
+  shadowCard: '0 4px 24px rgba(180,83,9,0.08), 0 0 0 1px rgba(180,83,9,0.10)',
+  shadowGlow: '0 0 30px rgba(180,83,9,0.15), 0 4px 16px rgba(0,0,0,0.08)',
+};
 export const FORUMPHS_DARK: BrandThemeTokens = {
   brandId: 'forumPHs',
   brandName: 'ForumPHs',
@@ -155,12 +170,31 @@ export const FORUMPHS_DARK: BrandThemeTokens = {
   collections: [],
 };
 
+// ── FORUMPHS — Light ──────────────────────────────────────────────────────────
+export const FORUMPHS_LIGHT: BrandThemeTokens = {
+  ...FORUMPHS_DARK,
+  shopName: 'Forum Property Holdings — Light v1.0',
+  mode: 'light',
+  bg: '#F9F8FF',           // Blanco con tinte amatista muy sutil
+  bgCard: '#FFFFFF',
+  bgElevated: '#F0EEF9',   // Lavanda muy suave
+  white: '#1A1028',        // Casi negro con tinte púrpura
+  text: 'rgba(26, 16, 40, 0.82)',
+  textMuted: 'rgba(26, 16, 40, 0.50)',
+  border: 'rgba(124, 58, 237, 0.10)',
+  borderMid: 'rgba(124, 58, 237, 0.18)',
+  shadowCard: '0 4px 24px rgba(124,58,237,0.08), 0 0 0 1px rgba(124,58,237,0.10)',
+  shadowGlow: '0 0 30px rgba(124,58,237,0.15), 0 4px 16px rgba(0,0,0,0.06)',
+};
+
 // ── REGISTRO GLOBAL ───────────────────────────────────────────────────────────
 export const BRAND_THEME_CONFIGS: BrandThemeTokens[] = [
   NEURONE_DARK,
   NEURONE_LIGHT,
   VIZOS_DARK,
+  VIZOS_LIGHT,
   FORUMPHS_DARK,
+  FORUMPHS_LIGHT,
 ];
 
 // Genera el bloque :root de CSS desde los tokens
