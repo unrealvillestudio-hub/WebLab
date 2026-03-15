@@ -621,7 +621,25 @@ export async function runWebPack(params: {
     });
 
     prompts.push(prompt);
-    const content = await callClaude(prompt, params.signal);
+    let content = await callClaude(prompt, params.signal);
+
+    // ── Liquid schema integrity check ──────────────────────────────────────
+    // The model sometimes truncates before closing {% endschema %} on long outputs.
+    // Auto-repair: if schema is opened but not closed, append closing tag.
+    if (outputMode === 'liquid') {
+      const schemaCount    = (content.match(/\{%-?\s*schema\s*-?%\}/g)    || []).length;
+      const endschemaCount = (content.match(/\{%-?\s*endschema\s*-?%\}/g) || []).length;
+      if (schemaCount > endschemaCount) {
+        const missing = schemaCount - endschemaCount;
+        content = content.trimEnd() + '\n' + '{% endschema %}\n'.repeat(missing);
+      }
+      // Also strip anything after the last {% endschema %} (model sometimes adds notes)
+      const lastEndSchema = content.lastIndexOf('{% endschema %}');
+      if (lastEndSchema !== -1) {
+        content = content.slice(0, lastEndSchema + '{% endschema %}'.length).trimEnd();
+      }
+    }
+    // ───────────────────────────────────────────────────────────────────────
     totalWords += content.split(/\s+/).length;
     sections.push({ sectionId, label: section.label, content });
     params.onSectionComplete?.(sectionId, content);

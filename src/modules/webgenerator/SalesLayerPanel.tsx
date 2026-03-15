@@ -312,10 +312,11 @@ interface SalesLayerPanelProps {
   brandId: string;
   pulse?: boolean;
   baseHtml?: string; // HTML completo del output generado — el modelo trabaja sobre él
+  outputMode?: 'html' | 'liquid' | 'markdown'; // formato del output base — determina el export
   onGenerate: (preset: SalesPreset, params: Record<string, string>, outputHtml: string) => void;
 }
 
-export function SalesLayerPanel({ context, blogPostType, brandId, pulse = false, baseHtml, onGenerate }: SalesLayerPanelProps) {
+export function SalesLayerPanel({ context, blogPostType, brandId, pulse = false, baseHtml, outputMode = 'html', onGenerate }: SalesLayerPanelProps) {
   const [open, setOpen]               = useState(false);
   const [selectedId, setSelectedId]   = useState<SalesPresetId | null>(null);
   const [params, setParams]           = useState<Record<string, string>>({});
@@ -459,10 +460,13 @@ OUTPUT: ${outputLabel}`;
 
   function handleDownload() {
     if (!output) return;
-    const blob = new Blob([output], { type: 'text/html' });
+    const isLiquid = outputMode === 'liquid';
+    const ext      = isLiquid ? 'liquid' : 'html';
+    const mime     = isLiquid ? 'text/plain' : 'text/html';
+    const blob = new Blob([output], { type: mime });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `sales-layer_${selectedPreset?.id}_${brandId}_${Date.now()}.html`;
+    a.download = `sales-layer_${selectedPreset?.id}_${brandId}_${Date.now()}.${ext}`;
     a.click();
   }
 

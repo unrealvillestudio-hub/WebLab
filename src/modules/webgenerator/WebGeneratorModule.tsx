@@ -1591,6 +1591,7 @@ export default function WebGeneratorModule() {
                     context={activeModule}
                     brandId={brandId}
                     pulse={true}
+                    outputMode={((result as any).outputMode as WebOutputMode) ?? outputMode}
                     baseHtml={(() => {
                       const resolvedMode = ((result as any).outputMode as WebOutputMode) ?? outputMode;
                       const _cat = getCatalog(brandId);
