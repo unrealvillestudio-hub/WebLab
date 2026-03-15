@@ -1,4 +1,5 @@
 {
+  "layout": "theme.liquid",
   "sections": {
     "nc-hero": {
       "type": "nc-hero",

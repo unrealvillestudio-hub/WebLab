@@ -37,13 +37,13 @@
         "type": "font_picker",
         "id": "font_heading",
         "label": "Tipografía de títulos",
-        "default": "helvetica_neue_n9"
+        "default": "sans-serif_n4"
       },
       {
         "type": "font_picker",
         "id": "font_body",
         "label": "Tipografía de cuerpo",
-        "default": "pt_sans_narrow_n4"
+        "default": "sans-serif_n4"
       }
     ]
   },
