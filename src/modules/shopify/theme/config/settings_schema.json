@@ -31,23 +31,6 @@
     ]
   },
   {
-    "name": "Typography",
-    "settings": [
-      {
-        "type": "font_picker",
-        "id": "font_heading",
-        "label": "Tipografía de títulos",
-        "default": "helvetica_neue_n4"
-      },
-      {
-        "type": "font_picker",
-        "id": "font_body",
-        "label": "Tipografía de cuerpo",
-        "default": "helvetica_neue_n4"
-      }
-    ]
-  },
-  {
     "name": "Favicon",
     "settings": [
       {
