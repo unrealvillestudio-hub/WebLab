@@ -48,7 +48,12 @@ async function themeApi(shop: string, token: string, action: string, payload: Re
     body: JSON.stringify({ shop, token, action, payload }),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  if (!res.ok) {
+    const msg = data.errors
+      ? (typeof data.errors === 'string' ? data.errors : JSON.stringify(data.errors))
+      : (data.error || `HTTP ${res.status}`);
+    throw new Error(msg);
+  }
   return data;
 }
 
