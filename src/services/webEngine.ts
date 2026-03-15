@@ -209,11 +209,16 @@ PROHIBICIONES ABSOLUTAS — rompen responsive en Shopify mobile:
 - ✅ SÍ: position:relative en contenedores, position:absolute SOLO para badges internos (top/right ≤ 30px del borde del padre).
 
 IMÁGENES DE BLUEPRINT EN LIQUID:
-- Para imágenes de producto (BP_PRODUCT image_filename): usa {{ section.settings.product_image | img_url: '800x' | img_tag }} y agrega al schema: { "type": "image_picker", "id": "product_image", "label": "Imagen producto" }.
-- Para BP_PERSON: { "type": "image_picker", "id": "person_image", "label": "Imagen persona" }.
-- Para BP_LOCATION: { "type": "image_picker", "id": "location_image", "label": "Imagen locación" }.
-- Para precio: usa {{ section.settings.product_price }} con default "[PRECIO]" — NUNCA hardcodees $0.00.
-- Para precio en schema: { "type": "text", "id": "product_price", "label": "Precio", "default": "" }.
+- Para imágenes de producto: USA SIEMPRE image_picker en el schema + image_url filter en el HTML.
+  HTML: <img src="{{ section.settings.prod_img_1 | image_url: width: 600 }}" alt="..." loading="lazy" width="600" height="400" style="width:100%;height:200px;object-fit:cover;display:block;">
+  Schema: { "type": "image_picker", "id": "prod_img_1", "label": "Imagen producto 1" }
+- ⛔ PROHIBIDO usar [IMAGE:FILENAME] en liquid — ese patrón es solo para HTML/WordPress
+- ⛔ PROHIBIDO usar img_url — está deprecado. SIEMPRE image_url: width: N
+- ⛔ PROHIBIDO usar asset_url para imágenes de producto — solo funciona para assets del theme
+- Para BP_PERSON: { "type": "image_picker", "id": "person_image", "label": "Imagen persona" }
+- Para BP_LOCATION: { "type": "image_picker", "id": "location_image", "label": "Imagen locación" }
+- Para precio: usa {{ section.settings.product_price }} con default "$10.00"
+- Para precio en schema: { "type": "text", "id": "product_price", "label": "Precio", "default": "$10.00" }.
 ESTRUCTURA BASE:
 <style>
   .section-${sectionId} { box-sizing: border-box; overflow-x: hidden; }
@@ -343,13 +348,14 @@ HERO DE COLECCIÓN:
 GRID DE PRODUCTOS — obligatorio mostrar imágenes:
 - Título sección: corto y con punch (ej: "Los productos que lo hacen posible")
 - Grid de product cards: mínimo 3 columnas desktop, 1 móvil
-- Cada card DEBE incluir:
-  · <img> del producto — usa el image_filename del contexto así: <img src="[IMAGE:FILENAME]" alt="NOMBRE" style="width:100%;height:200px;object-fit:cover;display:block;">
-  · El sistema reemplazará [IMAGE:FILENAME] con la URL real automáticamente al exportar
-  · Nombre del producto en bold
+- Cada card DEBE incluir imagen. Según el modo:
+  · HTML/WP: <img src="[IMAGE:FILENAME]" alt="NOMBRE" style="width:100%;height:200px;object-fit:cover;display:block;"> — el sistema reemplaza [IMAGE:FILENAME] al exportar. Usa SOLO el filename (ej: NSERHYA.png), sin paths.
+  · LIQUID: ⛔ NUNCA [IMAGE:...] — usa image_picker: <img src="{{ section.settings.prod_img_1 | image_url: width: 600 }}" alt="{{ section.settings.prod_name_1 }}" loading="lazy" style="width:100%;height:200px;object-fit:cover;display:block;"> con schema { "type": "image_picker", "id": "prod_img_1" }
+  · Nombre del producto en bold — en liquid: {{ section.settings.prod_name_1 }} con schema { "type": "text", "id": "prod_name_1" }
   · 1 benefit claim en 6 palabras máximo
-  · Precio: <span class="product-price">$10.00</span>
-  · Botón "Ver producto" o "Agregar"
+  · Precio: en liquid {{ section.settings.price_1 }} con schema { "type": "text", "id": "price_1", "default": "$10.00" }
+  · Botón "Ver producto" — en liquid: href="{{ section.settings.prod_url_1 }}" con schema { "type": "url", "id": "prod_url_1" }
+- Numera los settings de cada card: prod_img_1/2/3, prod_name_1/2/3, price_1/2/3, prod_url_1/2/3
 - Si hay subcollections diferentes: agrúpalos con un label pequeño de subcollection
 - Fondo alterno: #161923 para contrastar con el hero oscuro`
 : `
@@ -711,11 +717,14 @@ const BLUEPRINTS_IMAGE_BASE = 'https://raw.githubusercontent.com/unrealvillestud
 
 /**
  * Reemplaza placeholders [IMAGE:FILENAME] con URLs reales de BluePrints GitHub
+ * Maneja paths completos como [IMAGE:false/assets/images/products/FILENAME] extrayendo solo el filename
  */
 export function resolveImagePlaceholders(html: string): string {
-  return html.replace(/\[IMAGE:([^\]]+)\]/g, (_, filename) =>
-    `${BLUEPRINTS_IMAGE_BASE}${filename.trim()}`
-  );
+  return html.replace(/\[IMAGE:([^\]]+)\]/g, (_, raw) => {
+    // Strip any path prefix — solo queremos el filename
+    const filename = raw.trim().split('/').pop() ?? raw.trim();
+    return `${BLUEPRINTS_IMAGE_BASE}${filename}`;
+  });
 }
 
 /**
@@ -754,9 +763,20 @@ export function buildExportFile(
   superAggro = false,
 ): string {
   if (mode === 'liquid') {
-    return sections.map(s =>
+    let output = sections.map(s =>
       `{% comment %} === SECTION: ${s.label.toUpperCase()} === {% endcomment %}\n\n${s.content}`
     ).join('\n\n{% comment %} ─────────────────────────────────────── {% endcomment %}\n\n');
+
+    // Safety net post-processing for liquid:
+    // 1. Resolve any [IMAGE:FILENAME] that the model generated despite instructions
+    output = output.replace(/\[IMAGE:(?:[^/\]]*\/)*([^\]]+)\]/g, (_, filename) =>
+      `https://raw.githubusercontent.com/unrealvillestudio-hub/BluePrints/main/assets/images/products/${filename.trim()}`
+    );
+    // 2. Fix deprecated img_url filter → image_url
+    output = output.replace(/\|\s*img_url:\s*'[^']+'/g, '| image_url: width: 800');
+    output = output.replace(/\|\s*img_url\b/g, '| image_url: width: 800 |');
+
+    return output;
   }
 
   if (mode === 'html') {
