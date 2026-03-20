@@ -1,20 +1,93 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# WebLab — Unreal>ille Studio
 
-# Run and deploy your AI Studio app
+Generador de copy web del ecosistema Unreal>ille Studio.
+Produce outputs HTML y Liquid listos para publicar en WordPress o Shopify.
 
-This contains everything you need to run your app locally.
+**Live:** Vercel — conectado a rama `main`
+**Contexto completo del ecosistema:** [`CoreProject/CONTEXT.md`](https://github.com/unrealvillestudio-hub/CoreProject/blob/main/CONTEXT.md)
 
-View your app in AI Studio: https://ai.studio/apps/bcbc346f-86fd-4119-8af8-ec23006364c5
+---
 
-## Run Locally
+## Rol en el ecosistema
 
-**Prerequisites:**  Node.js
+WebLab es el módulo de generación de interfaces web. Consume BPs de BluePrints (brand, product, person) y los transforma en HTML/Liquid publicable. Es el único Lab con deploy propio en Vercel.
 
+```
+BluePrints (assets) ──→ WebLab (genera HTML/Liquid) ──→ Deploy (Hostinger/Shopify)
+CoreProject/sites/  ←── outputs aprobados se archivan aquí
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+---
+
+## Stack
+
+- React 18 + TypeScript + Vite + Tailwind
+- AI: Gemini 2.0 Flash (Gemini API)
+- State: Zustand
+- Deploy: Vercel (`main` → auto-deploy)
+
+---
+
+## Módulos activos
+
+| Módulo | Platform | Output | Estado |
+|--------|----------|--------|--------|
+| Web Corporativa | WordPress | HTML only | ✅ |
+| Landing | WordPress / Shopify | HTML + Liquid | ✅ |
+| E-Commerce | Shopify | HTML + Liquid | ✅ |
+| Blog | WordPress | HTML only | ✅ |
+
+**Regla crítica:** Blog y Web Corporativa → solo HTML. Liquid es exclusivo de módulos Shopify.
+
+---
+
+## Archivos clave
+
+```
+src/
+├── modules/webgenerator/WebGeneratorModule.tsx  ← UI + lógica principal
+├── services/webEngine.ts                        ← engine de generación + prompts
+├── config/
+│   ├── packs.ts          ← WEB_PACKS, PACKS_BY_MODULE, PAGE_SECTIONS
+│   ├── brands.ts         ← BRAND_LIST
+│   ├── brandContexts.tsx ← BRAND_CONTEXTS (buildNeuroneProductContext pendiente)
+│   └── humanizeConfig.ts ← Humanize Layer
+└── core/types.ts         ← WebModuleId, WebOutputMode, WebOutput
+```
+
+---
+
+## Dependencias
+
+| Consume | Provee |
+|---------|--------|
+| BluePrints (brand/product/person JSON) | HTML/Liquid para publicar |
+| DB_VARIABLES_v6 (tokens de marca) | — |
+| CoreProject/CONTEXT.md (big picture) | Archivos aprobados → CoreProject/sites/ |
+
+---
+
+## Pendiente
+
+- `buildNeuroneProductContext` en `brandContexts.tsx`
+- Brief layer pre-generación (3 preguntas antes de generar)
+
+---
+
+## Changelog
+
+| Fecha | Cambio |
+|---|---|
+| 2026-03-20 | README actualizado con arquitectura de ecosistema |
+| 2026-03-13 | Fixes HTML responsive · regla HTML-only para Web/Blog |
+| 2026-03-xx | WebLab v2.6 — commit `131a2ac` |
+
+---
+
+## Desarrollo local
+
+```bash
+npm install
+cp .env.example .env.local  # añade GEMINI_API_KEY
+npm run dev
+```
