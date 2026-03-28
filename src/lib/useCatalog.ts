@@ -52,7 +52,7 @@ interface ProductBlueprintRow {
 // ─── Adapter: ProductBlueprintRow → CatalogProduct ───────────
 // Mantiene la misma forma que productCatalog.ts para compatibilidad
 // con ShopifyPushModule y cualquier otro consumidor
-function adaptToCatalogProduct(row: ProductBlueprintRow, weblabBrandId: string): CatalogProduct {
+function adaptToCatalogProduct(row: ProductBlueprintRow): CatalogProduct {
   // linea: "Color_Rescue" → collection: "Color Rescue", collection_id: "color_rescue"
   const linea = row.linea ?? 'General'
   const collection = linea.replace(/_/g, ' ')
@@ -155,7 +155,7 @@ export function useCatalog(weblabBrandId: string) {
 
     sbFetch<ProductBlueprintRow>(path)
       .then(rows => {
-        const products = rows.map(r => adaptToCatalogProduct(r, weblabBrandId))
+        const products = rows.map(r => adaptToCatalogProduct(r))
         setCatalog(buildCollections(products))
       })
       .catch(err => {
@@ -188,6 +188,6 @@ export async function fetchCatalog(weblabBrandId: string): Promise<CatalogCollec
     `benefit_claims,hair_type,image_filename,price,msrp,cross_sell,active`
 
   const rows = await sbFetch<ProductBlueprintRow>(path)
-  const products = rows.map(r => adaptToCatalogProduct(r, weblabBrandId))
+  const products = rows.map(r => adaptToCatalogProduct(r))
   return buildCollections(products)
 }
