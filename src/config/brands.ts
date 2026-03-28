@@ -1,6 +1,9 @@
-// ─── BRANDS CONFIG — UNRLVL Ecosystem ───────────────────────────────────────
+// ─── BRANDS CONFIG — UNRLVL Ecosystem ────────────────────────
+// v2.1 — 2026-03-28: +WEBLAB_TO_SUPABASE_BRAND_ID map
+//   WebLab usa camelCase IDs internamente.
+//   Supabase usa IDs canónicos del ecosystem (PascalCase/distinto).
+//   Usar getSupabaseBrandId(weblabId) para cualquier fetch a Supabase.
 // v2.0 — Neurone Cosmética añadida (marca 10)
-// Actualizar este archivo en: src/config/brands.ts de cada app
 
 export type BrandId =
   | 'unrealilleStudio'
@@ -56,7 +59,7 @@ export const BRANDS: Record<BrandId, Brand> = {
     shortName: 'PO Comunidad',
     owner: 'Patricia Osorio',
     color: '#A855F7',
-    emoji: '🌐',
+    emoji: '🌟',
     description: 'Comunidad y contenido educativo de PO',
     market: 'Miami, FL',
     channels: ['instagram', 'youtube', 'email'],
@@ -90,7 +93,7 @@ export const BRANDS: Record<BrandId, Brand> = {
     owner: 'Sam',
     color: '#22C55E',
     emoji: '🌿',
-    description: 'Gel bebible natural — Asaí, Espirulina, Fruto del Monje',
+    description: 'Gel bebible natural — Açaí, Espirulina, Fruto del Monje',
     market: 'Miami, FL',
     channels: ['instagram', 'tiktok', 'shopify'],
   },
@@ -123,7 +126,7 @@ export const BRANDS: Record<BrandId, Brand> = {
     owner: 'Patricia Osorio',
     color: '#0076A8',
     secondaryColor: '#000000',
-    emoji: '💙',
+    emoji: '🔬',
     description: 'Distribución exclusiva South & Central Miami — Neurocosmética + Nano Tribología. B2C + Portal Pro B2B para profesionales.',
     market: 'South & Central Miami, FL',
     channels: ['shopify', 'instagram', 'whatsapp', 'b2b-portal'],
@@ -135,7 +138,7 @@ export const BRANDS: Record<BrandId, Brand> = {
     owner: 'Sam',
     color: '#5C3472',          // Amatista — color institucional
     secondaryColor: '#C4622D', // Terra — acento, énfasis slogan
-    emoji: '🟣',
+    emoji: '🏣',
     description: 'Administración de Propiedad Horizontal · Panamá · Desde 2015',
     market: 'Panamá',
     channels: ['web'],
@@ -145,7 +148,24 @@ export const BRANDS: Record<BrandId, Brand> = {
 export const BRAND_LIST = Object.values(BRANDS)
 export const BRAND_IDS = Object.keys(BRANDS) as BrandId[]
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
+// ─── Brand ID Map: WebLab → Supabase ─────────────────────────
+// WebLab usa IDs camelCase por razones históricas.
+// Supabase usa los IDs canónicos del ecosystem UNRLVL.
+// Este mapa es la fuente de verdad para traducción entre ambos sistemas.
+export const WEBLAB_TO_SUPABASE_BRAND_ID: Record<BrandId, string> = {
+  neuroneCosmetics:         'NeuroneSCF',
+  patriciaOsorioVizosSalon: 'PatriciaOsorioVizosSalon',
+  patriciaOsorioPersonal:   'PatriciaOsorioPersonal',
+  patriciaOsorioComunidad:  'PatriciaOsorioComunidad',
+  diamondDetails:           'DiamondDetails',
+  d7Herbal:                 'D7Herbal',
+  vivoseMask:               'VivoseMask',
+  vizosCosmetics:           'VizosCosmetics',
+  forumPhs:                 'ForumPHs',
+  unrealilleStudio:         'UnrealilleStudio',
+}
+
+// ─── Helpers ──────────────────────────────────────────────────
 
 export const getBrandById = (id: string): Brand | undefined =>
   BRANDS[id as BrandId]
@@ -155,3 +175,7 @@ export const getBrandColor = (id: string): string =>
 
 export const getBrandName = (id: string): string =>
   BRANDS[id as BrandId]?.name ?? id
+
+/** Traduce ID de WebLab al ID canónico de Supabase */
+export const getSupabaseBrandId = (weblabId: string): string =>
+  WEBLAB_TO_SUPABASE_BRAND_ID[weblabId as BrandId] ?? weblabId
