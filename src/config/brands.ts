@@ -121,13 +121,13 @@ export const BRANDS: Record<BrandId, Brand> = {
   },
   neuroneCosmetics: {
     id: 'neuroneCosmetics',
-    name: 'Neurone Cosmética',
-    shortName: 'Neurone',
+    name: 'Neurone South & Central Florida',
+    shortName: 'Neurone SCF',
     owner: 'Patricia Osorio',
     color: '#0076A8',
     secondaryColor: '#000000',
     emoji: '🔬',
-    description: 'Distribución exclusiva South & Central Miami — Neurocosmética + Nano Tribología. B2C + Portal Pro B2B para profesionales.',
+    description: 'Distribución exclusiva South & Central Florida — Neurocosmética + Nano Tribología. B2C + Portal Pro B2B para profesionales.',
     market: 'South & Central Miami, FL',
     channels: ['shopify', 'instagram', 'whatsapp', 'b2b-portal'],
   },
@@ -162,7 +162,7 @@ export const WEBLAB_TO_SUPABASE_BRAND_ID: Record<BrandId, string> = {
   vivoseMask:               'VivoseMask',
   vizosCosmetics:           'VizosCosmetics',
   forumPhs:                 'ForumPHs',
-  unrealilleStudio:         'UnrealilleStudio',
+  unreal>illeStudio:         'Unreal>illeStudio',
 }
 
 // ─── Helpers ──────────────────────────────────────────────────
