@@ -1,10 +1,7 @@
-// ─── BRAND BLUEPRINTS — UNRLVL WebLab ────────────────────────────────────────
-// Resumen embebido de los BP_BRAND del repo BluePrints.
-// Se inyectan automáticamente al seleccionar una marca.
-// Fuente: github.com/unrealvillestudio-hub/BluePrints/brands/
-// Sincronizar manualmente cuando se actualice un BP_BRAND en el repo.
-//
-// Badge en UI: "Brand context — injected by default" (azul)
+// BRAND BLUEPRINTS - UNRLVL WebLab
+// v1.1 - 2026-03-28: Unrealville Studio (sin chevron), referencias corregidas
+// NOTE: palette/typography para NeuroneSCF disponibles en Supabase brand_palette + brand_typography
+// Full Supabase migration pendiente en roadmap (Onboarding App)
 
 import { BrandId } from './brands';
 
@@ -12,16 +9,12 @@ export interface BrandBlueprintSummary {
   schemaVersion: string;
   displayName: string;
   tagline: string;
-  // Identidad visual clave
-  palettePrompt: string;       // String listo para inyectar en prompt
+  palettePrompt: string;
   typographyPrompt: string;
-  // Voz editorial
   voiceB2C: string;
   voiceB2B?: string;
-  // Reglas de marca
-  rulesInherited: string[];    // Reglas de Neurone global (o marca madre)
-  rulesOwned: string[];        // Reglas propias del distribuidor / operador
-  // Meta
+  rulesInherited: string[];
+  rulesOwned: string[];
   status: 'active' | 'draft' | 'pending';
   sourceFile: string;
 }
@@ -33,50 +26,73 @@ export const BRAND_BLUEPRINTS: Partial<Record<BrandId, BrandBlueprintSummary>> =
     displayName: 'Neurone South & Central Florida',
     tagline: 'La ciencia capilar que Miami necesitaba.',
     palettePrompt:
-      'Paleta Neurone: Negro obsidian #000000 (dominante), Azul Pantone 7546 #0076A8 (acento técnico / CTA), ' +
+      'Paleta Neurone: Negro obsidian #000000 (dominante), Azul #0076A8 (acento tecnico / CTA), ' +
       'Blanco #FAFAFA (espacio / respiro). ' +
-      'Líneas de producto: Restore #C27D5B terracota, Scalp #FAFAFA, Moisture #0076A8, ' +
-      'Styling #3F3E3F, Pro Salon #003A70 navy profundo, Color Rescue #41273B burdeos.',
+      'Lineas: Restore #C27D5B terracota, Scalp #FAFAFA, Moisture #0076A8, ' +
+      'Styling #3F3E3F, Pro Salon #003A70 navy, Color Rescue #41273B burdeos.',
     typographyPrompt:
-      'Tipografías Neurone: PT Sans Narrow (cuerpo, tablas, datos técnicos) + Montserrat (headlines, CTAs, labels). ' +
+      'Tipografias Neurone: PT Sans Narrow (cuerpo, tablas, datos tecnicos) + Montserrat (headlines, CTAs). ' +
       'Headlines: weight 800, letter-spacing -0.02em. Body: weight 400-500, line-height 1.65.',
     voiceB2C:
-      'Voz B2C Neurone SCF: Autoridad técnica accesible. Spanglish Miami natural — inglés para términos técnicos, ' +
-      'español para cercanía emocional. Tono directo, específico, sin hedging. ' +
-      'Educativa pero nunca condescendiente. "La ciencia trabaja para ti — te explicamos cómo."',
+      'Autoridad tecnica accesible. Spanglish Miami natural. Directo, especifico, sin hedging. ' +
+      '"La ciencia trabaja para ti - te explicamos como."',
     voiceB2B:
-      'Voz B2B Portal Pro: Colega de negocio, no vendedor. Respeta la experiencia del profesional. ' +
-      'Datos primero: márgenes, exclusividad territorial, soporte técnico. ' +
-      '"Esto es lo que te da ventaja en la silla. Los números lo respaldan."',
+      'Colega de negocio, no vendedor. Datos primero: margenes, exclusividad territorial, soporte tecnico. ' +
+      '"Esto es lo que te da ventaja en la silla. Los numeros lo respaldan."',
     rulesInherited: [
-      'Logotipo Neurone — tipografía, casing y proporción exacta del logo global',
-      'Claims de producto aprobados por Neurone global (neurocosmética, nano tribología)',
-      'Nomenclatura oficial de líneas: Restore, Moisture, Styling, Scalp, Color Rescue, Pro Salon',
+      'Logotipo Neurone - tipografia y proporcion exacta del logo global',
+      'Claims de producto aprobados por Neurone global (neurocosmetica, nano tribologia)',
+      'Nomenclatura oficial de lineas: Restore, Moisture, Styling, Scalp, Color Rescue, Pro Salon',
       'Paleta de colores primaria: negro + #0076A8 + blanco',
     ],
     rulesOwned: [
-      'Voz editorial local — tono, Spanglish Miami, calidez de PO como distribuidora',
+      'Voz editorial local - tono, Spanglish Miami, calidez de PO como distribuidora',
       'Slogan territorial: "La ciencia capilar que Miami necesitaba."',
-      'Énfasis en distribución exclusiva South & Central Miami como diferenciador',
-      'Arquitectura dual B2C / Portal Pro — entrada "Soy profesional" siempre visible',
-      'Fotografía: editorial warm Miami, mujeres latinas reales, cabello con textura auténtica',
+      'Enfasis en distribucion exclusiva South & Central Florida',
+      'Arquitectura dual B2C / Portal Pro',
+      'Fotografia: editorial warm Miami, mujeres latinas reales',
     ],
     status: 'active',
     sourceFile: 'BluePrints/brands/BP_BRAND_NeuroneSCF_v1.0.json',
   },
 
+  unrealilleStudio: {
+    schemaVersion: 'BP_BRAND_1.0',
+    displayName: 'Unrealville Studio',
+    tagline: 'Not for everyone.',
+    palettePrompt:
+      'Paleta UNRLVL: Negro #0A0A0A (dominante), Cyan #00FFD1 (acento / chevron), ' +
+      'Blanco #FAFAFA (texto / respiro). Studio: opacity 0.32 sobre negro.',
+    typographyPrompt:
+      'Tipografia UNRLVL: Geist Mono (codigo, labels, UI), Inter (cuerpo editorial). ' +
+      'Headlines: weight 700-900 uppercase. Chevron siempre blinking (SMIL animate).',
+    voiceB2C:
+      'Tecnico-creativo. Directo sin adornos. Sin postureo, sin buzzwords. ' +
+      '"Construimos sistemas. Los resultados hablan."',
+    rulesInherited: [],
+    rulesOwned: [
+      'Chevron > SIEMPRE blinking en outputs HTML/SVG (SMIL animate)',
+      'STUDIO en opacity 0.32 cuando aparece junto al logotipo',
+      'Favicon obligatorio en todo HTML output',
+      'ICR (Indice de Calidad de Respuesta) en todo output final',
+      'Signature version A (web/HTML) y version B (docs internos)',
+    ],
+    status: 'active',
+    sourceFile: 'BluePrints/brands/BP_BRAND_UnrealvilleStudio_v1.3.json',
+  },
+
 };
 
-// ── Helper: genera bloque de texto para inyectar en prompt ────────────────────
+// Helper: genera bloque de texto para inyectar en prompt
 export function getBrandBlueprintBlock(brandId: BrandId): string {
   const bp = BRAND_BLUEPRINTS[brandId];
   if (!bp) return '';
 
   const lines = [
-    `── BP_BRAND: ${bp.displayName} (${bp.schemaVersion}) ──`,
+    `BP_BRAND: ${bp.displayName} (${bp.schemaVersion})`,
     `Tagline: "${bp.tagline}"`,
     ``,
-    `PALETA Y TIPOGRAFÍA:`,
+    `PALETA Y TIPOGRAFIA:`,
     bp.palettePrompt,
     bp.typographyPrompt,
     ``,
@@ -89,16 +105,16 @@ export function getBrandBlueprintBlock(brandId: BrandId): string {
   }
 
   if (bp.rulesInherited.length) {
-    lines.push(``, `REGLAS HEREDADAS (marca global — no modificar):`);
-    bp.rulesInherited.forEach(r => lines.push(`  • ${r}`));
+    lines.push(``, `REGLAS HEREDADAS (no modificar):`);
+    bp.rulesInherited.forEach(r => lines.push(`  - ${r}`));
   }
 
   if (bp.rulesOwned.length) {
-    lines.push(``, `REGLAS PROPIAS (distribuidor / operador):`);
-    bp.rulesOwned.forEach(r => lines.push(`  • ${r}`));
+    lines.push(``, `REGLAS PROPIAS:`);
+    bp.rulesOwned.forEach(r => lines.push(`  - ${r}`));
   }
 
-  lines.push(`── FIN BP_BRAND ──`);
+  lines.push(`FIN BP_BRAND`);
   return lines.join('\n');
 }
 
