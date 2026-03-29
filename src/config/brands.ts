@@ -1,12 +1,9 @@
-// ─── BRANDS CONFIG — UNRLVL Ecosystem ────────────────────────
-// v2.1 — 2026-03-28: +WEBLAB_TO_SUPABASE_BRAND_ID map
-//   WebLab usa camelCase IDs internamente.
-//   Supabase usa IDs canónicos del ecosystem (PascalCase/distinto).
-//   Usar getSupabaseBrandId(weblabId) para cualquier fetch a Supabase.
-// v2.0 — Neurone Cosmética añadida (marca 10)
+// BRANDS CONFIG - UNRLVL Ecosystem
+// v2.1 - 2026-03-28: +WEBLAB_TO_SUPABASE_BRAND_ID map
+// v2.0 - Neurone Cosmetica anadida (marca 10)
 
 export type BrandId =
-  | 'unrealilleStudio'
+  | 'unrealvilleStudio'
   | 'patriciaOsorioPersonal'
   | 'patriciaOsorioComunidad'
   | 'patriciaOsorioVizosSalon'
@@ -31,14 +28,14 @@ export interface Brand {
 }
 
 export const BRANDS: Record<BrandId, Brand> = {
-  unrealilleStudio: {
-    id: 'unrealilleStudio',
+  unrealvilleStudio: {
+    id: 'unrealvilleStudio',
     name: 'Unreal>ille Studio',
     shortName: 'UNRLVL',
     owner: 'Sam',
     color: '#FFAB00',
-    emoji: '⚡',
-    description: 'Agencia inhouse — marketing, publicidad y estrategia',
+    emoji: '',
+    description: 'Agencia inhouse - marketing, publicidad y estrategia',
     market: 'Miami, FL',
     channels: ['web', 'instagram', 'linkedin'],
   },
@@ -48,7 +45,7 @@ export const BRANDS: Record<BrandId, Brand> = {
     shortName: 'PO Personal',
     owner: 'Patricia Osorio',
     color: '#EC4899',
-    emoji: '👩',
+    emoji: '',
     description: 'Marca personal de Patricia Osorio',
     market: 'Miami, FL',
     channels: ['instagram', 'tiktok', 'youtube'],
@@ -59,7 +56,7 @@ export const BRANDS: Record<BrandId, Brand> = {
     shortName: 'PO Comunidad',
     owner: 'Patricia Osorio',
     color: '#A855F7',
-    emoji: '🌟',
+    emoji: '',
     description: 'Comunidad y contenido educativo de PO',
     market: 'Miami, FL',
     channels: ['instagram', 'youtube', 'email'],
@@ -70,8 +67,8 @@ export const BRANDS: Record<BrandId, Brand> = {
     shortName: 'Vizos',
     owner: 'Patricia Osorio',
     color: '#F59E0B',
-    emoji: '✂️',
-    description: 'Salón de belleza — servicios capilares premium',
+    emoji: '',
+    description: 'Salon de belleza - servicios capilares premium',
     market: 'Miami, FL',
     channels: ['instagram', 'whatsapp', 'google'],
   },
@@ -81,7 +78,7 @@ export const BRANDS: Record<BrandId, Brand> = {
     shortName: 'Diamond',
     owner: 'Sam',
     color: '#3B82F6',
-    emoji: '💎',
+    emoji: '',
     description: 'Detailing de autos premium',
     market: 'Miami, FL',
     channels: ['instagram', 'google', 'whatsapp'],
@@ -92,8 +89,8 @@ export const BRANDS: Record<BrandId, Brand> = {
     shortName: 'D7',
     owner: 'Sam',
     color: '#22C55E',
-    emoji: '🌿',
-    description: 'Gel bebible natural — Açaí, Espirulina, Fruto del Monje',
+    emoji: '',
+    description: 'Gel bebible natural - Acai, Espirulina, Fruto del Monje',
     market: 'Miami, FL',
     channels: ['instagram', 'tiktok', 'shopify'],
   },
@@ -103,7 +100,7 @@ export const BRANDS: Record<BrandId, Brand> = {
     shortName: 'Vivose',
     owner: 'Sam',
     color: '#F472B6',
-    emoji: '🌸',
+    emoji: '',
     description: 'Mascarillas y skincare natural',
     market: 'Miami, FL',
     channels: ['instagram', 'tiktok', 'shopify'],
@@ -114,8 +111,8 @@ export const BRANDS: Record<BrandId, Brand> = {
     shortName: 'Vizos Co.',
     owner: 'Sam',
     color: '#6366F1',
-    emoji: '💄',
-    description: 'Cosméticos y maquillaje',
+    emoji: '',
+    description: 'Cosmeticos y maquillaje',
     market: 'Miami, FL',
     channels: ['instagram', 'tiktok', 'shopify'],
   },
@@ -126,9 +123,9 @@ export const BRANDS: Record<BrandId, Brand> = {
     owner: 'Patricia Osorio',
     color: '#0076A8',
     secondaryColor: '#000000',
-    emoji: '🔬',
-    description: 'Distribución exclusiva South & Central Florida — Neurocosmética + Nano Tribología. B2C + Portal Pro B2B para profesionales.',
-    market: 'South & Central Miami, FL',
+    emoji: '',
+    description: 'Distribucion exclusiva South & Central Florida. B2C + Portal Pro B2B.',
+    market: 'South & Central Florida, USA',
     channels: ['shopify', 'instagram', 'whatsapp', 'b2b-portal'],
   },
   forumPhs: {
@@ -136,11 +133,11 @@ export const BRANDS: Record<BrandId, Brand> = {
     name: 'ForumPHs',
     shortName: 'FPHs',
     owner: 'Sam',
-    color: '#5C3472',          // Amatista — color institucional
-    secondaryColor: '#C4622D', // Terra — acento, énfasis slogan
-    emoji: '🏣',
-    description: 'Administración de Propiedad Horizontal · Panamá · Desde 2015',
-    market: 'Panamá',
+    color: '#5C3472',
+    secondaryColor: '#C4622D',
+    emoji: '',
+    description: 'Administracion de Propiedad Horizontal - Panama - Desde 2015',
+    market: 'Panama',
     channels: ['web'],
   },
 }
@@ -148,10 +145,9 @@ export const BRANDS: Record<BrandId, Brand> = {
 export const BRAND_LIST = Object.values(BRANDS)
 export const BRAND_IDS = Object.keys(BRANDS) as BrandId[]
 
-// ─── Brand ID Map: WebLab → Supabase ─────────────────────────
-// WebLab usa IDs camelCase por razones históricas.
-// Supabase usa los IDs canónicos del ecosystem UNRLVL.
-// Este mapa es la fuente de verdad para traducción entre ambos sistemas.
+// Brand ID Map: WebLab camelCase -> Supabase canonical ID
+// WebLab usa IDs camelCase por razones historicas.
+// Supabase usa los IDs canonicos del ecosystem UNRLVL.
 export const WEBLAB_TO_SUPABASE_BRAND_ID: Record<BrandId, string> = {
   neuroneCosmetics:         'NeuroneSCF',
   patriciaOsorioVizosSalon: 'PatriciaOsorioVizosSalon',
@@ -162,10 +158,10 @@ export const WEBLAB_TO_SUPABASE_BRAND_ID: Record<BrandId, string> = {
   vivoseMask:               'VivoseMask',
   vizosCosmetics:           'VizosCosmetics',
   forumPhs:                 'ForumPHs',
-  unreal>illeStudio:         'Unreal>illeStudio',
+  unrealvilleStudio:         'UnrealvilleStudio',
 }
 
-// ─── Helpers ──────────────────────────────────────────────────
+// Helpers
 
 export const getBrandById = (id: string): Brand | undefined =>
   BRANDS[id as BrandId]
@@ -176,6 +172,5 @@ export const getBrandColor = (id: string): string =>
 export const getBrandName = (id: string): string =>
   BRANDS[id as BrandId]?.name ?? id
 
-/** Traduce ID de WebLab al ID canónico de Supabase */
 export const getSupabaseBrandId = (weblabId: string): string =>
   WEBLAB_TO_SUPABASE_BRAND_ID[weblabId as BrandId] ?? weblabId
