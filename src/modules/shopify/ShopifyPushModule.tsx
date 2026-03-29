@@ -85,7 +85,7 @@ function buildShopifyProduct(p: CatalogProduct) {
   const product: Record<string, unknown> = {
     title: p.display_name,
     body_html: `<p>${p.description_enhanced || p.description}</p>`,
-    vendor: 'Neurone Cosmética',
+    vendor: 'Neurone South & Central Florida',
     product_type: p.collection,
     tags: tags.join(', '),
     status: isDraft ? 'draft' : 'active',
