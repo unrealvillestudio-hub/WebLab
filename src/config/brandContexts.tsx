@@ -1,7 +1,7 @@
-// ─── BRAND AUTO-CONTEXT — UNRLVL WebLab ─────────────────────────────────────
-// v1.0 — Datos extraídos de DB_VARIABLES_v6_3 (CONTEXTOS + CTAs + PersonBlueprints)
-// Archivo: src/config/brandContexts.ts
+// BRAND AUTO-CONTEXT - UNRLVL WebLab
+// v1.1 - 2026-03-28: Unrealville Studio (sin chevron), referencias corregidas
 // Uso: auto-fill de campos de contexto en WebLab al seleccionar marca
+// NOTA: migración completa a Supabase pendiente en roadmap (requiere refactor webEngine.ts)
 
 import { BrandId } from './brands';
 
@@ -9,8 +9,8 @@ export interface BrandAutoContext {
   extraContext: string;
   productAudience?: string;
   productCompliance?: string;
-  complianceBlock?: string;         // compliance extendido — hard-guardarraíl inyectado ANTES del AGGRO
-  productCatalogContext?: string;   // resumen catálogo en texto — contexto de prompt para copy de producto
+  complianceBlock?: string;
+  productCatalogContext?: string;
   defaultPlatform: 'wordpress' | 'shopify';
 }
 
@@ -19,267 +19,166 @@ export const BRAND_CONTEXTS: Partial<Record<BrandId, BrandAutoContext>> = {
   neuroneCosmetics: {
     defaultPlatform: 'shopify',
     extraContext:
-      'Distribución exclusiva South & Central Miami. Tecnología Neurocosmética y Nano Tribología capilar. ' +
-      'Catálogo de 142 SKUs: colorimetría, tratamientos, cuidado capilar profesional. ' +
-      'Modelo comercial dual: tienda B2C para consumidor final + Portal Pro B2B exclusivo para profesionales (coloristas, propietarios de salones). ' +
-      'Única distribuidora exclusiva en South & Central Miami — diferenciador clave frente a cualquier competidor. ' +
-      'Paleta de marca: negro obsidian + navy #0076A8 + blanco. Tono: autoridad técnica accesible, Spanglish Miami.',
+      'Distribucion exclusiva South & Central Florida. Tecnologia Neurocosmetica y Nano Tribologia capilar. ' +
+      'Catalogo de 39 SKUs activos: colorimetria, tratamientos, cuidado capilar profesional. ' +
+      'Modelo comercial dual: tienda B2C para consumidor final + Portal Pro B2B exclusivo para profesionales. ' +
+      'Unica distribuidora exclusiva en South & Central Florida. ' +
+      'Paleta de marca: negro obsidian + navy #0076A8 + blanco. Tono: autoridad tecnica accesible, Spanglish Miami.',
     productAudience:
-      'Mujeres latinas 30–55 años Miami interesadas en colorimetría premium y cuidado capilar de alta gama. ' +
-      'Canal B2B: coloristas independientes y propietarios de salones en South & Central Miami.',
+      'Mujeres latinas 30-55 anos Miami interesadas en colorimetria premium y cuidado capilar de alta gama. ' +
+      'Canal B2B: coloristas independientes y propietarios de salones en South & Central Florida.',
     productCompliance:
-      'Cosmética capilar registrada. SIN claims médicos ni curativos. ' +
+      'Cosmetica capilar registrada. SIN claims medicos ni curativos. ' +
       'USAR: ayuda a, favorece, contribuye a, potencia, optimiza, nutre, fortalece. ' +
-      'PROHIBIDO: trata, cura, elimina enfermedades, patologías o condiciones capilares médicas.',
-
+      'PROHIBIDO: trata, cura, elimina enfermedades o condiciones capilares medicas.',
     complianceBlock:
-      '── COMPLIANCE NEURONE — GUARDARRAÍL OBLIGATORIO FDA/FTC ──────────────────────\n' +
-      'CLASIFICACIÓN: Cosméticos capilares registrados (21 CFR 701). NO son medicamentos.\n' +
-      'JURISDICCIÓN: Florida / US — estándares FTC (verdad en publicidad) + FDA (claims cosméticos).\n\n' +
-      'VERBOS APROBADOS (únicos permitidos para describir beneficios):\n' +
-      '  ayuda a • favorece • contribuye a • potencia • optimiza • nutre • fortalece\n' +
-      '  hidrata • suaviza • mejora la apariencia de • aporta brillo a • protege\n\n' +
-      'PROHIBIDO ABSOLUTO — activa rechazo de plataforma y riesgo legal:\n' +
-      '  ✗ "trata" • "cura" • "elimina" enfermedades o condiciones médicas capilares\n' +
-      '  ✗ Claims sobre alopecia, psoriasis, dermatitis seborreica, caspa patológica\n' +
-      '  ✗ "regenera el folículo piloso" o cualquier claim de acción biológica interna\n' +
-      '  ✗ Antes/después con claims de crecimiento capilar sin estudio clínico\n' +
-      '  ✗ "aprobado por la FDA" o "clínicamente probado" sin documentación válida\n\n' +
-      'PRODUCTOS DE RIESGO CRÍTICO — NO GENERAR COPY DE VENTA:\n' +
-      '  ✗ Capissen Shampoo — posible drug claim (anticaída clínico)\n' +
-      '  ✗ Capissen Lotion — posible drug claim\n' +
-      '  ✗ Derma Roller — posible medical device (FDA)\n' +
-      '  → shopify_visibility: pending — NO activar hasta attorney review\n\n' +
-      'PRODUCTOS DE RIESGO ALTO — copy con precaución extra:\n' +
-      '  Depura Shampoo ("detox"), Pro Salon line (Fanzi Mix, Plattina White, Total Violet Ink,\n' +
-      '  Neuroxide, Density Proff, Neurone Color, Pro Filus)\n' +
-      '  → B2B only. Evitar claims de resultado sin soporte técnico verificable.\n\n' +
-      'TESTIMONIOS Y PRUEBA SOCIAL:\n' +
-      '  • Solo testimonios reales y verificables. No fabricar resultados específicos.\n' +
-      '  • Si se usan resultados ("mi cabello creció X cm"), requieren disclaimer: "Resultados individuales pueden variar."\n\n' +
-      'DISCLAIMER FDA — incluir en landing pages y product pages cuando aplique:\n' +
-      '  "Este producto no ha sido evaluado por la FDA. No está destinado a diagnosticar,\n' +
-      '  tratar, curar o prevenir ninguna enfermedad o condición médica."\n' +
-      '────────────────────────────────────────────────────────────────────────────────',
-
+      'COMPLIANCE NEURONE - GUARDARRAIL FDA/FTC\n' +
+      'CLASIFICACION: Cosmeticos capilares (21 CFR 701). NO son medicamentos.\n' +
+      'JURISDICCION: Florida/US - FTC + FDA.\n\n' +
+      'VERBOS APROBADOS: ayuda a, favorece, contribuye a, potencia, optimiza, nutre, fortalece, hidrata, suaviza, protege\n\n' +
+      'PROHIBIDO ABSOLUTO:\n' +
+      '  - "trata", "cura", "elimina" enfermedades capilares\n' +
+      '  - Claims sobre alopecia, psoriasis, dermatitis, caspa patologica\n' +
+      '  - "regenera el foliculo piloso"\n' +
+      '  - "aprobado por la FDA" sin documentacion valida\n\n' +
+      'PRODUCTOS CRITICOS - NO GENERAR COPY:\n' +
+      '  - Capissen Shampoo, Capissen Lotion, Derma Roller (shopify_visibility: pending)\n\n' +
+      'DISCLAIMER FDA (incluir en landing/product pages):\n' +
+      '  "Este producto no ha sido evaluado por la FDA. No esta destinado a diagnosticar,\n' +
+      '  tratar, curar o prevenir ninguna enfermedad o condicion medica."',
     productCatalogContext:
-      '── CATÁLOGO NEURONE S&C FLORIDA — 39 BP_PRODUCT activos ────────────────────────\n' +
-      'Nota: catálogo completo en repo BluePrints/products/. Este es el resumen estructurado para copy.\n\n' +
-      'CATEGORÍA 1 — CUIDADO Y TRATAMIENTO (B2C, riesgo compliance: low)\n' +
-      '  • Humit Shampoo — hidratación profunda, control del frizz\n' +
-      '  • Humit Mask — mascarilla nutrición intensa, cabello seco y poroso\n' +
-      '  • Kerasin HB Shampoo — keratina hidrolizada, suavidad y brillo\n' +
-      '  • Dyfensor SF Shampoo — fortalecimiento, cabello debilitado\n' +
-      '  • Dyfensor Serum — sérum protector anti-daño\n' +
-      '  • Velvety Control — control frizz y suavidad duradera\n\n' +
-      'CATEGORÍA 2 — STYLING Y ACABADOS (B2C, riesgo: low)\n' +
-      '  • Geometry Gel — fijación fuerte, definición de rizos\n' +
-      '  • Geometry Cream — fijación media, acabado natural\n' +
-      '  • Controller — crema de control y peinado\n' +
-      '  • Molding Toner — tónico moldeador flexible\n' +
-      '  • Resplander Shine — brillo intenso, acabado liso\n\n' +
-      'CATEGORÍA 3 — COLORIMETRÍA CONSUMIDOR (B2C/B2B, riesgo: low)\n' +
-      '  • DY Fazza — coloración permanente profesional\n' +
-      '  • DY Fazza Color — gama ampliada de tonos\n\n' +
-      'CATEGORÍA 4 — DETOX / LIMPIEZA PROFUNDA (B2C, riesgo: high — precaución en copy)\n' +
-      '  • Depura Shampoo — limpieza profunda. EVITAR "detox capilar" — usar "limpieza profunda"\n\n' +
-      'CATEGORÍA 5 — PRO SALON LINE (B2B exclusivo, riesgo: high, shopifyVisibility: pending)\n' +
-      '  • Fanzi Mix — mezcla profesional para servicios de salón\n' +
-      '  • Plattina White — decoloración profesional\n' +
-      '  • Total Violet Ink — matizador violeta intenso\n' +
-      '  • Neuroxide — oxidante profesional\n' +
-      '  • Density Proff — tratamiento densidad profesional\n' +
-      '  • Neurone Color — coloración profesional full-coverage\n' +
-      '  • Pro Filus — alisado profesional\n' +
-      '  → COPY: solo para Portal Pro B2B. No generar copy B2C para estos productos.\n\n' +
-      'CATEGORÍA 6 — CRÍTICOS — SIN COPY ACTIVO (shopifyVisibility: pending / attorney)\n' +
-      '  • Capissen Shampoo — NO generar copy\n' +
-      '  • Capissen Lotion — NO generar copy\n' +
-      '  • Derma Roller — NO generar copy\n\n' +
-      'IMÁGENES DISPONIBLES:\n' +
-      '  • standard (fondo blanco): todos los 39 productos — usar para tienda Shopify y Portal Pro\n' +
-      '  • dark/campaign (fondo negro estudio): solo 8 productos disponibles:\n' +
-      '    Kerasin HB Shampoo, Capissen Shampoo*, Dyfensor Serum, Humit Shampoo,\n' +
-      '    DY Fazza, DY Fazza Color, Dyfensor SF Shampoo, Humit Mask\n' +
-      '    (*Capissen: imagen dark disponible pero producto sin copy activo)\n' +
-      '  ⚠️ Pendiente confirmar con PO si imágenes dark son uso libre para distribuidor.\n' +
-      '────────────────────────────────────────────────────────────────────────────────',
+      'CATALOGO NEURONE SCF - 39 SKUs activos\n\n' +
+      'B2C (publico): Moisture, Restore, Styling, Color Rescue, Scalp (productos seleccionados)\n' +
+      'B2B Pro Salon: Fanzi Mix, Plattina White, Total Violet Ink, Neuroxide, Density Proff, Neurone Color, Pro Filus\n' +
+      'CRITICOS sin copy: Capissen Shampoo, Capissen Lotion, Derma Roller\n' +
+      'Imagenes standard (fondo blanco): todos los 39 productos\n' +
+      'Imagenes dark/campaign: 8 productos disponibles',
   },
 
   patriciaOsorioVizosSalon: {
     defaultPlatform: 'wordpress',
     extraContext:
-      'Vizos Salón — salón de belleza premium en South Miami (local 12955 South Dixie Hwy). ' +
-      'Servicios: corte y color capilar, tratamientos (línea Neurone Cosmética), maquillaje profesional, nail bar. ' +
-      'Propietaria Patricia Osorio, especialista en colorimetría con más de 20 años. ' +
-      'Instalaciones modernas: espejo Hollywood, zona lounge con butacas azul navy, barra de café. ' +
-      'Ambiente íntimo, profesional y acogedor. Clientela latina principalmente. ' +
-      'Tono: experta local, cercana, práctica — "Esto es lo que funciona en la silla".',
+      'Vizos Salon - salon de belleza premium en South Miami (12955 South Dixie Hwy). ' +
+      'Servicios: corte y color capilar, tratamientos (linea Neurone), maquillaje profesional, nail bar. ' +
+      'Propietaria Patricia Osorio, especialista en colorimetria con mas de 20 anos. ' +
+      'Ambiente intimo, profesional y acogedor. Clientela latina principalmente. ' +
+      'Tono: experta local, cercana, practica.',
     productAudience:
-      'Mujeres latinas 25–55 años South Miami. Buscan servicios capilares y de belleza premium ' +
-      'en ambiente de confianza con profesionales experimentados.',
+      'Mujeres latinas 25-55 anos South Miami. Buscan servicios capilares y belleza premium.',
   },
 
   patriciaOsorioPersonal: {
     defaultPlatform: 'wordpress',
     extraContext:
-      'Marca personal de Patricia Osorio — empresaria multimarca Miami. ' +
-      'Distribuidora exclusiva Neurone Cosmética South & Central Miami. Propietaria Vizos Salón. Socia D7 Herbal España. ' +
-      'Más de 20 años de experiencia independiente en belleza y negocios. ' +
-      'Voz de liderazgo femenino latino en Miami. Conecta todas sus marcas desde perspectiva de fundadora auténtica. ' +
-      'Tono: directa, sin postureo, desde el camino recorrido — "Lo construí. Aquí está."',
+      'Marca personal de Patricia Osorio - empresaria multimarca Miami. ' +
+      'Distribuidora exclusiva Neurone South & Central Florida. Propietaria Vizos Salon. ' +
+      'Mas de 20 anos de experiencia en belleza y negocios. ' +
+      'Voz de liderazgo femenino latino en Miami.',
     productAudience:
-      'Mujeres latinas emprendedoras y profesionales 30–55 años. Comunidad hispana Miami y Florida.',
+      'Mujeres latinas emprendedoras 30-55 anos. Comunidad hispana Miami y Florida.',
   },
 
   patriciaOsorioComunidad: {
     defaultPlatform: 'wordpress',
     extraContext:
-      'Comunidad de mujeres emprendedoras y líderes fundada por Patricia Osorio en Miami. ' +
+      'Comunidad de mujeres emprendedoras fundada por Patricia Osorio en Miami. ' +
       'Contenido: emprendimiento femenino, liderazgo, negocios, crecimiento personal desde experiencia real. ' +
-      'Tono inspirador pero práctico y honesto — sin promesas vacías, desde camino recorrido. ' +
-      '"Si yo pude, tú puedes — y te digo exactamente cómo."',
+      'Tono inspirador pero practico y honesto.',
     productAudience:
-      'Mujeres latinas emprendedoras y profesionales 25–55 años. Comunidad hispana Miami y Florida.',
+      'Mujeres latinas emprendedoras 25-55 anos. Comunidad hispana Miami y Florida.',
     productCompliance:
-      'SIN promesas de ingresos garantizados ni resultados económicos específicos. ' +
-      'Testimonios deben ser reales y verificables. No usar claims de enriquecimiento rápido.',
+      'SIN promesas de ingresos garantizados. Testimonios reales y verificables.',
   },
 
   d7Herbal: {
     defaultPlatform: 'shopify',
     extraContext:
-      'D7 Herbal — gel bebible natural premium. Ingredientes: Asaí (antioxidante), Espirulina (proteínas + micronutrientes), Fruto del Monje (edulcorante natural sin azúcar). ' +
-      'Importado de Colombia. Suplemento de bienestar dirigido a latinos en Miami y Florida. ' +
-      'Fórmula 100% natural. Mercado wellness latinoamericano en crecimiento. ' +
-      'Tono: natural, saludable, auténtico latino.',
+      'D7 Herbal - gel bebible natural premium. Ingredientes: Acai (antioxidante), Espirulina (proteinas), Fruto del Monje (edulcorante natural). ' +
+      'Importado de Colombia. Suplemento de bienestar para latinos en Miami y Florida. ' +
+      'Tono: natural, saludable, autentico latino.',
     productAudience:
-      'Adultos latinos 25–55 años interesados en bienestar natural, salud integral y suplementación sin artificiales. Miami y Florida.',
+      'Adultos latinos 25-55 anos interesados en bienestar natural. Miami y Florida.',
     productCompliance:
-      'Suplemento alimenticio — SIN claims de tratamiento, diagnóstico o cura médica. ' +
-      'USAR: apoya, contribuye a, ayuda a mantener, favorece, potencia el bienestar. ' +
-      'INCLUIR disclaimer FDA: "Este producto no ha sido evaluado por la FDA. No está destinado a diagnosticar, tratar, curar o prevenir ninguna enfermedad." ' +
-      'No mencionar efectos sobre enfermedades específicas.',
+      'Suplemento alimenticio. SIN claims medicos. USAR: apoya, contribuye a, ayuda a mantener. ' +
+      'INCLUIR disclaimer FDA en toda landing page.',
     complianceBlock:
-      '── COMPLIANCE D7 HERBAL — GUARDARRAÍL OBLIGATORIO FDA/FTC ──────────────────────\n' +
-      'CLASIFICACIÓN: Suplemento alimenticio / Dietary Supplement (DSHEA, 21 CFR 101.36).\n' +
-      'JURISDICCIÓN: Florida / US — estándares FTC (verdad en publicidad) + FDA (DSHEA).\n\n' +
-      'VERBOS APROBADOS (únicos permitidos para describir beneficios):\n' +
-      '  apoya • contribuye a • ayuda a mantener • favorece • potencia • nutre\n' +
-      '  aporta energía a • promueve el bienestar • complementa\n\n' +
-      'PROHIBIDO ABSOLUTO:\n' +
-      '  ✗ Claims de tratamiento, diagnóstico, cura o prevención de enfermedades\n' +
-      '  ✗ Mencionar diabetes, obesidad, presión arterial, colesterol, cáncer u otras condiciones médicas\n' +
-      '  ✗ "Clínicamente probado", "aprobado por la FDA", "cura", "elimina", "trata"\n' +
-      '  ✗ Resultados de pérdida de peso con cifras específicas sin estudio clínico registrado\n' +
-      '  ✗ Testimonios que atribuyan curación de enfermedades al producto\n\n' +
-      'DISCLAIMER FDA — OBLIGATORIO en toda landing page y product page:\n' +
-      '  "Este producto no ha sido evaluado por la FDA. No está destinado a diagnosticar,\n' +
-      '  tratar, curar o prevenir ninguna enfermedad o condición médica."\n' +
-      '────────────────────────────────────────────────────────────────────────────────',
+      'COMPLIANCE D7 HERBAL - GUARDARRAIL FDA/FTC\n' +
+      'CLASIFICACION: Dietary Supplement (DSHEA, 21 CFR 101.36).\n\n' +
+      'VERBOS APROBADOS: apoya, contribuye a, ayuda a mantener, favorece, potencia, nutre\n\n' +
+      'PROHIBIDO: claims de tratamiento/diagnostico/cura, mencionar diabetes/obesidad/cancer\n\n' +
+      'DISCLAIMER FDA OBLIGATORIO:\n' +
+      '  "Este producto no ha sido evaluado por la FDA. No esta destinado a diagnosticar,\n' +
+      '  tratar, curar o prevenir ninguna enfermedad o condicion medica."',
   },
 
   diamondDetails: {
     defaultPlatform: 'wordpress',
     extraContext:
-      'Diamond Details — detailing de autos premium en Miami. ' +
-      'Servicios: recubrimiento cerámico, paint protection film (PPF), detailing interior/exterior de alta gama, corrección de pintura. ' +
-      'Trabajo artesanal y perfeccionista. Especialistas en vehículos de lujo y deportivos. ' +
-      'Tono: experto, técnico, premium — para clientes que saben la diferencia.',
+      'Diamond Details - detailing de autos premium en Alicante, Espana. ' +
+      'Servicios: recubrimiento ceramico, PPF, detailing interior/exterior, correccion de pintura. ' +
+      'Especialistas en vehiculos de lujo y deportivos. ' +
+      'Tono: experto, tecnico, premium.',
     productAudience:
-      'Hombres y mujeres 28–55 años Miami. Propietarios de vehículos premium/lujo (BMW, Mercedes, Porsche, Tesla, exóticos). ' +
-      'Valoran la calidad perfecta y el cuidado a largo plazo de su inversión.',
+      'Propietarios de vehiculos premium 28-55 anos. Valoran calidad perfecta y cuidado a largo plazo.',
   },
 
   vivoseMask: {
     defaultPlatform: 'shopify',
     extraContext:
-      'Vivose Mask — mascarillas y skincare natural para el mercado latinoamericano en Miami. ' +
-      'Productos de cuidado facial con ingredientes naturales y botánicos. E-commerce Shopify. ' +
+      'Vivose Mask - mascarillas y skincare natural para el mercado latinoamericano en Miami. ' +
+      'Ingredientes naturales y botanicos. E-commerce Shopify. ' +
       'Tono: natural, consciente, femenino y moderno.',
     productAudience:
-      'Mujeres latinas 20–45 años interesadas en skincare natural, clean beauty y rutinas de cuidado facial.',
+      'Mujeres latinas 20-45 anos interesadas en skincare natural y clean beauty.',
     productCompliance:
-      'Cosmética tópica. SIN claims médicos o dermatológicos clínicos. ' +
-      'USAR: hidrata, nutre, suaviza, ilumina, revitaliza, mejora la apariencia de. ' +
-      'PROHIBIDO: trata, cura condiciones de piel como acné, rosacea, eczema.',
+      'Cosmetica topica. SIN claims medicos. USAR: hidrata, nutre, suaviza, ilumina, revitaliza.',
     complianceBlock:
-      '── COMPLIANCE VIVOSE MASK — GUARDARRAÍL OBLIGATORIO FDA/FTC ─────────────────────\n' +
-      'CLASIFICACIÓN: Cosmético tópico (21 CFR 700). NO es medicamento ni device.\n' +
-      'JURISDICCIÓN: Florida / US — estándares FTC + FDA cosmetic claims.\n\n' +
-      'VERBOS APROBADOS (únicos permitidos):\n' +
-      '  hidrata • nutre • suaviza • ilumina • revitaliza • mejora la apariencia de\n' +
-      '  aporta luminosidad • protege • limpia • equilibra\n\n' +
-      'PROHIBIDO ABSOLUTO:\n' +
-      '  ✗ "trata", "cura" o referencias a acné, rosácea, eczema, psoriasis, dermatitis\n' +
-      '  ✗ Claims de acción biológica interna ("regenera células", "estimula colágeno" sin estudio)\n' +
-      '  ✗ "Dermatológicamente probado" o "clínicamente testado" sin documentación válida\n' +
-      '  ✗ Resultados de reducción de arrugas con % específico sin estudio\n' +
-      '  ✗ Comparaciones con medicamentos o tratamientos médicos estéticos\n' +
-      '────────────────────────────────────────────────────────────────────────────────',
+      'COMPLIANCE VIVOSE MASK - GUARDARRAIL FDA/FTC\n' +
+      'CLASIFICACION: Cosmetico topico (21 CFR 700).\n\n' +
+      'VERBOS APROBADOS: hidrata, nutre, suaviza, ilumina, revitaliza, protege\n\n' +
+      'PROHIBIDO: "trata"/"cura" acne, rosacea, eczema, psoriasis, dermatitis\n' +
+      '"Dermatologicamente probado" sin documentacion valida',
   },
 
   vizosCosmetics: {
     defaultPlatform: 'shopify',
     extraContext:
-      'Vizos Cosmetics — línea de cosméticos y maquillaje color para el mercado latino Miami. ' +
+      'Vizos Cosmetics - cosmeticos y maquillaje color para el mercado latino Miami. ' +
       'Productos: labiales, sombras, bases, iluminadores. E-commerce Shopify. ' +
-      'Tono: bold, glam, latina — celebra la belleza diversa.',
+      'Tono: bold, glam, latina.',
     productAudience:
-      'Mujeres latinas 18–45 años Miami. Amantes del maquillaje, el color y la expresión a través de la belleza.',
+      'Mujeres latinas 18-45 anos Miami. Amantes del maquillaje y la expresion a traves de la belleza.',
   },
 
   forumPhs: {
     defaultPlatform: 'wordpress',
     extraContext:
-      'ForumPHs (FPHs) — administración de propiedad horizontal, Panamá, fundada 2015. ' +
+      'ForumPHs (FPHs) - administracion de propiedad horizontal, Panama, fundada 2015. ' +
       'Portafolio: ~1.500 unidades, 7 propiedades. ' +
-      'GM y representante legal: Ivette Flores (Abogada). ' +
-      'Web: forumphs.com. Marco legal: Ley 284 de 2022 (Propiedad Horizontal, Panamá). ' +
-      'POSICIONAMIENTO: ForumPHs no vende "administración de edificios" — vende gestión patrimonial sistémica. ' +
-      'Diferenciador: estándar único de calidad para todos los clientes, pricing value-based, SLAs auditables. ' +
-      'Slogan invariable: "Construiste tu patrimonio. Nosotros le construimos un sistema." ' +
-      'La segunda parte ("Nosotros le construimos un sistema.") lleva énfasis visual en color Terra (#C4622D). ' +
-      'SERVICIOS CORE: gestión administrativa, servicio jurídico, gestión contable, Actas de Asamblea, ' +
-      'Document Factory, reportes SLA mensuales, gestión de morosidad. ' +
-      'SLA: Urgente (inmediato), Prioritario (horas), Regular (días hábiles). ' +
-      'AUDIENCIA: Juntas Directivas y propietarios de Propiedades Horizontales en Panamá. ' +
-      'NOMBRE ANTERIOR: PHAS — no usar como identificador activo, solo como contexto histórico.',
+      'GM: Ivette Flores (Abogada). Web: forumphs.com. Marco legal: Ley 284 de 2022. ' +
+      'POSICIONAMIENTO: gestion patrimonial sistemica, no administracion de edificios. ' +
+      'Slogan: "Construiste tu patrimonio. Nosotros le construimos un sistema."',
     productAudience:
-      'Juntas Directivas y propietarios de Propiedades Horizontales en Panamá. ' +
-      'Perfil: tomadores de decisión con activos patrimoniales inmobiliarios, ' +
-      'interesados en gestión profesional, transparencia financiera y cumplimiento legal.',
+      'Juntas Directivas y propietarios de Propiedades Horizontales en Panama.',
     productCompliance:
-      'Marco legal: Ley No. 284 de 14 de febrero de 2022. Territorio: Panamá. ' +
-      'Ivette Flores es la única GM activa y firmante oficial. ' +
-      'Roberto González ya no forma parte de la empresa — no mencionar como representante.',
+      'Marco legal: Ley No. 284 de 2022. Territorio: Panama. ' +
+      'Ivette Flores es la unica GM activa. Roberto Gonzalez ya no es representante.',
     complianceBlock:
-      '── REGLAS DE MARCA FORUMPHS ─────────────────────────────────────────────\n' +
-      'NOMBRE: Siempre "ForumPHs" — capital F, PH en caps, s minúscula.\n' +
-      'SIGLA: FPHs. EXCEPCIÓN: "FORUMPHS" solo en Cinzel (labels, tags, eyebrow-caps).\n\n' +
-      'SLOGAN INVARIABLE (no acortar, no parafrasear):\n' +
-      '  "Construiste tu patrimonio. Nosotros le construimos un sistema."\n' +
-      '  — Parte 1: voz del propietario (tono atenuado)\n' +
-      '  — Parte 2: promesa ForumPHs (énfasis en Terra #C4622D)\n\n' +
+      'REGLAS DE MARCA FORUMPHS\n' +
+      'NOMBRE: Siempre "ForumPHs" - capital F, PH en caps, s minuscula.\n' +
+      'SIGLA: FPHs.\n\n' +
+      'SLOGAN INVARIABLE: "Construiste tu patrimonio. Nosotros le construimos un sistema."\n\n' +
       'PALETA AMATISTA CARBON:\n' +
-      '  Amatista (#5C3472) · Amatista Dark (#3A1F4A) · Amatista Light (#EAD9F5)\n' +
-      '  Terra (#C4622D) · Carbon (#1C2233) · Carbon Dark (#0E1018)\n' +
-      '  Ink (#1A1612) · Stone (#6B6460) · Parchment (#F0EDE8)\n\n' +
-      'TIPOGRAFÍA: EB Garamond (display/slogan) · Cormorant Garamond (editorial) · Cinzel (labels) · DM Sans (body/UI)\n\n' +
-      'PROHIBIDO:\n' +
-      '  ✗ Usar colores fuera de la paleta Amatista Carbon\n' +
-      '  ✗ Acortar o parafrasear el slogan\n' +
-      '  ✗ Referir a Roberto González como representante activo\n' +
-      '  ✗ Usar posicionamiento "PHAS" o "OS of your PH" en materiales nuevos\n' +
-      '────────────────────────────────────────────────────────────────────────',
+      '  Amatista #5C3472, Terra #C4622D, Carbon #1C2233\n\n' +
+      'PROHIBIDO: acortar el slogan, mencionar a Roberto Gonzalez como representante',
   },
 
   unrealilleStudio: {
     defaultPlatform: 'wordpress',
     extraContext:
-      'Unreal>ille Studio — agencia inhouse de marketing, publicidad y estrategia digital del ecosistema UNRLVL. ' +
-      'Especializada en marcas latinas en Miami. No es agencia pública en esta fase — operación inhouse exclusiva. ' +
-      'Servicios: marketing digital, estrategia de contenido, e-commerce, publicidad pagada, producción creativa.',
+      'Unrealville Studio - agencia inhouse de marketing, publicidad y estrategia digital del ecosistema UNRLVL. ' +
+      'Especializada en marcas latinas en Miami. Operacion inhouse exclusiva. ' +
+      'Servicios: marketing digital, estrategia de contenido, e-commerce, publicidad pagada, produccion creativa.',
     productAudience:
       'Ecosistema interno UNRLVL: marcas propias y marcas de familia/asociados.',
   },
