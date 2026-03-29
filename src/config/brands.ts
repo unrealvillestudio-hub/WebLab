@@ -3,7 +3,7 @@
 // v2.0 - Neurone Cosmetica anadida (marca 10)
 
 export type BrandId =
-  | 'unrealvilleStudio'
+  | 'unrealilleStudio'
   | 'patriciaOsorioPersonal'
   | 'patriciaOsorioComunidad'
   | 'patriciaOsorioVizosSalon'
@@ -28,9 +28,9 @@ export interface Brand {
 }
 
 export const BRANDS: Record<BrandId, Brand> = {
-  unrealvilleStudio: {
-    id: 'unrealvilleStudio',
-    name: 'Unreal>ille Studio',
+  unrealilleStudio: {
+    id: 'unrealilleStudio',
+    name: 'Unrealville Studio',
     shortName: 'UNRLVL',
     owner: 'Sam',
     color: '#FFAB00',
@@ -158,7 +158,7 @@ export const WEBLAB_TO_SUPABASE_BRAND_ID: Record<BrandId, string> = {
   vivoseMask:               'VivoseMask',
   vizosCosmetics:           'VizosCosmetics',
   forumPhs:                 'ForumPHs',
-  unrealvilleStudio:         'UnrealvilleStudio',
+  unrealilleStudio:         'UnrealvilleStudio',
 }
 
 // Helpers
