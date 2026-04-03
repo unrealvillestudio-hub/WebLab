@@ -1,13 +1,17 @@
 /**
- * UNRLVL — WebLab webEngine v2.0
+ * UNRLVL – WebLab webEngine v2.1
+ *
+ * v2.1 changelog (2026-04-03):
+ * - Supabase integration: loadWebBrandContext() reemplaza los 3 archivos hardcoded
+ *   (brandContexts, humanizeConfig, brandBlueprints) en tiempo de ejecución.
+ *   Los hardcoded permanecen como fallback automático si Supabase no responde.
+ * - buildSectionPrompt y buildBlogPrompt reciben webCtx (preloaded, no lookups inline)
+ * - runWebPack y runBlogPost hacen un solo fetch de brand context antes de generar
  *
  * v2.0 changelog:
  * - Output modes: 'markdown' | 'html' | 'liquid'
- *   markdown — copy listo para CMS / documentos (anterior)
- *   html     — HTML semántico + CSS inline, listo para Custom HTML en Shopify/WP
- *   liquid   — Sección Shopify nativa (.liquid + schema JSON), lista para theme editor
- * - BlogLab support: nuevo module 'blog' con tipos de post (educativo, SEO, producto, UGC)
- * - Humanize layer (F2.5): preservado de v1.2
+ * - BlogLab support
+ * - Humanize layer (F2.5)
  */
 import {
   BrandProfile, WebPack, PageSection,
@@ -15,96 +19,76 @@ import {
   ProductSpec, WebOutput,
 } from '../core/types';
 import { PAGE_SECTIONS } from '../config/packs';
-import { getHumanizeBlock } from '../config/humanizeConfig';
-import { getBrandBlueprintBlock } from '../config/brandBlueprints';
-import { BRAND_CONTEXTS } from '../config/brandContexts';
+// CAMBIO 1: loadWebBrandContext reemplaza los 3 imports hardcoded.
+// getHumanizeBlock, getBrandBlueprintBlock y BRAND_CONTEXTS los maneja webBrandLoader internamente como fallback.
+import { loadWebBrandContext, type WebBrandContextResult } from '../lib/webBrandLoader';
 
 export type WebOutputMode = 'html' | 'liquid';
 
 const CLAUDE_MODEL = "claude-sonnet-4-6";
 
-// ── SUPER AGGRO BLOCK — NIVEL MÁXIMO ──────────────────────────────────────────
-// ⚠️ ADVERTENCIA INTERNA: Este modo genera copy de persuasión extrema.
-// Puede incluir urgencia agresiva, comparaciones directas, y framing de pérdida
-// que algunos canales (Meta Ads, Google Ads, Shopify reviews) pueden rechazar.
-// Es responsabilidad del operador revisar antes de publicar.
+// ── SUPER AGGRO BLOCK ─────────────────────────────────────────────────────────
 const SUPER_AGGRO_BLOCK = `
-════════════════════════════════════════════════════════════════
-  ⚠️  AVISO AL OPERADOR — AGGRO OUTPUT ACTIVO
-════════════════════════════════════════════════════════════════
+────────────────────────────────────────────────────────────────
+  ⚠️  AVISO AL OPERADOR – AGGRO OUTPUT ACTIVO
+────────────────────────────────────────────────────────────────
   Este output usa persuasión de alta presión y está diseñado
   para maximizar conversión, no para pasar filtros editoriales.
-
   ANTES DE PUBLICAR, revisa estos puntos:
-
   › Meta Ads / TikTok Ads
     Urgencia extrema y escasez pueden ser rechazados si no son
     verificables con evidencia en la cuenta publicitaria.
-
   › Google Ads
     Claims de resultados sin disclaimer ("desde la primera
     aplicación") activan revisión manual. Añade un asterisco
     con fuente si el claim es medible.
-
   › Shopify / Políticas de plataforma
     Comparaciones con competencia implícita son generalmente
     aceptadas. Comparaciones directas con nombre de marca
     requieren evidencia o pueden generar disputas.
-
   › Recomendación operacional
     Usar este output como punto de partida. Una reducción del
     20–30% en intensidad suele ser suficiente para paid media
     sin sacrificar conversión orgánica.
-
   El copy que sigue es deliberadamente incómodo. Ese es el punto.
-════════════════════════════════════════════════════════════════
-
-REGLAS AGGRO ABSOLUTAS — aplica todas sin excepción ni moderación:
-
+────────────────────────────────────────────────────────────────
+REGLAS AGGRO ABSOLUTAS – aplica todas sin excepción ni moderación:
 PSICOLOGÍA DE PÉRDIDA (no de ganancia):
 - El lector ya está perdiendo dinero, clientes, oportunidades. No potencialmente. Ahora mismo.
 - Cada día sin actuar es un día que tu competencia te está comiendo el mercado.
 - No vendas el producto. Vende el costo de no tenerlo.
-
 DOLOR PRIMERO, SOLUCIÓN DESPUÉS, CONSECUENCIA AL FINAL:
 - Sección 1: abre con el dolor más profundo, sin suavizarlo.
 - Sección 2: la solución existe, es específica, está disponible hoy.
 - Sección 3: si no actúas ahora, la ventana se cierra. Y eso tiene un precio.
-
 COPY QUE INCOMODA (deliberadamente):
 - Haz que el lector se sienta incómodo quedándose donde está.
 - La comodidad es el enemigo. El status quo es la amenaza.
 - "Seguir como estás" debe sonar peor que cualquier riesgo de comprar.
-
 URGENCIA REAL, NO FABRICADA:
 - Si hay exclusividad: úsala como escasez real ("solo nosotros, solo aquí").
 - Si hay stock limitado: nómbralo con número si existe.
 - Si hay timing: "cada semana que esperas es una semana que tu competencia lleva ventaja".
 - PROHIBIDO urgencia genérica ("¡Oferta por tiempo limitado!"). Siempre específica.
-
-CERO HEDGING — AFIRMACIÓN ABSOLUTA:
+CERO HEDGING – AFIRMACIÓN ABSOLUTA:
 - Elimina: podría, quizás, tal vez, esperamos, creemos, intentamos, buscamos.
 - Reemplaza con: es, funciona, entrega, garantiza, cambia, transforma.
 - Si hay garantía real: ponla en el CTA. Si no hay, no la inventes.
-
 CTAs QUE NO DAN OPCIÓN DE SALIDA ELEGANTE:
 - Verbo fuerte + beneficio inmediato + qué pasa si no actúas.
 - Ej: "Accede hoy — o deja que tu competencia se te adelante."
 - Ej: "Reserva tu cupo ahora. Cuando se llene, se llena."
 - Ej: "Ver catálogo — 142 productos que tus clientes ya están buscando."
-
 PRUEBA SOCIAL COMO ARMA:
 - No "nuestros clientes están satisfechos".
 - Sí: "Los coloristas top de South Miami ya usan esto. ¿Tú todavía no?"
 - Convierte la prueba social en presión social implícita.
-
 HEADLINES QUE DUELEN O PROVOCAN:
-- Formato A — Dolor: "Tu cabello merece ciencia real. No otro producto que promete y no entrega."
-- Formato B — Provocación: "¿Sigues comprando al por mayor en Amazon? Tus clientes lo notan."
-- Formato C — Contraste: "Tus competidores ya tienen acceso. Tú todavía estás esperando."
+- Formato A – Dolor: "Tu cabello merece ciencia real. No otro producto que promete y no entrega."
+- Formato B – Provocación: "¿Sigues comprando al por mayor en Amazon? Tus clientes lo notan."
+- Formato C – Contraste: "Tus competidores ya tienen acceso. Tú todavía estás esperando."
 - NUNCA: headlines aspiracionales genéricos ("Descubre la diferencia", "Eleva tu experiencia").
-
-DISEÑO VISUAL AGGRO — EL LAYOUT TAMBIÉN DEBE INCOMODAR:
+DISEÑO VISUAL AGGRO – EL LAYOUT TAMBIÉN DEBE INCOMODAR:
 - Hero: fondo oscuro (#0a0a0a o #0d0d0d), texto blanco. El contraste es intencional.
   No hay calidez en la apertura. El lector entra en territorio serio.
 - Jerarquía rota: usa una tarjeta de feature o bloque que sea visualmente distinto
@@ -145,9 +129,8 @@ REGLAS ESTRICTAS:
 - CRÍTICO: NUNCA uses grid-template-columns en style inline. NUNCA uses position:absolute con valores negativos. Ambos rompen el layout en mobile. Si necesitas múltiples columnas usa SIEMPRE flex-wrap.
 - NO incluyas <script>, NO incluyas frameworks externos.
 - La sección debe ser copy-paste directo en un bloque "Custom HTML" de ${platform === 'shopify' ? 'Shopify' : 'WordPress'}.
-- ⛔ PROHIBIDO incluir después del HTML: notas de producción, tablas markdown, comentarios sobre decisiones de diseño, explicaciones, resúmenes ni ningún texto fuera del bloque HTML. El output termina con la etiqueta de cierre de la sección (</section> o </div>). NADA más.
-
-SISTEMA DE GRIDS RESPONSIVE — OBLIGATORIO:
+- ✗ PROHIBIDO incluir después del HTML: notas de producción, tablas markdown, comentarios sobre decisiones de diseño, explicaciones, resúmenes ni ningún texto fuera del bloque HTML. El output termina con la etiqueta de cierre de la sección (</section> o </div>). NADA más.
+SISTEMA DE GRIDS RESPONSIVE – OBLIGATORIO:
 El documento final ya incluye este CSS base. DEBES usarlo en lugar de inline grid-template-columns:
   .rg-2       → 2 columnas iguales (1fr 1fr)
   .rg-3       → 3 columnas iguales (repeat(3, 1fr))
@@ -155,14 +138,12 @@ El documento final ya incluye este CSS base. DEBES usarlo en lugar de inline gri
   .rg-contact → 2 columnas contacto (1fr 1fr)
   .rg-contact-aggro → 2 columnas asimétricas (1fr 1.6fr)
   A 860px o menos, TODAS colapsan a 1 columna automáticamente.
-
-PROHIBICIONES ABSOLUTAS — violan el responsive del documento:
-- ❌ NUNCA uses grid-template-columns con múltiples columnas como inline style. Usa las clases .rg-* siempre.
-- ❌ NUNCA uses position: absolute con valores negativos (left: -Npx, right: -Npx, top: -Npx) en elementos decorativos.
-- ❌ NUNCA uses width fijo > 100% o min-width > 100% en ningún elemento.
-- ❌ NUNCA añadas elementos decorativos con dimensiones que excedan el viewport (ej: width: 400px en posición absoluta).
-- ✅ SÍ puedes usar position: relative en contenedores y position: absolute SOLO para badges/labels internos con top/right positivos pequeños (max 30px desde el borde del contenedor padre).
-
+PROHIBICIONES ABSOLUTAS – violan el responsive del documento:
+- ✗ NUNCA uses grid-template-columns con múltiples columnas como inline style. Usa las clases .rg-* siempre.
+- ✗ NUNCA uses position: absolute con valores negativos (left: -Npx, right: -Npx, top: -Npx) en elementos decorativos.
+- ✗ NUNCA uses width fijo > 100% o min-width > 100% en ningún elemento.
+- ✗ NUNCA añadas elementos decorativos con dimensiones que excedan el viewport (ej: width: 400px en posición absoluta).
+- ✓ Sí puedes usar position: relative en contenedores y position: absolute SOLO para badges/labels internos con top/right positivos pequeños (max 30px desde el borde del contenedor padre).
 IMÁGENES DE BLUEPRINT:
 - Cuando el contexto incluya image_filename de un producto, úsalo como: <img src="{{ 'FILENAME' | asset_url }}" alt="NOMBRE_PRODUCTO" ...> (Shopify) o <img src="[IMAGE:FILENAME]" alt="..."> (WP).
 - Para BP_PERSON: coloca el <img> en secciones hero/about con class="person-bp-img".
@@ -187,9 +168,8 @@ REGLAS ESTRICTAS:
 - CSS debe ir dentro de <style> al inicio del archivo.
 - El archivo debe ser autosuficiente: funciona al subirlo como nueva sección en el theme editor de Shopify.
 - Nombre de sección en schema: "${sectionLabel}" con class: "section-${sectionId}".
-- ⛔ PROHIBIDO incluir después del {% endschema %}: notas, tablas markdown, explicaciones ni ningún texto adicional. El output termina con {% endschema %}. NADA más.
-
-SISTEMA DE GRIDS RESPONSIVE — OBLIGATORIO EN LIQUID:
+- ✗ PROHIBIDO incluir después del {% endschema %}: notas, tablas markdown, explicaciones ni ningún texto adicional. El output termina con {% endschema %}. NADA más.
+SISTEMA DE GRIDS RESPONSIVE – OBLIGATORIO EN LIQUID:
 Define estas clases en el <style> de tu sección y úsalas en el HTML (no inline grid-template-columns):
   .s${sectionId}-rg-2       { display:grid; grid-template-columns:1fr 1fr; gap:40px 56px; }
   .s${sectionId}-rg-3       { display:grid; grid-template-columns:repeat(3,1fr); gap:0; }
@@ -201,20 +181,18 @@ Define estas clases en el <style> de tu sección y úsalas en el HTML (no inline
     }
   }
 Incluye SIEMPRE este bloque de media query en el <style> de la sección.
-
-PROHIBICIONES ABSOLUTAS — rompen responsive en Shopify mobile:
-- ❌ NUNCA grid-template-columns con múltiples columnas como inline style. Usa las clases .s${sectionId}-rg-* siempre.
-- ❌ NUNCA position:absolute con valores negativos (left:-Npx, right:-Npx) en decorativos.
-- ❌ NUNCA width o min-width > 100vw en ningún elemento.
-- ✅ SÍ: position:relative en contenedores, position:absolute SOLO para badges internos (top/right ≤ 30px del borde del padre).
-
+PROHIBICIONES ABSOLUTAS – rompen responsive en Shopify mobile:
+- ✗ NUNCA grid-template-columns con múltiples columnas como inline style. Usa las clases .s${sectionId}-rg-* siempre.
+- ✗ NUNCA position:absolute con valores negativos (left:-Npx, right:-Npx) en decorativos.
+- ✗ NUNCA width o min-width > 100vw en ningún elemento.
+- ✓ Sí: position:relative en contenedores, position:absolute SOLO para badges internos (top/right ≤ 30px del borde del padre).
 IMÁGENES DE BLUEPRINT EN LIQUID:
 - Para imágenes de producto: USA SIEMPRE image_picker en el schema + image_url filter en el HTML.
   HTML: <img src="{{ section.settings.prod_img_1 | image_url: width: 600 }}" alt="..." loading="lazy" width="600" height="400" style="width:100%;height:200px;object-fit:cover;display:block;">
   Schema: { "type": "image_picker", "id": "prod_img_1", "label": "Imagen producto 1" }
-- ⛔ PROHIBIDO usar [IMAGE:FILENAME] en liquid — ese patrón es solo para HTML/WordPress
-- ⛔ PROHIBIDO usar img_url — está deprecado. SIEMPRE image_url: width: N
-- ⛔ PROHIBIDO usar asset_url para imágenes de producto — solo funciona para assets del theme
+- ✗ PROHIBIDO usar [IMAGE:FILENAME] en liquid — ese patrón es solo para HTML/WordPress
+- ✗ PROHIBIDO usar img_url — está deprecado. SIEMPRE image_url: width: N
+- ✗ PROHIBIDO usar asset_url para imágenes de producto — solo funciona para assets del theme
 - Para BP_PERSON: { "type": "image_picker", "id": "person_image", "label": "Imagen persona" }
 - Para BP_LOCATION: { "type": "image_picker", "id": "location_image", "label": "Imagen locación" }
 - Para precio: usa {{ section.settings.product_price }} con default "$10.00"
@@ -268,6 +246,7 @@ ESTRUCTURA BASE:
 }
 
 // ── PROMPT BUILDER ────────────────────────────────────────────────────────────
+// CAMBIO 2: buildSectionPrompt recibe webCtx en lugar de hacer lookups hardcoded
 function buildSectionPrompt(params: {
   brand: BrandProfile;
   pack: WebPack;
@@ -279,10 +258,11 @@ function buildSectionPrompt(params: {
   extraContext: string;
   superAggro: boolean;
   outputMode: WebOutputMode;
+  webCtx: WebBrandContextResult;
 }): string {
   const {
     brand, pack, section, language, tone,
-    platform, productSpec, extraContext, superAggro, outputMode,
+    platform, productSpec, extraContext, superAggro, outputMode, webCtx,
   } = params;
 
   const langMap: Record<WebLanguage, string> = {
@@ -310,51 +290,54 @@ ${productSpec.price ? `Precio referencia: ${productSpec.price}` : ""}
 ${productSpec.complianceNotes ? `RESTRICCIONES DE COMPLIANCE: ${productSpec.complianceNotes}` : ""}`
     : "";
 
-  const humanizeBlock = getHumanizeBlock('web', brand.id);
+  // CAMBIO 3: usar webCtx en lugar de llamar a los 3 archivos hardcoded
+  const humanizeBlock      = webCtx.humanizeWeb
+  const brandBlueprintBlock = webCtx.blueprintBlock
+  const brandCtx = {
+    complianceBlock:       webCtx.complianceBlock       || undefined,
+    productCatalogContext: webCtx.catalogContext         || undefined,
+    defaultPlatform:       webCtx.defaultPlatform,
+  }
+
   const formatInstructions = getFormatInstructions(outputMode, section.id, section.label, platform);
   const modeLabel = outputMode === 'liquid' ? 'Shopify Liquid' : outputMode === 'html' ? 'HTML' : 'Markdown';
-  const brandBlueprintBlock = getBrandBlueprintBlock(brand.id as any);
-  const brandCtx = BRAND_CONTEXTS[brand.id as keyof typeof BRAND_CONTEXTS];
 
-  // productCatalogContext (texto estático legacy) se omite cuando el extraContext ya
-  // contiene el bloque dinámico del EcomProductSelector (evita duplicación y datos stale)
   const hasEcomContext = extraContext.includes('── CONTEXTO E-COMMERCE');
   const catalogContextBlock =
     !hasEcomContext && brandCtx?.productCatalogContext
       ? `${brandCtx.productCatalogContext}\n\n`
       : '';
 
-  // Instrucciones visuales específicas para Product Page y Collection Page
-  const isProductPage   = pack.id === 'ecom_product_page';
+  const isProductPage    = pack.id === 'ecom_product_page';
   const isCollectionPage = pack.id === 'ecom_collection';
+
   const collectionPageOverride = isCollectionPage ? `
 ── INSTRUCCIONES CRÍTICAS PARA COLLECTION PAGE ───────────────────────────────
 Esta sección es una PÁGINA DE COLECCIÓN de e-commerce. NO es una página corporativa.
 Visual, impactante, que muestra productos reales con imágenes.
-
 ${section.id === 'hero' ? `
 HERO DE COLECCIÓN:
 - HEADLINE: 2-4 palabras máximo en H1. Tamaño gigante (clamp 3rem-6rem). Bold extremo. Que ocupe toda la línea.
   Ejemplos correctos: "HIDRATACIÓN SIN COMPROMISO" / "TU CUERO CABELLUDO PRIMERO" / "REPARA. RESTAURA. DOMINA."
-  Ejemplos incorretos: "Descubre nuestra línea de productos Moisture" (demasiado largo, sin punch)
+  Ejemplos incorrectos: "Descubre nuestra línea de productos Moisture" (demasiado largo, sin punch)
 - SUBHEADLINE: 1 frase de 10-15 palabras máximo. Específica, con datos o diferenciador.
-- DOS CTAs en flex-wrap: [Ver colección] (botón sólido color marca) + [Soy profesional → Portal Pro] (outline)
+- DOS CTAs en flex-wrap: [Ver colección] (botón sólido color marca) + [Soy profesional – Portal Pro] (outline)
 - Eyebrow: DOS elementos en una línea horizontal en desktop, wrap permitido en mobile:
   · Wrapper: display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:24px
-  · Primero: badge azul (#0076A8) con "Línea [NOMBRE COLECCIÓN]" — texto en una sola línea, white-space:nowrap
-  · Segundo: texto plain "Distribuidor Exclusivo · South & Central Florida" — white-space:nowrap — SIEMPRE "Florida" NO "Miami"
-- Fondo: #0E1018 oscuro. Acento: #0076A8 navy Neurone.` 
+  · Primero: badge azul (#0076A8) con "Línea [NOMBRE COLECCIÓN]" – texto en una sola línea, white-space:nowrap
+  · Segundo: texto plain "Distribuidor Exclusivo · South & Central Florida" – white-space:nowrap – SIEMPRE "Florida" NO "Miami"
+- Fondo: #0E1018 oscuro. Acento: #0076A8 navy Neurone.`
 : section.id === 'features' ? `
-GRID DE PRODUCTOS — obligatorio mostrar imágenes:
+GRID DE PRODUCTOS – obligatorio mostrar imágenes:
 - Título sección: corto y con punch (ej: "Los productos que lo hacen posible")
 - Grid de product cards: mínimo 3 columnas desktop, 1 móvil
 - Cada card DEBE incluir imagen. Según el modo:
   · HTML/WP: <img src="[IMAGE:FILENAME]" alt="NOMBRE" style="width:100%;height:200px;object-fit:cover;display:block;"> — el sistema reemplaza [IMAGE:FILENAME] al exportar. Usa SOLO el filename (ej: NSERHYA.png), sin paths.
-  · LIQUID: ⛔ NUNCA [IMAGE:...] — usa image_picker: <img src="{{ section.settings.prod_img_1 | image_url: width: 600 }}" alt="{{ section.settings.prod_name_1 }}" loading="lazy" style="width:100%;height:200px;object-fit:cover;display:block;"> con schema { "type": "image_picker", "id": "prod_img_1" }
-  · Nombre del producto en bold — en liquid: {{ section.settings.prod_name_1 }} con schema { "type": "text", "id": "prod_name_1" }
+  · LIQUID: ✗ NUNCA [IMAGE:...] — usa image_picker: <img src="{{ section.settings.prod_img_1 | image_url: width: 600 }}" alt="{{ section.settings.prod_name_1 }}" loading="lazy" style="width:100%;height:200px;object-fit:cover;display:block;"> con schema { "type": "image_picker", "id": "prod_img_1" }
+  · Nombre del producto en bold – en liquid: {{ section.settings.prod_name_1 }} con schema { "type": "text", "id": "prod_name_1" }
   · 1 benefit claim en 6 palabras máximo
   · Precio: en liquid {{ section.settings.price_1 }} con schema { "type": "text", "id": "price_1", "default": "$10.00" }
-  · Botón "Ver producto" — en liquid: href="{{ section.settings.prod_url_1 }}" con schema { "type": "url", "id": "prod_url_1" }
+  · Botón "Ver producto" – en liquid: href="{{ section.settings.prod_url_1 }}" con schema { "type": "url", "id": "prod_url_1" }
 - Numera los settings de cada card: prod_img_1/2/3, prod_name_1/2/3, price_1/2/3, prod_url_1/2/3
 - Si hay subcollections diferentes: agrúpalos con un label pequeño de subcollection
 - Fondo alterno: #161923 para contrastar con el hero oscuro`
@@ -366,10 +349,9 @@ CTA FINAL DE COLECCIÓN:
 ` : '';
 
   const productPageOverride = isProductPage ? `
-── INSTRUCCIONES CRÍTICAS PARA PRODUCT PAGE ─────────────────────────────────
+── INSTRUCCIONES CRÍTICAS PARA PRODUCT PAGE ──────────────────────────────────
 Esta sección es una PÁGINA DE PRODUCTO de e-commerce. NO es una web corporativa.
 El formato debe ser visual, orientado a conversión, con muy poco texto y mucho peso visual.
-
 ESTRUCTURA OBLIGATORIA para la sección "${section.label}":
 ${section.id === 'hero' ? `
 HERO DE PRODUCTO (layout split 50/50):
@@ -382,11 +364,11 @@ HERO DE PRODUCTO (layout split 50/50):
   · Nombre del producto en H1 grande y bold
   · Rating visual (★★★★★ con número de reviews)
   · Precio destacado ($XX.XX) — si el precio es 0.00 usa $10.00 como placeholder
-  · 3-4 bullets de beneficio clave (máx 8 palabras cada uno) con ícono ✓ o ●
+  · 3-4 bullets de beneficio clave (máx 8 palabras cada uno) con ícono ✓ o →
   · Botón CTA primario full-width "Agregar al carrito" o "Comprar ahora"
   · Botón secundario opcional "Ver descripción completa"
-  · Trust badges pequeños debajo: 🔒 Pago seguro · 🚚 Envío gratis +$50 · ↩ 30 días devolución
-PROHIBIDO en el hero: párrafos de texto largos, múltiples CTAs de texto, fondos blancos sin imagen.` 
+  · Trust badges pequeños debajo: 🔒 Pago seguro · 📦 Envío gratis +$50 · ↩ 30 días devolución
+PROHIBIDO en el hero: párrafos de texto largos, múltiples CTAs de texto, fondos blancos sin imagen.`
 : section.id === 'features' ? `
 FEATURES DEL PRODUCTO:
 - Sección oscura de contraste (fondo #0E1018 o similar)
@@ -408,7 +390,6 @@ SECCIÓN CTA FINAL:
   return `Eres un redactor web senior, front-end developer y estratega de conversión especializado en negocios hispanos en Miami.
 Generas contenido en formato ${modeLabel} listo para producción.
 Tu estándar no es copy "correcto" — es copy que convierte. Directo, específico, que incomoda al lector lo suficiente para que actúe.
-
 MARCA: ${brand.name}
 DESCRIPCIÓN: ${brand.description}
 MERCADO: ${brand.market}
@@ -419,50 +400,37 @@ IDIOMA: ${langMap[language]}
 TONO: ${toneMap[tone]}
 PALABRAS APROXIMADAS: ${section.wordCount}
 OUTPUT MODE: ${modeLabel}
-
 ${productBlock}
-
 ${collectionPageOverride}${productPageOverride}${brandBlueprintBlock ? `${brandBlueprintBlock}\n\n` : ""}${brandCtx?.complianceBlock ? `${brandCtx.complianceBlock}\n\n` : ""}${catalogContextBlock}${extraContext ? `CONTEXTO DE MARCA / DB_VARIABLES:\n${extraContext}` : ""}
-
-── ESTÁNDAR DE COPY BASE (SIEMPRE APLICA) ──────────────────────────────────────
+── ESTÁNDAR DE COPY BASE (SIEMPRE APLICA) ────────────────────────────────────
 ADN UNRLVL: Todo copy producido aquí sigue estas reglas por defecto. No son opcionales.
-
-ESTRUCTURA DOLOR → SOLUCIÓN → CONSECUENCIA:
+ESTRUCTURA DOLOR — SOLUCIÓN — CONSECUENCIA:
 - Abre con el dolor real del lector, sin suavizarlo. Hazlo sentir reconocible.
 - Presenta la solución como específica, disponible, con nombre y número.
 - Cierra con la consecuencia de no actuar — no el beneficio de actuar.
-
 AFIRMACIÓN SIN HEDGING:
 - Prohibido: "podría", "quizás", "tal vez", "esperamos", "creemos", "intentamos".
 - Obligatorio: verbos de acción en presente — "funciona", "entrega", "transforma", "garantiza".
 - Si hay datos: úsalos. Si no hay datos: sé específico en la descripción de la transformación.
-
 HEADLINES CON FRICCIÓN INTENCIONAL:
 - Un buen headline hace que el lector se sienta interpelado, no inspirado.
 - Formato preferido: dolor directo ("Tu cabello merece ciencia real — no otra promesa vacía.")
 - O contraste que incomoda ("Tus competidores ya tienen acceso. ¿Tú todavía estás esperando?")
 - NUNCA: aspiracional genérico ("Descubre la diferencia", "Eleva tu experiencia").
-
 CTAs QUE NO DAN SALIDA CÓMODA:
 - Verbo fuerte + beneficio inmediato + (opcional) consecuencia de no actuar.
 - Ej: "Accede hoy — o deja que tu competencia se te adelante."
 - Ej: "Ver catálogo completo — 142 productos que tus clientes ya buscan."
-
 PRUEBA SOCIAL COMO PRESIÓN:
 - No "clientes satisfechos". Sí: nombres de rol, números concretos, transformaciones verificables.
 - Convierte la prueba social en presión social implícita cuando la marca lo permita.
-
 URGENCIA REAL, NO GENÉRICA:
 - Si hay exclusividad, escasez o timing real: úsalos con nombre propio.
 - PROHIBIDO: "¡No te lo pierdas!", "Oferta por tiempo limitado", "Últimas unidades" sin contexto.
 ────────────────────────────────────────────────────────────────────────────────
-
 ${superAggro ? `\n${SUPER_AGGRO_BLOCK}\n` : ""}
-
 ${humanizeBlock}
-
 ${formatInstructions}
-
 GENERA LA SECCIÓN AHORA:`;
 }
 
@@ -482,21 +450,18 @@ const BLOG_TYPE_INSTRUCTIONS: Record<BlogPostType, string> = {
 - Tono: autoridad accesible, explica conceptos técnicos con analogías reales
 - Incluye ejemplos concretos del mercado Miami/hispano cuando sea relevante
 - CTA final: invita a explorar productos o servicios relacionados, no vende directamente`,
-
   seo: `POST SEO-OPTIMIZADO:
 - Estructura: H1 con keyword principal → H2s con keywords secundarias → FAQ al final (schema markup friendly)
 - Keyword density natural: keyword principal 2-3 veces, variantes semánticas en H2s
 - Párrafos cortos (3-4 líneas máximo), ideal para featured snippets
 - Meta description al final del post (max 155 chars) en bloque separado
 - CTA interno: link a producto/categoría relacionada`,
-
   producto: `POST DE PRODUCTO:
 - Estructura: problema que resuelve → cómo funciona → beneficios concretos → prueba social → CTA
 - Tono: informativo + persuasivo, no publicitario explícito
 - Incluye casos de uso reales del mercado objetivo
 - Compliance: si el producto tiene restricciones, aplicarlas al copy
 - CTA directo: compra o más información`,
-
   ugc: `POST ESTILO UGC / TESTIMONIAL:
 - Estructura: historia de cliente real (o ficticia pero realista) → transformación → resultado concreto
 - Voz: primera o tercera persona, conversacional, específica en detalles
@@ -505,23 +470,29 @@ const BLOG_TYPE_INSTRUCTIONS: Record<BlogPostType, string> = {
 - CTA: invita a otros a compartir su experiencia o probar el producto`,
 };
 
-export function buildBlogPrompt(params: {
+// CAMBIO 4: buildBlogPrompt recibe webCtx en lugar de hacer lookups hardcoded
+function buildBlogPrompt(params: {
   brand: BrandProfile;
   blog: BlogSpec;
   language: WebLanguage;
   platform: WebPlatform;
   outputMode: WebOutputMode;
   extraContext?: string;
+  webCtx: WebBrandContextResult;
 }): string {
-  const { brand, blog, language, platform, outputMode, extraContext } = params;
+  const { brand, blog, language, platform, outputMode, extraContext, webCtx } = params;
 
   const langMap: Record<WebLanguage, string> = {
     ES: "español neutro", "ES-FL": "español latino Miami/Florida", EN: "English", "ES+EN": "ES + EN",
   };
 
-  const humanizeBlock = getHumanizeBlock('copy', brand.id);
-  const brandBlueprintBlock = getBrandBlueprintBlock(brand.id as any);
-  const brandCtx = BRAND_CONTEXTS[brand.id as keyof typeof BRAND_CONTEXTS];
+  // CAMBIO 4b: usar webCtx.humanizeCopy y webCtx.blueprintBlock en lugar de los hardcoded
+  const humanizeBlock       = webCtx.humanizeCopy
+  const brandBlueprintBlock = webCtx.blueprintBlock
+  const brandCtx = {
+    complianceBlock: webCtx.complianceBlock || undefined,
+  }
+
   const modeLabel = outputMode === 'liquid' ? 'Shopify Liquid (blog post template)' : outputMode === 'html' ? 'HTML semántico' : 'Markdown';
   const targetWords = blog.wordCount ?? 800;
 
@@ -532,30 +503,23 @@ export function buildBlogPrompt(params: {
     : `FORMATO: Markdown limpio. # para H1, ## para H2, **negrita** para énfasis. Incluye meta_description al final en bloque separado.`;
 
   return `Eres un content strategist y copywriter especializado en blogs para e-commerce hispano Miami.
-
 MARCA: ${brand.name}
 DESCRIPCIÓN: ${brand.description}
 MERCADO: ${brand.market}
 PLATAFORMA: ${platform === 'shopify' ? 'Shopify Blog' : 'WordPress Blog'}
 IDIOMA: ${langMap[language]}
 OUTPUT MODE: ${modeLabel}
-
 TEMA DEL POST: ${blog.topic}
 ${blog.keywords?.length ? `KEYWORDS: ${blog.keywords.join(', ')}` : ''}
 EXTENSIÓN OBJETIVO: ~${targetWords} palabras
-
 ${brandBlueprintBlock ? `${brandBlueprintBlock}\n\n` : ''}${brandCtx?.complianceBlock ? `${brandCtx.complianceBlock}\n\n` : ''}${extraContext ? `CONTEXTO ADICIONAL:\n${extraContext}` : ''}
-
 ${BLOG_TYPE_INSTRUCTIONS[blog.postType]}
-
 ${humanizeBlock}
-
 ${formatBlock}
-
 GENERA EL POST COMPLETO AHORA:`;
 }
 
-// ── CLAUDE CALLER (via Vercel proxy — evita CORS) ────────────────────────────
+// ── CLAUDE CALLER (via Vercel proxy — evita CORS) ─────────────────────────────
 async function callClaude(prompt: string, signal?: AbortSignal): Promise<string> {
   const res = await fetch('/api/generate', {
     method: 'POST',
@@ -572,14 +536,14 @@ async function callClaude(prompt: string, signal?: AbortSignal): Promise<string>
     const err = await res.json().catch(() => ({}));
     throw new Error(`Claude API error ${res.status}: ${(err as any)?.error ?? (err as any)?.detail ?? res.statusText}`);
   }
-    const data = await res.json();
-  // Strip markdown code fences que Claude puede añadir
+  const data = await res.json();
   const lines = (data.text ?? '').trim().split('\n');
   const clean = lines.filter((l: string) => !l.startsWith('```')).join('\n').trim();
   return clean;
 }
 
 // ── PUBLIC API: WEB PACK ──────────────────────────────────────────────────────
+// CAMBIO 5a: runWebPack pre-carga webBrandCtx UNA VEZ antes del loop de secciones
 export async function runWebPack(params: {
   brand: BrandProfile;
   pack: WebPack;
@@ -597,16 +561,17 @@ export async function runWebPack(params: {
   const sections: WebOutput["sections"] = [];
   let totalWords = 0;
   const prompts: string[] = [];
-
   const resolvedContext = params.dbPrompt?.trim() || params.extraContext;
   const superAggro  = params.superAggro  ?? false;
   const outputMode  = params.outputMode ?? 'html';
+
+  // CAMBIO 5a: un solo fetch de brand context para todas las secciones
+  const webBrandCtx = await loadWebBrandContext(params.brand.id)
 
   for (const sectionId of params.pack.sections) {
     const section = PAGE_SECTIONS[sectionId as keyof typeof PAGE_SECTIONS];
     if (!section) continue;
 
-    // Build accumulated prior-sections block for coherence
     const priorBlock = sections.length > 0
       ? `\n── SECCIONES YA GENERADAS (mantén coherencia — no repitas, continúa la narrativa) ──\n` +
         sections.map(s => `[${s.label}]\n${s.content.slice(0, 400)}${s.content.length > 400 ? '…' : ''}`).join('\n\n') +
@@ -614,24 +579,24 @@ export async function runWebPack(params: {
       : '';
 
     const prompt = buildSectionPrompt({
-      brand: params.brand,
-      pack: params.pack,
+      brand:       params.brand,
+      pack:        params.pack,
       section,
-      language: params.language,
-      tone: params.tone,
-      platform: params.platform,
+      language:    params.language,
+      tone:        params.tone,
+      platform:    params.platform,
       productSpec: params.productSpec,
       extraContext: resolvedContext + priorBlock,
       superAggro,
       outputMode,
+      webCtx:      webBrandCtx,
     });
 
     prompts.push(prompt);
+
     let content = await callClaude(prompt, params.signal);
 
     // ── Liquid schema integrity check ──────────────────────────────────────
-    // The model sometimes truncates before closing {% endschema %} on long outputs.
-    // Auto-repair: if schema is opened but not closed, append closing tag.
     if (outputMode === 'liquid') {
       const schemaCount    = (content.match(/\{%-?\s*schema\s*-?%\}/g)    || []).length;
       const endschemaCount = (content.match(/\{%-?\s*endschema\s*-?%\}/g) || []).length;
@@ -639,13 +604,12 @@ export async function runWebPack(params: {
         const missing = schemaCount - endschemaCount;
         content = content.trimEnd() + '\n' + '{% endschema %}\n'.repeat(missing);
       }
-      // Also strip anything after the last {% endschema %} (model sometimes adds notes)
       const lastEndSchema = content.lastIndexOf('{% endschema %}');
       if (lastEndSchema !== -1) {
         content = content.slice(0, lastEndSchema + '{% endschema %}'.length).trimEnd();
       }
     }
-    // ───────────────────────────────────────────────────────────────────────
+
     totalWords += content.split(/\s+/).length;
     sections.push({ sectionId, label: section.label, content });
     params.onSectionComplete?.(sectionId, content);
@@ -668,6 +632,7 @@ export async function runWebPack(params: {
 }
 
 // ── PUBLIC API: BLOG POST ─────────────────────────────────────────────────────
+// CAMBIO 5b: runBlogPost pre-carga webBrandCtx antes de buildBlogPrompt
 export async function runBlogPost(params: {
   brand: BrandProfile;
   blog: BlogSpec;
@@ -679,13 +644,17 @@ export async function runBlogPost(params: {
 }): Promise<{ content: string; outputMode: WebOutputMode; generatedAt: string }> {
   const outputMode = params.outputMode ?? 'html';
 
+  // CAMBIO 5b: un solo fetch de brand context
+  const webBrandCtx = await loadWebBrandContext(params.brand.id)
+
   const prompt = buildBlogPrompt({
-    brand: params.brand,
-    blog: params.blog,
-    language: params.language,
-    platform: params.platform,
+    brand:        params.brand,
+    blog:         params.blog,
+    language:     params.language,
+    platform:     params.platform,
     outputMode,
     extraContext: params.extraContext,
+    webCtx:       webBrandCtx,
   });
 
   const content = await callClaude(prompt, params.signal);
@@ -712,37 +681,25 @@ export function getMimeType(mode: WebOutputMode): string {
   return mode === 'liquid' ? 'text/plain' : mode === 'html' ? 'text/html' : 'text/markdown';
 }
 
-// Genera un archivo exportable con todas las secciones concatenadas
 const BLUEPRINTS_IMAGE_BASE = 'https://raw.githubusercontent.com/unrealvillestudio-hub/BluePrints/main/assets/images/products/';
 
-/**
- * Reemplaza placeholders [IMAGE:FILENAME] con URLs reales de BluePrints GitHub
- * Maneja paths completos como [IMAGE:false/assets/images/products/FILENAME] extrayendo solo el filename
- */
 export function resolveImagePlaceholders(html: string): string {
   return html.replace(/\[IMAGE:([^\]]+)\]/g, (_, raw) => {
-    // Strip any path prefix — solo queremos el filename
     const filename = raw.trim().split('/').pop() ?? raw.trim();
     return `${BLUEPRINTS_IMAGE_BASE}${filename}`;
   });
 }
 
-/**
- * Post-processor: rellena <img src=""> vacíos buscando coincidencia por alt text
- * contra el catálogo de productos. Último recurso cuando el modelo no inyecta la URL.
- */
 export function injectProductImages(
   html: string,
-  imageMap: Record<string, string>,  // { "Nombre Producto": "URL" }
+  imageMap: Record<string, string>,
 ): string {
-  // Caso 1: src vacío con alt de producto — <img alt="Nombre" src="">
   let result = html.replace(
     /<img([^>]*?)src=""([^>]*?)>/gi,
     (match, before, after) => {
       const altMatch = (before + after).match(/alt="([^"]+)"/i);
       if (!altMatch) return match;
       const altText = altMatch[1];
-      // Buscar por nombre exacto o parcial en el mapa
       const url = imageMap[altText]
         ?? Object.entries(imageMap).find(([k]) =>
             altText.toLowerCase().includes(k.toLowerCase()) ||
@@ -752,7 +709,6 @@ export function injectProductImages(
       return `<img${before}src="${url}"${after}>`;
     }
   );
-  // Caso 2: [IMAGE:FILENAME] no resuelto
   result = resolveImagePlaceholders(result);
   return result;
 }
@@ -767,15 +723,11 @@ export function buildExportFile(
       `{% comment %} === SECTION: ${s.label.toUpperCase()} === {% endcomment %}\n\n${s.content}`
     ).join('\n\n{% comment %} ─────────────────────────────────────── {% endcomment %}\n\n');
 
-    // Safety net post-processing for liquid:
-    // 1. Resolve any [IMAGE:FILENAME] that the model generated despite instructions
     output = output.replace(/\[IMAGE:(?:[^/\]]*\/)*([^\]]+)\]/g, (_, filename) =>
       `https://raw.githubusercontent.com/unrealvillestudio-hub/BluePrints/main/assets/images/products/${filename.trim()}`
     );
-    // 2. Fix deprecated img_url filter → image_url
     output = output.replace(/\|\s*img_url:\s*'[^']+'/g, '| image_url: width: 800');
     output = output.replace(/\|\s*img_url\b/g, '| image_url: width: 800 |');
-
     return output;
   }
 
@@ -789,7 +741,6 @@ export function buildExportFile(
       .replace(/\{\{[^}]+\}\}/g, '')
       .replace(/\{%-?\s*.*?-?%\}/g, '');
 
-    // Override CSS de Dawn/Shopify — rompe el contenedor page-width y rte
     const dawnOverride = `<style>
 /* ── Shopify Dawn override — ancho completo ── */
 :root { --max-width--body-normal: 100% !important; --page-width: 2000px !important; }
@@ -804,7 +755,6 @@ export function buildExportFile(
   margin-inline-start: 0 !important;
   margin-inline-end: 0 !important;
 }
-/* Romper el grid de Dawn */
 .page-width { max-width: 100% !important; padding: 0 !important; }
 main > .shopify-section { padding: 0 !important; }
 </style>`;
@@ -870,9 +820,7 @@ main > .shopify-section { padding: 0 !important; }
         gap: 24px !important;
       }
     }
-    /* CTA base — evita desplazamiento por herencia de margin/text-align */
     a[class*="cta"], button[class*="cta"], .cta-button { display: inline-block; }
-    /* CTA mobile — wrapping obligatorio, sin overflow lateral */
     @media (max-width: 860px) {
       a[class*="cta"], button[class*="cta"], .cta-button {
         white-space: normal !important;
