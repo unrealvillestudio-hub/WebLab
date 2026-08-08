@@ -827,7 +827,7 @@ export function ThemePicker({ currentThemeId, aggroMode, onSelect, onClose }: Th
             <span>Preview real · Desktop + Mobile</span>
           </div>
           <div className="text-[10px] text-zinc-700 uppercase tracking-widest">
-            WEBLAB v3.0 · >UNREALVILLE STUDIO
+            WEBLAB v3.0 · &gt;UNREALVILLE STUDIO
           </div>
         </div>
       </motion.div>
