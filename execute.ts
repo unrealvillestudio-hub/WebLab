@@ -119,7 +119,7 @@ Evitar: ${humanize.avoid_phrases ?? ''}`;
     ? `\nCOPY DE REFERENCIA (CopyLab): Adapta este copy al formato web:\n${copyLabOutput.slice(0, 500)}`
     : '';
 
-  const system = `Eres WebLab, el motor de copy web de UNRLVL Studio. Generas contenido web profesional listo para publicar.
+  const system = `Eres WebLab, el motor de copy web de Unrealville Studio. Generas contenido web profesional listo para publicar.
 
 MARCA: ${brandName} | MERCADO: ${market} | IDIOMA: ${idioma}
 ${humanizeContext}

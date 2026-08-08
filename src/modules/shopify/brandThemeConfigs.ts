@@ -1,7 +1,7 @@
 // ── BRAND THEME CONFIGS ──────────────────────────────────────────────────────
 // Fuente de verdad para tokens de diseño por marca.
 // Cada marca define sus tokens — el sistema genera el CSS y el theme automáticamente.
-// Unreal>ille Studio — principio multimarca
+// Unrealville Studio — principio multimarca
 
 export type ThemeMode = 'dark' | 'light';
 

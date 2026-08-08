@@ -94,7 +94,7 @@ export default function App() {
           </div>
         </div>
         <span className="text-[#FFAB00]/30">UNRLVL WebLab {BUILD_TAG}</span>
-        <span className="text-zinc-600 hidden md:block tracking-wide normal-case">Designed &amp; Developed by <span className="text-zinc-500">Unreal&gt;ille Studio</span> · Miami, FL</span>
+        <span className="text-zinc-600 hidden md:block tracking-wide normal-case">Designed &amp; Developed by <span className="text-zinc-500">&gt;UNREALVILLE STUDIO</span> · North Miami, FL</span>
       </footer>
     </div>
   );

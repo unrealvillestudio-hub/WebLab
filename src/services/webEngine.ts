@@ -835,8 +835,8 @@ main > .shopify-section { padding: 0 !important; }
 ${aggroWarningHtml}
 ${body}
 <footer style="font-family:'DM Sans','Helvetica Neue',Arial,sans-serif;font-size:0.75rem;color:#6B6460;text-align:center;padding:28px 24px;border-top:1px solid #1e1e2a;margin-top:0;background:#0E1018;line-height:1.7;">
-  Designed &amp; Developed by <strong style="color:#C4622D;">Unreal&gt;ille Studio</strong><br>
-  1303 N 46th Ave, Hollywood, FL 33021
+  Designed &amp; Developed by <strong style="color:#C4622D;">&gt;UNREALVILLE STUDIO</strong><br>
+  12951 Biscayne Blvd, North Miami, FL 33181
 </footer>
 </body>
 </html>`;
@@ -844,5 +844,5 @@ ${body}
 
   // markdown
   return sections.map(s => `## ${s.label}\n\n${s.content}`).join('\n\n---\n\n') +
-    '\n\n---\n\n*Designed & Developed by Unreal>ille Studio · Miami, FL*';
+    '\n\n---\n\n*Designed & Developed by >UNREALVILLE STUDIO · North Miami, FL*';
 }

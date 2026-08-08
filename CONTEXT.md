@@ -77,7 +77,7 @@ Análisis via extracción de frames con `ffmpeg`. Dos bugs estructurales:
 - `SectionCard` — botón "Preview" inline por sección (Liquid preview estático, deprecated en favor del Full Page Preview)
 - Botón "CLEAN" en outputs AGGRO: exporta sin banner naranja de advertencia
 - Anti-leak en prompts: instrucción `⛔` — output termina con tag de cierre, nada después
-- Firma Unreal>ille: añadida a `buildExportFile()` (dirección: 1303 N 46th Ave, Hollywood, FL 33021)
+- Firma Unrealville: añadida a `buildExportFile()` (dirección: 12951 Biscayne Blvd, North Miami, FL 33181)
 - Commits de esa sesión: `618e54d`, `7043ef2`, `9645d22`
 
 ---
@@ -104,16 +104,16 @@ Análisis via extracción de frames con `ffmpeg`. Dos bugs estructurales:
 ```typescript
 const PREVIEW_BASE_CSS = `...` // sistema .rg-*, reset, box-sizing
 const FIRMA_HTML = `<footer style="background:#1C2233;...">
-  Designed & Developed by Unreal>ille Studio
-  1303 N 46th Ave, Hollywood, FL 33021
+  Designed & Developed by Unrealville Studio
+  12951 Biscayne Blvd, North Miami, FL 33181
 </footer>`
 ```
 
 ### 2. Firma — especificación definitiva
 
 - **Fondo:** `#1C2233` (carbón profundo) — SIEMPRE, independientemente del fondo de la última sección
-- **Línea 1:** `Designed & Developed by` + `Unreal>ille Studio` (link, color `#a8a8b3`, bold)
-- **Línea 2:** `1303 N 46th Ave, Hollywood, FL 33021` (10px, color `#52525b`)
+- **Línea 1:** `Designed & Developed by` + `Unrealville Studio` (link, color `#a8a8b3`, bold)
+- **Línea 2:** `12951 Biscayne Blvd, North Miami, FL 33181` (10px, color `#52525b`)
 - **Aplica en:** preview fullscreen + archivos exportados via `buildExportFile()`
 - **NO aparece** en ningún elemento del UI de la app
 
