@@ -1256,8 +1256,8 @@ function fullWeb(theme: ThemeIdentity): string {
       <div style="display:flex;gap:2rem;">${['Inicio','Proyectos','Servicios','Contacto'].map(l=>`<a href="#" style="font-family:${f.b};font-size:.8rem;color:${p.muted};">${l}</a>`).join('')}</div>
     </div>
     <div style="border-top:1px solid ${p.rule};padding-top:1.5rem;display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-family:${f.b};font-size:.7rem;color:${p.muted};">© ${new Date().getFullYear()} ${theme.name} — Studio · Miami, FL</span>
-      <span style="font-family:${f.b};font-size:.7rem;color:${p.muted};">Diseñado con WEBLAB · UNRLVL Studio</span>
+      <span style="font-family:${f.b};font-size:.7rem;color:${p.muted};">© ${new Date().getFullYear()} ${theme.name} — Studio · North Miami, FL</span>
+      <span style="font-family:${f.b};font-size:.7rem;color:${p.muted};">Diseñado con WEBLAB · >UNREALVILLE STUDIO</span>
     </div>
   </footer>`;
 

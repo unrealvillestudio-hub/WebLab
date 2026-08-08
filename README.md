@@ -1,6 +1,6 @@
-# WebLab — Unreal>ille Studio
+# WebLab — Unrealville Studio
 
-Generador de copy web del ecosistema Unreal>ille Studio.
+Generador de copy web del ecosistema Unrealville Studio.
 Produce outputs HTML y Liquid listos para publicar en WordPress o Shopify.
 
 **Live:** Vercel — conectado a rama `main`

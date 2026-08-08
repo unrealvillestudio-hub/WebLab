@@ -1,6 +1,6 @@
 // ── THEME FILES MAP ─────────────────────────────────────────────────────────
 // Sistema multimarca — los archivos de theme se generan desde brandThemeConfigs.ts
-// Unreal>ille Studio — WL v2.3+
+// Unrealville Studio — WL v2.3+
 
 import { type BrandThemeTokens, generateBrandCSS, generateCollectionTemplates } from './brandThemeConfigs';
 
