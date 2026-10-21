@@ -11,7 +11,8 @@
     "catalog:update": "ts-node --esm scripts/generate_catalog.ts",
     "catalog:update:local": "ts-node --esm scripts/generate_catalog.ts --local ../BluePrints/products",
     "sync:catalog": "ts-node --esm scripts/generate_catalog.ts --local ../BluePrints/products",
-    "sync:catalog:remote": "ts-node --esm scripts/generate_catalog.ts"
+    "sync:catalog:remote": "ts-node --esm scripts/generate_catalog.ts",
+    "test": "node tests/sin_voseo_test.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
