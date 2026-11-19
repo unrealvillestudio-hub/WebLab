@@ -22,7 +22,6 @@ const CANONICAL_MAP: Record<string, string> = {
   patriciaOsorioPersonal:      'PatriciaOsorioPersonal',
   patriciaOsorioComunidad:     'PatriciaOsorioComunidad',
   d7Herbal:                    'D7Herbal',
-  diamondDetails:              'DiamondDetails',
   vivoseMask:                  'VivoseMask',
   vizosCosmetics:              'VizosCosmetics',
   forumPhs:                    'ForumPHs',
