@@ -17,7 +17,6 @@ export const WEBLAB_TO_SUPABASE_BRAND_ID: Record<string, string> = {
   patriciaOsorioVizosSalon: 'PatriciaOsorioVizosSalon',
   patriciaOsorioPersonal:   'PatriciaOsorioPersonal',
   patriciaOsorioComunidad:  'PatriciaOsorioComunidad',
-  diamondDetails:           'DiamondDetails',
   d7Herbal:                 'D7Herbal',
   vivoseMask:               'VivoseMask',
   vizosCosmetics:           'VizosCosmetics',

@@ -132,21 +132,6 @@ export const BRAND_HUMANIZE_OVERRIDES: HumanizeBrandOverride[] = [
     ].join('\n'),
   },
   {
-    brandId: 'diamondDetails',
-    copy: [
-      HUMANIZE_DEFAULTS.copy,
-      'DIAMOND DETAILS ESPECIFICO:',
-      '- Lenguaje de taller premium: tecnico sin ser pedante.',
-      '- El auto es la extension de la identidad del cliente.',
-    ].join('\n'),
-    image: [
-      HUMANIZE_DEFAULTS.image,
-      'DIAMOND DETAILS VISUAL:',
-      '- Reflejos en carroceria mostrando entorno real del taller.',
-      '- Angulos bajos que dan drama y escala al vehiculo.',
-    ].join('\n'),
-  },
-  {
     brandId: 'd7Herbal',
     copy: [
       HUMANIZE_DEFAULTS.copy,

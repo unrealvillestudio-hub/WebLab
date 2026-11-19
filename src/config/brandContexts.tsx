@@ -111,17 +111,6 @@ export const BRAND_CONTEXTS: Partial<Record<BrandId, BrandAutoContext>> = {
       '  tratar, curar o prevenir ninguna enfermedad o condicion medica."',
   },
 
-  diamondDetails: {
-    defaultPlatform: 'wordpress',
-    extraContext:
-      'Diamond Details - detailing de autos premium en Alicante, Espana. ' +
-      'Servicios: recubrimiento ceramico, PPF, detailing interior/exterior, correccion de pintura. ' +
-      'Especialistas en vehiculos de lujo y deportivos. ' +
-      'Tono: experto, tecnico, premium.',
-    productAudience:
-      'Propietarios de vehiculos premium 28-55 anos. Valoran calidad perfecta y cuidado a largo plazo.',
-  },
-
   vivoseMask: {
     defaultPlatform: 'shopify',
     extraContext:

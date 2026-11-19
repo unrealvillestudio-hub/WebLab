@@ -7,7 +7,6 @@ export type BrandId =
   | 'patriciaOsorioPersonal'
   | 'patriciaOsorioComunidad'
   | 'patriciaOsorioVizosSalon'
-  | 'diamondDetails'
   | 'd7Herbal'
   | 'vivoseMask'
   | 'vizosCosmetics'
@@ -71,17 +70,6 @@ export const BRANDS: Record<BrandId, Brand> = {
     description: 'Salon de belleza - servicios capilares premium',
     market: 'Miami, FL',
     channels: ['instagram', 'whatsapp', 'google'],
-  },
-  diamondDetails: {
-    id: 'diamondDetails',
-    name: 'Diamond Details',
-    shortName: 'Diamond',
-    owner: 'Sam',
-    color: '#3B82F6',
-    emoji: '',
-    description: 'Detailing de autos premium',
-    market: 'Miami, FL',
-    channels: ['instagram', 'google', 'whatsapp'],
   },
   d7Herbal: {
     id: 'd7Herbal',
@@ -153,7 +141,6 @@ export const WEBLAB_TO_SUPABASE_BRAND_ID: Record<BrandId, string> = {
   patriciaOsorioVizosSalon: 'PatriciaOsorioVizosSalon',
   patriciaOsorioPersonal:   'PatriciaOsorioPersonal',
   patriciaOsorioComunidad:  'PatriciaOsorioComunidad',
-  diamondDetails:           'DiamondDetails',
   d7Herbal:                 'D7Herbal',
   vivoseMask:               'VivoseMask',
   vizosCosmetics:           'VizosCosmetics',
